@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACIDIC Clothing</title>
+    <style>
+      /* ====== BASE ====== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #fafafa;
+        color: #0e0c0c;
+        overflow-x: hidden;
+      }
+
+      /* ====== HEADER ====== */
+      header {
+        background: #000;
+        color: #ffffff;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      /* Gold glow on brand */
+      header h1 {
+        font-size: 24px;
+        letter-spacing: 2px;
+        color: #fff3c2;
+        animation: goldGlowFlicker 3s infinite alternate;
+      }
+
+      nav ul {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+      }
+      nav li {
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      nav li:hover {
+        color: #f4b400;
+      }
+
+      /* ====== HERO SLIDESHOW ====== */
+      .hero {
+        position: relative;
+        height: 70vh;
+        overflow: hidden;
+      }
+      .hero-slides {
+        height: 100%;
+        position: relative;
+      }
+      .hero-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+      }
+      .hero-slide.active {
+        opacity: 1;
+      }
+
+      /* HERO CONTENT */
+      .hero-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+        z-index: 2;
+        font-weight: bolder;
+        font-style: oblique;
+      }
+      .hero-content h2 {
+        font-size: 48px;
+        margin-bottom: 10px;
+        color: #fff3c2;
+        animation: goldGlowFlicker 2.5s infinite alternate;
+      }
+      .hero-content p {
+        font-size: 24px;
+        letter-spacing: 3px;
+        color: #f8e49c;
+        animation: trackPulse 3s ease-in-out infinite;
+      }
+
+      /* === GOLD GLOW FLICKER ANIMATION === */
+      @keyframes goldGlowFlicker {
+        0%,
+        19%,
+        21%,
+        23%,
+        25%,
+        54%,
+        56%,
+        100% {
+          text-shadow: 0 0 5px #fff8d9, 0 0 10px #f4b400, 0 0 20px #f4b400,
+            0 0 40px #f4b400, 0 0 80px #f4b400;
+          opacity: 1;
+        }
+        20%,
+        24%,
+        55% {
+          text-shadow: none;
+          opacity: 0.6;
+        }
+      }
+
+      /* === TRACKING EXPAND/CONTRACT === */
+      @keyframes trackPulse {
+        0%,
+        100% {
+          letter-spacing: 3px;
+          opacity: 1;
+        }
+        50% {
+          letter-spacing: 8px;
+          opacity: 0.85;
+        }
+      }
+
+      /* Slideshow controls */
+      .slideshow-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 3;
+      }
+      .slideshow-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .slideshow-dot.active {
+        background-color: white;
+      }
+      .slideshow-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 3;
+        font-size: 18px;
+        transition: background-color 0.3s;
+      }
+      .slideshow-nav:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+      .slideshow-prev {
+        left: 20px;
+      }
+      .slideshow-next {
+        right: 20px;
+      }
+
+      /* ====== PRODUCTS ====== */
+      .products {
+        padding: 60px 40px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        opacity: 0;
+        transform: translateX(50px);
+        transition: all 0.6s ease;
+      }
+      .products.active {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .product {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+      }
+      .product:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      }
+      .product img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+      }
+      .product-info {
+        text-align: center;
+        padding: 15px;
+      }
+      .add-to-cart {
+        background: #000;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .add-to-cart:hover {
+        background: #f4b400;
+        color: #000;
+      }
+
+      /* CART SIDEBAR */
+      .cart-sidebar {
+        position: fixed;
+        right: -400px;
+        top: 0;
+        width: 350px;
+        height: 100%;
+        background: #fff;
+        box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2);
+        transition: right 0.4s ease;
+        z-index: 2000;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .cart-sidebar.active {
+        right: 0;
+      }
+      .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+      }
+      .checkout-btn {
+        background: #000;
+        color: #fff;
+        border: none;
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .checkout-btn:hover {
+        background: #f4b400;
+        color: #000;
+      }
+
+      footer {
+        background: #000;
+        color: #fff;
+        text-align: center;
+        padding: 25px;
+        margin-top: 50px;
+      }
+
+      /* ====== MODAL ====== */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        position: relative;
+      }
+      .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 22px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      /* Checkout form */
+      .checkout-form input,
+      .checkout-form select {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .confirm-payment {
+        background: #000;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        width: 100%;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .confirm-payment:hover {
+        background: #f4b400;
+        color: #000;
+      }
+
+      /* ====== SIGN UP PAGE ====== */
+      .signup-section {
+        display: none;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        min-height: 80vh;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .signup-section.active {
+        display: flex;
+      }
+
+      .signup-container {
+        max-width: 350px;
+        background: #f8f9fd;
+        background: linear-gradient(
+          0deg,
+          rgb(255, 255, 255) 0%,
+          rgb(244, 247, 251) 100%
+        );
+        border-radius: 40px;
+        padding: 25px 35px;
+        border: 5px solid rgb(255, 255, 255);
+        box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 30px 30px -20px;
+        margin: 20px;
+      }
+
+      .signup-heading {
+        text-align: center;
+        font-weight: 900;
+        font-size: 30px;
+        color: #000;
+        margin-bottom: 10px;
+      }
+
+      .signup-subheading {
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .signup-form {
+        margin-top: 20px;
+      }
+
+      .signup-form .input {
+        width: 100%;
+        background: white;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 20px;
+        margin-top: 15px;
+        box-shadow: #cff0ff 0px 10px 10px -5px;
+        border-inline: 2px solid transparent;
+      }
+
+      .signup-form .input::-moz-placeholder {
+        color: rgb(170, 170, 170);
+      }
+
+      .signup-form .input::placeholder {
+        color: rgb(170, 170, 170);
+      }
+
+      .signup-form .input:focus {
+        outline: none;
+        border-inline: 2px solid #f4b400;
+      }
+
+      .signup-form .forgot-password {
+        display: block;
+        margin-top: 10px;
+        margin-left: 10px;
+      }
+
+      .signup-form .forgot-password a {
+        font-size: 11px;
+        color: #0099ff;
+        text-decoration: none;
+      }
+
+      .signup-button {
+        display: block;
+        width: 100%;
+        font-weight: bold;
+        background: linear-gradient(45deg, #000 0%, #333 100%);
+        color: white;
+        padding-block: 15px;
+        margin: 20px auto;
+        border-radius: 20px;
+        box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 20px 10px -15px;
+        border: none;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+      }
+
+      .signup-button:hover {
+        transform: scale(1.03);
+        box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 23px 10px -20px;
+        background: linear-gradient(45deg, #f4b400 0%, #ffd700 100%);
+        color: #000;
+      }
+
+      .signup-button:active {
+        transform: scale(0.95);
+        box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 15px 10px -10px;
+      }
+
+      .social-account-container {
+        margin-top: 25px;
+      }
+
+      .social-account-container .title {
+        display: block;
+        text-align: center;
+        font-size: 10px;
+        color: rgb(170, 170, 170);
+      }
+
+      .social-account-container .social-accounts {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 5px;
+      }
+
+      .social-account-container .social-accounts .social-button {
+        background: linear-gradient(
+          45deg,
+          rgb(0, 0, 0) 0%,
+          rgb(112, 112, 112) 100%
+        );
+        border: 5px solid white;
+        padding: 5px;
+        border-radius: 50%;
+        width: 40px;
+        aspect-ratio: 1;
+        display: grid;
+        place-content: center;
+        box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 12px 10px -8px;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+      }
+
+      .social-account-container .social-accounts .social-button .svg {
+        fill: white;
+        margin: auto;
+      }
+
+      .social-account-container .social-accounts .social-button:hover {
+        transform: scale(1.2);
+      }
+
+      .social-account-container .social-accounts .social-button:active {
+        transform: scale(0.9);
+      }
+
+      .agreement {
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+      }
+
+      .agreement a {
+        text-decoration: none;
+        color: #0099ff;
+        font-size: 9px;
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+      }
+
+      .login-link a {
+        color: #f4b400;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .login-link a:hover {
+        text-decoration: underline;
+      }
+
+      /* ====== PAYMENT PAGE ====== */
+      .payment-modal {
+        width: fit-content;
+        height: fit-content;
+        background: #ffffff;
+        box-shadow: 0px 187px 75px rgba(0, 0, 0, 0.01),
+          0px 105px 63px rgba(0, 0, 0, 0.05), 0px 47px 47px rgba(0, 0, 0, 0.09),
+          0px 12px 26px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1);
+        border-radius: 26px;
+        max-width: 450px;
+      }
+
+      .payment-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .payment--options {
+        width: calc(100% - 40px);
+        display: grid;
+        grid-template-columns: 33% 34% 33%;
+        gap: 20px;
+        padding: 10px;
+      }
+
+      .payment--options button {
+        height: 55px;
+        background: #f2f2f2;
+        border-radius: 11px;
+        padding: 0;
+        border: 0;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .payment--options button:hover {
+        background: #e0e0e0;
+      }
+
+      .payment--options button.active {
+        background: #f4b400;
+      }
+
+      .payment--options button svg {
+        height: 18px;
+      }
+
+      .payment--options button:last-child svg {
+        height: 22px;
+      }
+
+      .separator {
+        width: calc(100% - 20px);
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 10px;
+        color: #8b8e98;
+        margin: 0 10px;
+      }
+
+      .separator > p {
+        word-break: keep-all;
+        display: block;
+        text-align: center;
+        font-weight: 600;
+        font-size: 11px;
+        margin: auto;
+      }
+
+      .separator .line {
+        display: inline-block;
+        width: 100%;
+        height: 1px;
+        border: 0;
+        background-color: #e8e8e8;
+        margin: auto;
+      }
+
+      .credit-card-info--form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .input_container {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 4fr 2fr;
+        gap: 15px;
+      }
+
+      .split input {
+        width: 100%;
+      }
+
+      .input_label {
+        font-size: 10px;
+        color: #8b8e98;
+        font-weight: 600;
+      }
+
+      .input_field {
+        width: auto;
+        height: 40px;
+        padding: 0 0 0 16px;
+        border-radius: 9px;
+        outline: none;
+        background-color: #f2f2f2;
+        border: 1px solid #e5e5e500;
+        transition: all 0.3s cubic-bezier(0.15, 0.83, 0.66, 1);
+      }
+
+      .input_field:focus {
+        border: 1px solid transparent;
+        box-shadow: 0px 0px 0px 2px #242424;
+        background-color: transparent;
+      }
+
+      .purchase--btn {
+        height: 55px;
+        background: #f2f2f2;
+        border-radius: 11px;
+        border: 0;
+        outline: none;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        background: linear-gradient(
+          180deg,
+          #363636 0%,
+          #1b1b1b 50%,
+          #000000 100%
+        );
+        box-shadow: 0px 0px 0px 0px #ffffff, 0px 0px 0px 0px #000000;
+        transition: all 0.3s cubic-bezier(0.15, 0.83, 0.66, 1);
+        cursor: pointer;
+      }
+
+      .purchase--btn:hover {
+        box-shadow: 0px 0px 0px 2px #ffffff, 0px 0px 0px 4px #0000003a;
+        background: linear-gradient(
+          180deg,
+          #f4b400 0%,
+          #e6a800 50%,
+          #d89c00 100%
+        );
+        color: #000;
+      }
+
+      /* Reset input number styles */
+      .input_field::-webkit-outer-spin-button,
+      .input_field::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .input_field[type="number"] {
+        -moz-appearance: textfield;
+        -webkit-appearance: textfield;
+        appearance: textfield;
+      }
+
+      .order-summary {
+        background: #f9f9f9;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .order-summary h3 {
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .order-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+
+      .order-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>ACIDIC</h1>
+      <nav>
+        <ul>
+          <li onclick="showCategory('tshirts')">T-Shirts</li>
+          <li onclick="showCategory('sweaters')">Sweaters</li>
+          <li onclick="showCategory('hoodies')">Hoodies</li>
+          <li onclick="showCategory('pants')">Pants</li>
+          <li onclick="showCategory('twopieces')">Two Pieces</li>
+          <li onclick="showCategory('accessories')">Accessories</li>
+          <li onclick="showSignUp()">Sign Up</li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- HERO SLIDESHOW -->
+    <section class="hero" id="main-content">
+      <div class="hero-slides">
+        <div
+          class="hero-slide active"
+          style="background-image: url(acidic%2020.jpg)"
+        ></div>
+        <div
+          class="hero-slide"
+          style="background-image: url(acidic%207.jpg)"
+        ></div>
+        <div
+          class="hero-slide"
+          style="background-image: url(acidic%2028.jpg)"
+        ></div>
+        <div
+          class="hero-slide"
+          style="background-image: url(acidic%2012.jpg)"
+        ></div>
+        <div
+          class="hero-slide"
+          style="background-image: url(acidic%209.jpg)"
+        ></div>
+      </div>
+
+      <div class="hero-content">
+        <h2 id="glow-text">Elevate Your Streetwear</h2>
+        <p id="tracking-text">Modern. Minimal. Bold.</p>
+      </div>
+
+      <!-- Slideshow Controls -->
+      <button class="slideshow-nav slideshow-prev" onclick="prevSlide()">
+        ❮
+      </button>
+      <button class="slideshow-nav slideshow-next" onclick="nextSlide()">
+        ❯
+      </button>
+
+      <div class="slideshow-controls">
+        <div class="slideshow-dot active" onclick="goToSlide(0)"></div>
+        <div class="slideshow-dot" onclick="goToSlide(1)"></div>
+        <div class="slideshow-dot" onclick="goToSlide(2)"></div>
+        <div class="slideshow-dot" onclick="goToSlide(3)"></div>
+        <div class="slideshow-dot" onclick="goToSlide(4)"></div>
+      </div>
+    </section>
+
+    <!-- SIGN UP SECTION -->
+    <section class="signup-section" id="signup-section">
+      <div class="signup-container">
+        <h2 class="signup-heading">Join ACIDIC</h2>
+        <p class="signup-subheading">
+          Create an account to unlock exclusive offers
+        </p>
+
+        <form class="signup-form">
+          <input type="text" class="input" placeholder="Full Name" required />
+          <input type="email" class="input" placeholder="Email" required />
+          <input
+            type="password"
+            class="input"
+            placeholder="Password"
+            required
+          />
+          <input
+            type="password"
+            class="input"
+            placeholder="Confirm Password"
+            required
+          />
+
+          <button type="button" class="signup-button" onclick="signUp()">
+            Sign Up
+          </button>
+        </form>
+
+        <div class="social-account-container">
+          <span class="title">Or continue with</span>
+          <div class="social-accounts">
+            <button class="social-button">
+              <svg
+                class="svg"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1em"
+                viewBox="0 0 488 512"
+              >
+                <path
+                  d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+                ></path>
+              </svg>
+            </button>
+            <button class="social-button">
+              <svg
+                class="svg"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1em"
+                viewBox="0 0 448 512"
+              >
+                <path
+                  d="M400 32H48A48 48 0 0 0 0 80v352a48 48 0 0 0 48 48h137.25V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.27c-30.81 0-40.42 19.12-40.42 38.73V256h68.78l-11 71.69h-57.78V480H400a48 48 0 0 0 48-48V80a48 48 0 0 0-48-48z"
+                ></path>
+              </svg>
+            </button>
+            <button class="social-button">
+              <svg
+                class="svg"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1em"
+                viewBox="0 0 448 512"
+              >
+                <path
+                  d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-48.9 158.8c.2 2.8.2 5.7.2 8.5 0 86.7-66 186.6-186.6 186.6-37.2 0-71.7-10.8-100.7-29.4 5.3.6 10.4.8 15.8.8 30.7 0 58.9-10.4 81.4-28-28.8-.6-53-19.5-61.3-45.5 10.1 1.5 19.2 1.5 29.6-1.2-30-6.1-52.5-32.5-52.5-64.4v-.8c8.7 4.9 18.9 7.9 29.6 8.3a65.447 65.447 0 0 1-29.2-54.6c0-12.2 3.2-23.4 8.9-33.1 32.3 39.8 80.8 65.8 135.2 68.6-9.3-44.5 24-80.6 64-80.6 18.9 0 35.9 7.9 47.9 20.7 14.8-2.8 29-8.3 41.6-15.8-4.9 15.2-15.2 28-28.8 36.1 13.2-1.4 26-5.1 37.8-10.2-8.9 13.1-20.1 24.7-32.9 34z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="agreement">
+          By signing up, you agree to the <a href="#">Terms of Service</a> and
+          <a href="#">Privacy Policy</a>
+        </div>
+
+        <div class="login-link">
+          Already have an account? <a href="#" onclick="showLogin()">Log in</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="product-section" class="products"></section>
+
+    <!-- CART SIDEBAR -->
+    <div id="cart-sidebar" class="cart-sidebar">
+      <div class="cart-header">
+        <h2>Your Cart</h2>
+        <span class="close-cart" onclick="toggleCart(false)">×</span>
+      </div>
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-footer">
+        <p>Total: <span id="cart-total">R0</span></p>
+        <button class="checkout-btn" onclick="checkout()">Checkout</button>
+      </div>
+    </div>
+
+    <!-- PRODUCT MODAL -->
+    <div id="product-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">×</span>
+        <img
+          id="modal-img"
+          src=""
+          alt=""
+          style="
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+          "
+        />
+        <h3 id="modal-name"></h3>
+        <p id="modal-price"></p>
+        <label for="size">Select Size:</label>
+        <select id="size">
+          <option value="Small">Small</option>
+          <option value="Medium">Medium</option>
+          <option value="Large">Large</option>
+          <option value="Extra Large">Extra Large</option>
+        </select>
+        <button class="add-to-cart" onclick="addSelectedToCart()">
+          Add to Cart
+        </button>
+      </div>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div id="checkout-modal" class="modal">
+      <div class="modal-content checkout-form">
+        <span class="close-modal" onclick="closeCheckout()">×</span>
+        <h3>Checkout Details</h3>
+        <p>Delivery Fee: <strong>R150</strong></p>
+
+        <input type="text" placeholder="Country/Region" id="country" required />
+        <input type="text" placeholder="First Name" id="fname" required />
+        <input type="text" placeholder="Last Name" id="lname" required />
+        <input type="text" placeholder="Address" id="address" required />
+        <input type="text" placeholder="City" id="city" required />
+        <input type="text" placeholder="Province" id="province" required />
+        <input type="text" placeholder="Postal Code" id="postal" required />
+        <input type="text" placeholder="Phone Number" id="phone" required />
+        <input type="email" placeholder="Email" id="email" required />
+
+        <label>Payment Method:</label>
+        <select id="payment-method">
+          <option value="Card">Credit/Debit Card</option>
+          <option value="EFT">EFT / Bank Transfer</option>
+          <option value="Cash on Delivery">Cash on Delivery</option>
+        </select>
+
+        <p style="margin-top: 10px">
+          Total (including delivery): <strong id="final-total"></strong>
+        </p>
+
+        <button class="confirm-payment" onclick="proceedToPayment()">
+          Proceed to Payment
+        </button>
+      </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div id="payment-modal" class="modal">
+      <div class="payment-modal">
+        <div class="payment-form">
+          <span class="close-modal" onclick="closePayment()">×</span>
+          <h2 style="text-align: center; margin-bottom: 20px">
+            Complete Your Payment
+          </h2>
+
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div id="payment-order-items"></div>
+            <div class="order-total">
+              <span>Total:</span>
+              <span id="payment-total">R0</span>
+            </div>
+          </div>
+
+          <div class="payment--options">
+            <button class="pay-option" onclick="selectPaymentOption('card')">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="24px"
+                height="24px"
+              >
+                <path
+                  fill="#ff9800"
+                  d="M32 10A14 14 0 1 0 32 38A14 14 0 1 0 32 10Z"
+                />
+                <path
+                  fill="#d50000"
+                  d="M16 10A14 14 0 1 0 16 38A14 14 0 1 0 16 10Z"
+                />
+                <path
+                  fill="#ff3d00"
+                  d="M18,24c0,4.755,2.376,8.95,6,11.48c3.624-2.53,6-6.725,6-11.48s-2.376-8.95-6-11.48 C20.376,15.05,18,19.245,18,24z"
+                />
+              </svg>
+            </button>
+            <button class="pay-option" onclick="selectPaymentOption('paypal')">
+              <svg
+                height="24"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.5 14.25c0 .83-.67 1.5-1.5 1.5h-.75v1.5h.75c.83 0 1.5.67 1.5 1.5v.75h1.5v-.75c0-.83.67-1.5 1.5-1.5h.75v-1.5h-.75c-.83 0-1.5-.67-1.5-1.5v-.75h-1.5v.75zm6-6c0 .83-.67 1.5-1.5 1.5h-.75v1.5h.75c.83 0 1.5.67 1.5 1.5v.75h1.5v-.75c0-.83.67-1.5 1.5-1.5h.75v-1.5h-.75c-.83 0-1.5-.67-1.5-1.5v-.75h-1.5v.75z"
+                  fill="#0a7ea4"
+                />
+                <path
+                  d="M22.25 4.5h-20.5c-.83 0-1.5.67-1.5 1.5v12c0 .83.67 1.5 1.5 1.5h20.5c.83 0 1.5-.67 1.5-1.5v-12c0-.83-.67-1.5-1.5-1.5zm-1.5 12h-17.5v-9h17.5v9z"
+                  fill="#0a7ea4"
+                />
+              </svg>
+            </button>
+            <button class="pay-option" onclick="selectPaymentOption('bank')">
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V5.5L3 7V9H21ZM21 12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12Z"
+                  fill="#0a7ea4"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="separator">
+            <div class="line"></div>
+            <p>OR</p>
+            <div class="line"></div>
+          </div>
+
+          <form class="credit-card-info--form" id="card-form">
+            <div class="input_container">
+              <label for="card_number" class="input_label">Card number</label>
+              <input
+                id="card_number"
+                class="input_field"
+                type="number"
+                name="card_number"
+                placeholder="1234 5678 9012 3456"
+                required
+              />
+            </div>
+            <div class="input_container">
+              <label for="expiration_date" class="input_label"
+                >Expiration date</label
+              >
+              <input
+                id="expiration_date"
+                class="input_field"
+                type="text"
+                name="expiration_date"
+                placeholder="MM/YY"
+                required
+              />
+            </div>
+            <div class="split">
+              <div class="input_container">
+                <label for="cvv" class="input_label">CVV</label>
+                <input
+                  id="cvv"
+                  class="input_field"
+                  type="number"
+                  name="cvv"
+                  placeholder="123"
+                  required
+                />
+              </div>
+              <div class="input_container">
+                <label for="zip_code" class="input_label">ZIP code</label>
+                <input
+                  id="zip_code"
+                  class="input_field"
+                  type="number"
+                  name="zip_code"
+                  placeholder="12345"
+                  required
+                />
+              </div>
+            </div>
+            <div class="input_container">
+              <label for="cardholder_name" class="input_label"
+                >Cardholder name</label
+              >
+              <input
+                id="cardholder_name"
+                class="input_field"
+                type="text"
+                name="cardholder_name"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+          </form>
+
+          <button
+            id="purchase-btn"
+            class="purchase--btn"
+            onclick="processPayment()"
+          >
+            Pay <span id="payment-amount">R0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2025 ACIDIC Clothing. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      // === PRODUCT DATA ===
+      const products = {
+        tshirts: [
+          { name: "Infinite", price: 250, img: "acidic 3.jpg" },
+          { name: "Infinite II", price: 350, img: "acidic 33.jpg" },
+          { name: "Acidic Effect", price: 350, img: "acidic 4.jpg" },
+          { name: "Lightning", price: 300, img: "acidic 19.jpg" },
+          { name: "Naruto", price: 400, img: "acidic 14.jpg" },
+          { name: "Hand Signature", price: 300, img: "acidic 16.jpg" },
+          { name: "Hand Signature II", price: 300, img: "acidic 15.jpg" },
+          { name: "Feather rainbow", price: 300, img: "acidic 26.jpg" },
+          { name: "Angelic", price: 300, img: "acidic 1.jpg" },
+          { name: "Rainbow", price: 350, img: "acidic 6.jpg" },
+          { name: "Butterfly effect", price: 300, img: "acidic 9.jpg" },
+        ],
+        sweaters: [
+          { name: "Infinite", price: 350, img: "acidic 2.jpg" },
+          { name: "Infinite II", price: 400, img: "acidic 7.jpg" },
+          { name: "Acidic Effect", price: 450, img: "acidic m.jpg" },
+          { name: "Angelic", price: 400, img: "acidic 1.jpg" },
+          { name: "Rainbow", price: 400, img: "acidic 34.jpg" },
+          { name: "Butterfly effect", price: 400, img: "acidic.jpg" },
+        ],
+        hoodies: [
+          { name: "Infinite II", price: 500, img: "acidic 8.jpg" },
+          { name: "Feather rainbow", price: 450, img: "acidic 5.jpg" },
+          { name: "Hand Signature", price: 450, img: "acidic 24.jpg" },
+          { name: "Hand Signature II", price: 450, img: "acidic 23.jpg" },
+          { name: "Naruto", price: 550, img: "acidic 22.jpg" },
+          { name: "Angelic", price: 450, img: "acidic 25.jpg" },
+          { name: "Rainbow", price: 450, img: "acidic 27.jpg" },
+          { name: "Lightning", price: 450, img: "acidic 21.jpg" },
+          { name: "Infinite", price: 400, img: "acidic 32.jpg" },
+        ],
+        pants: [
+          { name: "Slim Fit Cargo", price: 499, img: "acidic 12.jpg" },
+          { name: "Street Joggers", price: 459, img: "acidic 13.jpg" },
+        ],
+        twopieces: [
+          { name: "Ladies Set", price: 500, img: "acidic 28.jpg" },
+          { name: "Infinite Set", price: 500, img: "acidic 29.jpg" },
+        ],
+        accessories: [
+          { name: "Infinite Cap", price: 300, img: "acidic 31.jpg" },
+          { name: "Rainbow Cap", price: 250, img: "acidic 30.jpg" },
+        ],
+      };
+
+      // === HERO SLIDESHOW ===
+      const slides = document.querySelectorAll(".hero-slide");
+      const dots = document.querySelectorAll(".slideshow-dot");
+      let currentSlide = 0;
+      let slideInterval;
+
+      function showSlide(index) {
+        slides.forEach((slide) => slide.classList.remove("active"));
+        dots.forEach((dot) => dot.classList.remove("active"));
+        slides[index].classList.add("active");
+        dots[index].classList.add("active");
+        currentSlide = index;
+        resetSlideInterval();
+      }
+
+      function nextSlide() {
+        showSlide((currentSlide + 1) % slides.length);
+      }
+      function prevSlide() {
+        showSlide((currentSlide - 1 + slides.length) % slides.length);
+      }
+      function goToSlide(index) {
+        showSlide(index);
+      }
+      function resetSlideInterval() {
+        clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 4000);
+      }
+      resetSlideInterval();
+
+      // === CART & MODALS ===
+      const cart = [];
+      let currentItem = null;
+      const DELIVERY_FEE = 150;
+      let currentPaymentTotal = 0;
+
+      function showCategory(category) {
+        const section = document.getElementById("product-section");
+        section.classList.remove("active");
+        section.innerHTML = "";
+        setTimeout(() => {
+          products[category].forEach((item) => {
+            const div = document.createElement("div");
+            div.classList.add("product");
+            div.innerHTML = `
+              <img src="${item.img}" alt="${item.name}">
+              <div class="product-info">
+                <h3>${item.name}</h3>
+                <p>R${item.price}</p>
+              </div>`;
+            div.onclick = () => openModal(item);
+            section.appendChild(div);
+          });
+          requestAnimationFrame(() => section.classList.add("active"));
+        }, 150);
+      }
+
+      function openModal(item) {
+        currentItem = item;
+        document.getElementById("modal-img").src = item.img;
+        document.getElementById("modal-name").textContent = item.name;
+        document.getElementById("modal-price").textContent = "R" + item.price;
+        document.getElementById("product-modal").classList.add("active");
+      }
+      function closeModal() {
+        document.getElementById("product-modal").classList.remove("active");
+      }
+
+      function addSelectedToCart() {
+        const size = document.getElementById("size").value;
+        const existing = cart.find(
+          (i) => i.name === currentItem.name && i.size === size
+        );
+        if (existing) existing.qty++;
+        else
+          cart.push({
+            name: currentItem.name,
+            price: currentItem.price,
+            size,
+            qty: 1,
+          });
+        updateCart();
+        toggleCart(true);
+        closeModal();
+      }
+
+      function updateCart() {
+        const cartItems = document.getElementById("cart-items");
+        const totalEl = document.getElementById("cart-total");
+        cartItems.innerHTML = "";
+        let total = 0;
+        cart.forEach((item, index) => {
+          total += item.price * item.qty;
+          const div = document.createElement("div");
+          div.classList.add("cart-item");
+          div.innerHTML = `<span>${item.name} (${item.size}) x${item.qty}</span>
+                          <span>R${item.price * item.qty}</span>
+                          <button onclick="removeFromCart(${index})">X</button>`;
+          cartItems.appendChild(div);
+        });
+        totalEl.textContent = "R" + total;
+      }
+
+      function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+      }
+      function toggleCart(show) {
+        document
+          .getElementById("cart-sidebar")
+          .classList.toggle("active", show);
+      }
+
+      function checkout() {
+        if (cart.length === 0) return alert("Your cart is empty!");
+        toggleCart(false);
+        const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+        const finalTotal = subtotal + DELIVERY_FEE;
+        document.getElementById("final-total").textContent = "R" + finalTotal;
+        document.getElementById("checkout-modal").classList.add("active");
+      }
+
+      function closeCheckout() {
+        document.getElementById("checkout-modal").classList.remove("active");
+      }
+
+      function proceedToPayment() {
+        const fields = [
+          "country",
+          "fname",
+          "lname",
+          "address",
+          "city",
+          "province",
+          "postal",
+          "phone",
+          "email",
+        ];
+        for (let id of fields) {
+          if (!document.getElementById(id).value.trim()) {
+            alert("Please fill out all fields.");
+            return;
+          }
+        }
+
+        // Calculate total for payment
+        const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+        currentPaymentTotal = subtotal + DELIVERY_FEE;
+
+        // Update payment modal with order details
+        document.getElementById("payment-amount").textContent =
+          "R" + currentPaymentTotal;
+        document.getElementById("payment-total").textContent =
+          "R" + currentPaymentTotal;
+
+        const paymentOrderItems = document.getElementById(
+          "payment-order-items"
+        );
+        paymentOrderItems.innerHTML = "";
+
+        cart.forEach((item) => {
+          const itemDiv = document.createElement("div");
+          itemDiv.classList.add("order-item");
+          itemDiv.innerHTML = `<span>${item.name} (${item.size}) x${
+            item.qty
+          }</span>
+                              <span>R${item.price * item.qty}</span>`;
+          paymentOrderItems.appendChild(itemDiv);
+        });
+
+        // Add delivery fee
+        const deliveryDiv = document.createElement("div");
+        deliveryDiv.classList.add("order-item");
+        deliveryDiv.innerHTML = `<span>Delivery Fee</span>
+                                <span>R${DELIVERY_FEE}</span>`;
+        paymentOrderItems.appendChild(deliveryDiv);
+
+        // Close checkout and open payment modal
+        closeCheckout();
+        document.getElementById("payment-modal").classList.add("active");
+      }
+
+      function closePayment() {
+        document.getElementById("payment-modal").classList.remove("active");
+      }
+
+      function selectPaymentOption(option) {
+        // Remove active class from all buttons
+        document.querySelectorAll(".pay-option").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        // Add active class to selected button
+        event.target.classList.add("active");
+
+        // Show/hide card form based on selection
+        const cardForm = document.getElementById("card-form");
+        if (option === "card") {
+          cardForm.style.display = "flex";
+        } else {
+          cardForm.style.display = "none";
+        }
+      }
+
+      function processPayment() {
+        // Validate card form if card payment is selected
+        const cardForm = document.getElementById("card-form");
+        if (cardForm.style.display !== "none") {
+          const cardFields = [
+            "card_number",
+            "expiration_date",
+            "cvv",
+            "zip_code",
+            "cardholder_name",
+          ];
+          for (let id of cardFields) {
+            if (!document.getElementById(id).value.trim()) {
+              alert("Please fill out all payment details.");
+              return;
+            }
+          }
+        }
+
+        // Process payment
+        alert("✅ Payment Successful! Thank you for your order.");
+
+        // Clear cart and close modals
+        cart.length = 0;
+        updateCart();
+        closePayment();
+
+        // Reset payment options
+        document.querySelectorAll(".pay-option").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        document.getElementById("card-form").style.display = "flex";
+      }
+
+      // === SIGN UP FUNCTIONALITY ===
+      function showSignUp() {
+        document.getElementById("main-content").style.display = "none";
+        document.getElementById("product-section").style.display = "none";
+        document.getElementById("signup-section").classList.add("active");
+      }
+
+      function showMainContent() {
+        document.getElementById("main-content").style.display = "block";
+        document.getElementById("product-section").style.display = "grid";
+        document.getElementById("signup-section").classList.remove("active");
+      }
+
+      function signUp() {
+        const inputs = document.querySelectorAll(".signup-form .input");
+        let isValid = true;
+
+        inputs.forEach((input) => {
+          if (!input.value.trim()) {
+            isValid = false;
+            input.style.borderColor = "red";
+          } else {
+            input.style.borderColor = "";
+          }
+        });
+
+        if (isValid) {
+          alert("Account created successfully! Welcome to ACIDIC.");
+          showMainContent();
+        } else {
+          alert("Please fill in all required fields.");
+        }
+      }
+
+      function showLogin() {
+        alert("Login functionality would go here.");
+        // In a real implementation, you would show a login form
+      }
+
+      showCategory("tshirts");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACIDIC Clothing</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #0b0b0b;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      header {
+        width: 100%;
+        padding: 20px;
+        background: #111;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        color: #fff;
+        margin: 0;
+      }
+      header button {
+        background: #00ffcc;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      #product-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+        width: 90%;
+        max-width: 1000px;
+        margin-top: 30px;
+      }
+      .product {
+        background: #1a1a1a;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      }
+      .product img {
+        width: 100%;
+        border-radius: 10px;
+      }
+      .product button {
+        margin-top: 10px;
+        background: #00ffcc;
+        color: #000;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      #cart {
+        margin-top: 40px;
+        width: 90%;
+        max-width: 600px;
+      }
+      #checkoutBtn {
+        background: #00ffcc;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>ACIDIC Clothing</h1>
+      <div>
+        <button id="loginBtn">Login</button>
+        <button id="logoutBtn" style="display: none">Logout</button>
+      </div>
+    </header>
+
+    <div id="product-list"></div>
+
+    <section id="cart">
+      <h2>Your Cart</h2>
+      <ul id="cartItems"></ul>
+      <p>Total: R<span id="cartTotal">0</span></p>
+      <button id="checkoutBtn">Pay Now</button>
+    </section>
+
+    <script type="module">
+      // === Import Firebase modules ===
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        addDoc,
+        doc,
+        setDoc,
+        updateDoc,
+        arrayUnion,
+        serverTimestamp,
+        increment,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+      // === Firebase config (replace with yours) ===
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "acidic-clothing.firebaseapp.com",
+        projectId: "acidic-clothing",
+        storageBucket: "acidic-clothing.appspot.com",
+        messagingSenderId: "XXXXXXXXXXXX",
+        appId: "XXXXXXXXXXXX",
+      };
+
+      // === Initialize Firebase ===
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // === Cart setup ===
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      function updateCartDisplay() {
+        const cartItems = document.getElementById("cartItems");
+        const cartTotal = document.getElementById("cartTotal");
+        cartItems.innerHTML = "";
+        let total = 0;
+        cart.forEach((item, index) => {
+          total += item.price * item.quantity;
+          cartItems.innerHTML += `<li>${item.name} x${item.quantity} - R${
+            item.price * item.quantity
+          }
+          <button onclick="removeFromCart(${index})">Remove</button></li>`;
+        });
+        cartTotal.textContent = total.toFixed(2);
+      }
+
+      window.removeFromCart = (index) => {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartDisplay();
+      };
+
+      function addToCart(id, name, price, image) {
+        const existing = cart.find((item) => item.id === id);
+        if (existing) existing.quantity++;
+        else cart.push({ id, name, price, image, quantity: 1 });
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartDisplay();
+        alert(`${name} added to cart.`);
+      }
+      window.addToCart = addToCart;
+
+      updateCartDisplay();
+
+      // === Load Products from Firestore ===
+      async function loadProducts() {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const container = document.getElementById("product-list");
+        container.innerHTML = "";
+
+        querySnapshot.forEach((docItem) => {
+          const p = docItem.data();
+          container.innerHTML += `
+          <div class="product">
+            <img src="${p.image}" alt="${p.name}">
+            <h3>${p.name}</h3>
+            <p>R${p.price}</p>
+            <button onclick="addToCart('${docItem.id}', '${p.name}', ${p.price}, '${p.image}')">Add to Cart</button>
+          </div>`;
+        });
+      }
+      window.addEventListener("DOMContentLoaded", loadProducts);
+
+      // === Order Number Generator ===
+      function generateOrderNumber() {
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const randomPart = Math.random()
+          .toString(36)
+          .substring(2, 6)
+          .toUpperCase();
+        return `AC${timestamp}-${randomPart}`;
+      }
+
+      // === Save Order to Firestore ===
+      async function saveOrder(userId, cart, total) {
+        const orderNumber = generateOrderNumber();
+
+        const orderData = {
+          orderNumber,
+          userId,
+          items: cart,
+          total,
+          timestamp: serverTimestamp(),
+        };
+
+        await addDoc(collection(db, "orders"), orderData);
+        await updateDoc(doc(db, "users", userId), {
+          orders: arrayUnion(orderData),
+        });
+
+        return orderNumber;
+      }
+
+      // === Process Payment ===
+      async function processPayment() {
+        try {
+          const user = auth.currentUser;
+          if (!user) {
+            alert("Please log in before checking out.");
+            return;
+          }
+          if (!cart || cart.length === 0) {
+            alert("Your cart is empty!");
+            return;
+          }
+
+          const total = cart.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          );
+
+          alert("✅ Payment successful!");
+
+          const orderNumber = await saveOrder(user.uid, cart, total);
+
+          const pointsEarned = Math.floor(total / 10);
+          await updateDoc(doc(db, "users", user.uid), {
+            points: increment(pointsEarned),
+          });
+
+          cart = [];
+          localStorage.removeItem("cart");
+          updateCartDisplay();
+
+          alert(
+            `🎉 Order ${orderNumber} saved! You've earned ${pointsEarned} points.`
+          );
+        } catch (error) {
+          console.error("Payment Error:", error);
+          alert("❌ Error saving your order. Please try again.");
+        }
+      }
+
+      document
+        .getElementById("checkoutBtn")
+        .addEventListener("click", processPayment);
+
+      // === Authentication ===
+      async function login() {
+        const email = prompt("Enter email:");
+        const password = prompt("Enter password:");
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          alert("Logged in successfully!");
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+
+      async function signup() {
+        const email = prompt("Enter email:");
+        const password = prompt("Create password:");
+        const username = prompt("Enter username:");
+        try {
+          const userCred = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          await setDoc(doc(db, "users", userCred.user.uid), {
+            username,
+            email,
+            points: 0,
+            orders: [],
+          });
+          alert("Account created!");
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+
+      async function logout() {
+        await signOut(auth);
+        alert("Logged out.");
+      }
+
+      document.getElementById("loginBtn").addEventListener("click", () => {
+        const choice = confirm(
+          "Already have an account? OK = Login, Cancel = Sign up"
+        );
+        if (choice) login();
+        else signup();
+      });
+      document.getElementById("logoutBtn").addEventListener("click", logout);
+
+      // === Auth state listener ===
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          document.getElementById("loginBtn").style.display = "none";
+          document.getElementById("logoutBtn").style.display = "inline-block";
+        } else {
+          document.getElementById("loginBtn").style.display = "inline-block";
+          document.getElementById("logoutBtn").style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>
