@@ -282,3 +282,49 @@ function hideAllSections() {
     document.getElementById("signup-section").style.display = "none";
     document.getElementById("login-section").style.display = "none";
 }
+
+// Quick search functionality
+function addSearchBar() {
+    const header = document.querySelector('header');
+    const searchHTML = `
+        <div class="search-container" style="margin: 0 20px;">
+            <input type="text" id="search-input" placeholder="Search products..." 
+                style="padding: 8px 12px; border-radius: 20px; border: 1px solid #ccc;">
+        </div>
+    `;
+    header.insertAdjacentHTML('beforeend', searchHTML);
+    
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const results = searchProducts(e.target.value);
+        displaySearchResults(results);
+    });
+}
+
+// Initialize on load
+addSearchBar();
+
+window.addEventListener('error', function(e) {
+    console.error('Application error:', e.error);
+    // Show user-friendly error message
+    showNotification('Something went wrong. Please refresh the page.', 'error');
+});
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        z-index: 10000;
+        background: ${type === 'error' ? '#e74c3c' : type === 'success' ? '#2ecc71' : '#3498db'};
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}

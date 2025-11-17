@@ -1,15 +1,168 @@
-<!-- cancel.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payment Cancelled</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>Payment Cancelled - ACIDIC Clothing</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/auth.css" />
+    <style>
+      .cancel-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      }
+
+      .cancel-content {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .cancel-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+      }
+
+      .cancel-content h1 {
+        color: #e74c3c;
+        margin-bottom: 15px;
+        font-size: 2.5em;
+      }
+
+      .cancel-content p {
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+
+      .btn-primary {
+        background: #000;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #f4b400;
+        color: #000;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #f4b400;
+        color: #000;
+      }
+
+      .btn-secondary:hover {
+        background: #000;
+        color: #f4b400;
+        transform: translateY(-2px);
+      }
+
+      .help-section {
+        background: #fff9e6;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 25px 0;
+        border-left: 4px solid #f4b400;
+      }
+    </style>
   </head>
   <body>
-    <h1>❌ Payment Cancelled</h1>
-    <p>Your payment was not completed. You can try again later.</p>
-    <a href="index.html">Return to shop</a>
+    <header>
+      <h1>ACIDIC</h1>
+      <nav>
+        <ul>
+          <li>
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a
+              href="index.html#product-section"
+              style="color: inherit; text-decoration: none"
+              >Shop</a
+            >
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <section class="cancel-container">
+      <div class="cancel-content">
+        <div class="cancel-icon">❌</div>
+        <h1>Payment Cancelled</h1>
+        <p>
+          Your payment was cancelled. No charges have been made to your account.
+        </p>
+
+        <div class="help-section">
+          <h3>Need Help?</h3>
+          <p>
+            If you encountered any issues during checkout, our support team is
+            here to help.
+          </p>
+          <p>
+            <strong>Email:</strong> support@acidic.com<br />
+            <strong>Phone:</strong> 066-532-8795
+          </p>
+        </div>
+
+        <div class="btn-group">
+          <a href="index.html" class="btn btn-primary">Return to Shopping</a>
+          <a
+            href="index.html"
+            class="btn btn-secondary"
+            onclick="retryCheckout()"
+            >Retry Checkout</a
+          >
+        </div>
+
+        <p style="margin-top: 25px; font-size: 14px; color: #999">
+          Your cart items have been saved for your convenience.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 ACIDIC Clothing. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      function retryCheckout() {
+        // In a real implementation, this would redirect back to checkout
+        // For now, just go to homepage
+        window.location.href = "index.html";
+      }
+
+      // You could also save the cart state for retry
+      // localStorage.setItem('pendingCart', JSON.stringify(cartItems));
+    </script>
   </body>
 </html>

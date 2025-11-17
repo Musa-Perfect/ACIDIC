@@ -1,19 +1,199 @@
-<!-- success.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payment Successful</title>
+    <title>Payment Successful - ACIDIC Clothing</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/auth.css" />
     <style>
-      body {
+      .success-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      }
+
+      .success-content {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
         text-align: center;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .success-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+      }
+
+      .success-content h1 {
+        color: #2ecc71;
+        margin-bottom: 15px;
+        font-size: 2.5em;
+      }
+
+      .success-content p {
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+
+      .btn-primary {
+        background: #000;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #f4b400;
+        color: #000;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #f4b400;
+        color: #000;
+      }
+
+      .btn-secondary:hover {
+        background: #000;
+        color: #f4b400;
+        transform: translateY(-2px);
+      }
+
+      .order-details {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 25px 0;
+        text-align: left;
+      }
+
+      .order-details h3 {
+        color: #333;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #f4b400;
+        padding-bottom: 5px;
       }
     </style>
   </head>
   <body>
-    <h1>✅ Thank you for your order!</h1>
-    <p>Your payment has been received successfully.</p>
-    <a href="index.html">Return to shop</a>
+    <header>
+      <h1>ACIDIC</h1>
+      <nav>
+        <ul>
+          <li>
+            <a href="index.html" style="color: inherit; text-decoration: none"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a
+              href="index.html#product-section"
+              style="color: inherit; text-decoration: none"
+              >Shop</a
+            >
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <section class="success-container">
+      <div class="success-content">
+        <div class="success-icon">✅</div>
+        <h1>Payment Successful!</h1>
+        <p>
+          Thank you for your purchase. Your order has been confirmed and will be
+          processed shortly.
+        </p>
+
+        <div class="order-details">
+          <h3>Order Information</h3>
+          <p>
+            <strong>Order Number:</strong>
+            <span id="order-number"
+              >ACD-${new Date().getTime().toString().slice(-8)}</span
+            >
+          </p>
+          <p><strong>Estimated Delivery:</strong> 3-5 business days</p>
+          <p><strong>Confirmation Email:</strong> Sent to your email address</p>
+        </div>
+
+        <div class="btn-group">
+          <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+          <a href="#" class="btn btn-secondary" onclick="trackOrder()"
+            >Track Your Order</a
+          >
+        </div>
+
+        <p style="margin-top: 25px; font-size: 14px; color: #999">
+          Need help?
+          <a href="mailto:support@acidic.com" style="color: #f4b400"
+            >Contact Support</a
+          >
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 ACIDIC Clothing. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      // Generate a random order number
+      document.getElementById("order-number").textContent =
+        "ACD-" +
+        new Date().getFullYear().toString().slice(-2) +
+        (new Date().getMonth() + 1).toString().padStart(2, "0") +
+        new Date().getDate().toString().padStart(2, "0") +
+        "-" +
+        Math.floor(1000 + Math.random() * 9000);
+
+      function trackOrder() {
+        const orderNumber = document.getElementById("order-number").textContent;
+        alert(
+          `To track your order (${orderNumber}), please check your email for tracking information. You'll receive tracking updates once your order ships.`
+        );
+      }
+
+      // Clear cart from localStorage since payment was successful
+      localStorage.removeItem("acidicCart");
+      // Get URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderNumber = urlParams.get("order") || generateOrderNumber();
+      const orderTotal = urlParams.get("total");
+      const pointsEarned = urlParams.get("points");
+
+      // Update the page with order details
+      if (orderNumber) {
+        document.getElementById("order-number").textContent = orderNumber;
+      }
+      if (orderTotal) {
+        document.getElementById("order-total").textContent = `R${orderTotal}`;
+      }
+    </script>
   </body>
 </html>

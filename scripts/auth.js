@@ -1,3 +1,24 @@
+// Application initialization
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("ACIDIC Clothing - Initializing Application");
+    
+    // Initialize core functionality
+    if (typeof showCategory === 'function') {
+        showCategory("tshirts");
+    }
+    
+    if (typeof initializeApp === 'function') {
+        initializeApp();
+    }
+    
+    // Initialize slideshow
+    if (typeof resetSlideInterval === 'function') {
+        resetSlideInterval();
+    }
+    
+    console.log("ACIDIC Clothing - Ready!");
+});
+
 // === USER AUTHENTICATION ===
 let users = JSON.parse(localStorage.getItem("acidicUsers")) || [];
 let currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;

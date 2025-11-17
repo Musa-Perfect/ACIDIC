@@ -13,6 +13,8 @@
       <h1>ACIDIC</h1>
       <nav>
         <ul>
+          </li>
+          <li onclick="showCategory('allproducts')">All Products</li>
           <li onclick="showCategory('tshirts')">T-Shirts</li>
           <li onclick="showCategory('sweaters')">Sweaters</li>
           <li onclick="showCategory('hoodies')">Hoodies</li>
@@ -23,6 +25,24 @@
           <li id="auth-link" onclick="showSignUp()">Sign Up</li>
         </ul>
       </nav>
+      <!-- Cart Icon -->
+      <div class="cart-icon-container" onclick="toggleCart(true)">
+        <svg
+          class="cart-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.4 5.2 16.4H17M17 13V16.4M9 19C9 19.6 8.6 20 8 20C7.4 20 7 19.6 7 19C7 18.4 7.4 18 8 18C8.6 18 9 18.4 9 19ZM17 19C17 19.6 16.6 20 16 20C15.4 20 15 19.6 15 19C15 18.4 15.4 18 16 18C16.6 18 17 18.4 17 19Z"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="cart-count" id="cart-count">0</span>
+      </div>
     </header>
 
     <!-- HERO SLIDESHOW -->
@@ -517,6 +537,26 @@
       </div>
     </div>
 
+    <!-- PRODUCTS SECTION -->
+    <section
+      id="products-section"
+      class="products-section"
+      style="display: none"
+    >
+      <div class="section-header">
+        <h2 id="category-title">All Products</h2>
+        <p id="category-description">Discover our latest collection</p>
+        <p style="color: #666; font-size: 14px; margin-top: 10px">
+          💡 <strong>Tip:</strong> Use the cart icons to quickly add items, or
+          click the navigation dots below to browse products
+        </p>
+      </div>
+      <div class="products-grid" id="products-grid">
+        <!-- Products will be dynamically inserted here -->
+      </div>
+      <!-- Navigation dots will be inserted here dynamically -->
+    </section>
+
     <!-- CUSTOMIZATION MODAL -->
     <div id="customize-modal" class="modal">
       <div class="modal-content">
@@ -528,29 +568,46 @@
             <div class="color-options">
               <div
                 class="color-option active"
+                data-color="black"
+                data-name="Black"
                 style="background: #000"
-                onclick="selectColor(this, '#000')"
+                onclick="selectColor(this, 'black', 'Black')"
               ></div>
               <div
                 class="color-option"
+                data-color="white"
+                data-name="White"
                 style="background: #fff; border: 1px solid #ccc"
-                onclick="selectColor(this, '#fff')"
+                onclick="selectColor(this, 'white', 'White')"
               ></div>
               <div
                 class="color-option"
+                data-color="gold"
+                data-name="Gold"
                 style="background: #f4b400"
-                onclick="selectColor(this, '#f4b400')"
+                onclick="selectColor(this, 'gold', 'Gold')"
               ></div>
               <div
                 class="color-option"
+                data-color="red"
+                data-name="Red"
                 style="background: #ff0000"
-                onclick="selectColor(this, '#ff0000')"
+                onclick="selectColor(this, 'red', 'Red')"
               ></div>
               <div
                 class="color-option"
+                data-color="blue"
+                data-name="Royal Blue"
                 style="background: #0000ff"
-                onclick="selectColor(this, '#0000ff')"
+                onclick="selectColor(this, 'blue', 'Royal Blue')"
               ></div>
+            </div>
+            <div
+              class="selected-color-info"
+              id="selected-color-info"
+              style="margin-top: 10px; font-size: 14px; color: #666"
+            >
+              Selected: <strong>Black</strong>
             </div>
           </div>
           <button class="add-to-cart" onclick="addCustomizationToCart()">
@@ -908,6 +965,76 @@
       </div>
     </div>
 
+    <!-- ENHANCED LOYALTY PROGRAM SECTION -->
+    <section class="loyalty-program" id="loyalty-program" style="display: none">
+      <div class="loyalty-container">
+        <h2>ACIDIC Rewards</h2>
+        <div class="loyalty-card">
+          <div class="points-display">
+            <h3 id="user-points">0 Points</h3>
+            <div class="progress-bar">
+              <div
+                class="progress"
+                id="points-progress"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p id="tier-info">Earn 1 point per R10 spent</p>
+            <div
+              id="current-benefits"
+              style="margin-top: 10px; font-size: 12px"
+            ></div>
+          </div>
+          <div class="rewards">
+            <div class="reward-tier" id="bronze-tier">
+              <h4>Bronze (100 pts)</h4>
+              <p>10% Off Next Purchase</p>
+            </div>
+            <div class="reward-tier" id="silver-tier">
+              <h4>Silver (200 pts)</h4>
+              <p>10% Off Next Purchase + Free Delivery</p>
+            </div>
+            <div class="reward-tier" id="gold-tier">
+              <h4>Gold (500 pts)</h4>
+              <p>10% Off Next Purchase + Free Delivery + Exclusive Drops</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reward History -->
+        <div class="reward-history" id="reward-history">
+          <h3>Reward History</h3>
+          <div
+            id="reward-history-list"
+            style="max-height: 200px; overflow-y: auto"
+          >
+            <p style="text-align: center; color: #666">
+              No rewards claimed yet
+            </p>
+          </div>
+        </div>
+
+        <!-- Order History -->
+        <div
+          class="order-history"
+          style="
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+          "
+        >
+          <h3>Order History</h3>
+          <div
+            id="order-history-list"
+            style="max-height: 200px; overflow-y: auto"
+          >
+            <p style="text-align: center; color: #666">No orders yet</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CONFIRMATION MODAL -->
     <div id="confirmation-modal" class="modal">
       <div class="modal-content" style="max-width: 500px">
@@ -1002,10 +1129,12 @@
       </p>
     </footer>
 
+    <script src="scripts/data.js"></script>
     <script src="scripts/products.js"></script>
     <script src="scripts/cart.js"></script>
     <script src="scripts/auth.js"></script>
     <script src="scripts/rewards.js"></script>
     <script src="scripts/main.js"></script>
+    <script src="scripts/init.js"></script>
   </body>
 </html>
