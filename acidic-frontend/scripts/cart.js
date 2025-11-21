@@ -670,6 +670,7 @@ window.getCartData = function() {
 };
 
 // Initialize cart-related event listeners
+// Enhanced event listeners initialization
 function initCartEventListeners() {
     // Close cart when clicking outside
     document.addEventListener('click', function(event) {
@@ -680,19 +681,51 @@ function initCartEventListeners() {
         }
     });
     
-    // Escape key to close cart
+    // Escape key to close everything
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             toggleCart(false);
+            closeModal();
+            closeCustomize();
+            closeCheckout();
+            closePayment();
+            closeConfirmation();
         }
     });
 }
 
-// Initialize when DOM is loaded
+// Test function to verify everything works
+function testCustomizationModal() {
+    console.log('Testing customization modal...');
+    
+    // Test close function exists
+    if (typeof closeCustomize === 'function') {
+        console.log('✓ closeCustomize function exists');
+    } else {
+        console.error('✗ closeCustomize function not found');
+    }
+    
+    // Test modal element exists
+    const modal = document.getElementById('customize-modal');
+    if (modal) {
+        console.log('✓ Customization modal element exists');
+    } else {
+        console.error('✗ Customization modal element not found');
+    }
+    
+    // Test close button exists
+    const closeBtn = document.querySelector('#customize-modal .close-modal');
+    if (closeBtn) {
+        console.log('✓ Close button exists');
+        console.log('✓ Close button onclick:', closeBtn.getAttribute('onclick'));
+    } else {
+        console.error('✗ Close button not found');
+    }
+}
+
+// Run test on load (optional)
 document.addEventListener('DOMContentLoaded', function() {
-    initCartEventListeners();
-    updateCartCount();
-    loadCartItems();
+    setTimeout(testCustomizationModal, 1000);
 });
 
 // Color selection function with name display
@@ -1050,8 +1083,6 @@ document.head.appendChild(style);
 
 // cart.js - Fixed Checkout Functionality
 
-// ... (keep all your existing cart code above) ...
-
 // Fixed Checkout function
 function checkout() {
     if (cart.length === 0) {
@@ -1379,3 +1410,104 @@ window.processPayment = processPayment;
 window.trackOrder = trackOrder;
 window.contactSupport = contactSupport;
 window.continueShopping = continueShopping;
+
+// Enhanced close customize function
+function closeCustomize() {
+    const customizeModal = document.getElementById('customize-modal');
+    if (customizeModal) {
+        customizeModal.style.display = 'none';
+    }
+    // Don't automatically go back to home page - let user decide
+}
+
+// Enhanced show customize modal function
+function showCustomizeModal() {
+    const customizeModal = document.getElementById('customize-modal');
+    if (customizeModal) {
+        customizeModal.style.display = 'block';
+        
+        // Initialize with default color (Black)
+        const defaultColor = '#000';
+        const defaultColorName = 'Black';
+        updateSelectedColorDisplay(defaultColor, defaultColorName);
+        
+        // Add event listener for escape key
+        const handleEscapeKey = function(e) {
+            if (e.key === 'Escape') {
+                closeCustomize();
+                document.removeEventListener('keydown', handleEscapeKey);
+            }
+        };
+        document.addEventListener('keydown', handleEscapeKey);
+        
+        // Store the handler for cleanup
+        customizeModal._escapeHandler = handleEscapeKey;
+    }
+}
+
+// Enhanced close customize with cleanup
+function closeCustomize() {
+    const customizeModal = document.getElementById('customize-modal');
+    if (customizeModal) {
+        customizeModal.style.display = 'none';
+        
+        // Remove escape key listener
+        if (customizeModal._escapeHandler) {
+            document.removeEventListener('keydown', customizeModal._escapeHandler);
+            delete customizeModal._escapeHandler;
+        }
+    }
+}
+
+// Close modal when clicking outside
+function initModalCloseEvents() {
+    const customizeModal = document.getElementById('customize-modal');
+    if (customizeModal) {
+        customizeModal.addEventListener('click', function(event) {
+            if (event.target === customizeModal) {
+                closeCustomize();
+            }
+        });
+    }
+    
+    // Also initialize other modals
+    const modals = ['product-modal', 'checkout-modal', 'payment-modal', 'confirmation-modal'];
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    if (modalId === 'product-modal') closeModal();
+                    if (modalId === 'checkout-modal') closeCheckout();
+                    if (modalId === 'payment-modal') closePayment();
+                    if (modalId === 'confirmation-modal') closeConfirmation();
+                    if (modalId === 'customize-modal') closeCustomize();
+                }
+            });
+        }
+    });
+}
+
+// Update the back to home button in customization modal
+function updateCustomizationBackButton() {
+    const backButton = document.querySelector('.back-to-home');
+    if (backButton) {
+        backButton.onclick = function() {
+            closeCustomize();
+            showHomePage();
+        };
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initCartEventListeners();
+    initModalCloseEvents();
+    updateCartCount();
+    loadCartItems();
+    updateAuthUI();
+    updateCustomizationBackButton();
+    
+    // Ensure home page is shown on load
+    showHomePage();
+});

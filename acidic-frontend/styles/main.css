@@ -2895,3 +2895,125 @@ header nav ul li:hover {
         font-size: 16px;
     }
 }
+
+/* Enhanced Close Button Styling */
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #333;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.close-modal:hover {
+    background: #f5f5f5;
+    color: #ff4444;
+    transform: scale(1.1);
+}
+
+.close-modal:active {
+    transform: scale(0.95);
+}
+
+/* Modal header spacing */
+.modal-content h3 {
+    margin-right: 40px; /* Make space for close button */
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+/* Ensure modal content has proper positioning */
+.modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Customization modal specific styles */
+#customize-modal .modal-content {
+    max-width: 450px;
+}
+
+/* Back to shopping button styling */
+.back-to-home {
+    background: #666 !important;
+    color: white !important;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.back-to-home:hover {
+    background: #555 !important;
+    transform: translateY(-2px);
+}
+
+.back-to-home:active {
+    transform: translateY(0);
+}
+
+/* Modal overlay */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+}
+
+.modal.active {
+    display: flex;
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 20px;
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+    
+    .close-modal {
+        top: 10px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 24px;
+    }
+    
+    .modal-content h3 {
+        margin-right: 30px;
+        font-size: 20px;
+    }
+}
