@@ -1,5 +1,167 @@
 // === PRODUCT DATA WITH REAL IMAGES ===
 const products = {
+    allproducts: [
+         {
+            name: "Infinite",
+            price: 250,
+            img: "acidic 3.jpg",
+        },
+        {
+            name: "Infinite II",
+            price: 350,
+            img: "acidic 33.jpg",
+        },
+        {
+            name: "Acidic Effect",
+            price: 350,
+            img: "acidic 4.jpg",
+        },
+        {
+            name: "Lightning",
+            price: 300,
+            img: "acidic 19.jpg",
+        },
+        {
+            name: "Naruto",
+            price: 400,
+            img: "acidic 14.jpg",
+        },
+        {
+            name: "Hand Signature",
+            price: 300,
+            img: "acidic 16.jpg",
+        },
+        {
+            name: "Hand Signature II",
+            price: 300,
+            img: "acidic 15.jpg",
+        },
+        {
+            name: "Feather rainbow",
+            price: 300,
+            img: "acidic 26.jpg",
+        },
+        {
+            name: "Angelic",
+            price: 300,
+            img: "acidic 1.jpg",
+        },
+        {
+            name: "Rainbow",
+            price: 350,
+            img: "acidic 6.jpg",
+        },
+        {
+            name: "Butterfly effect",
+            price: 300,
+            img: "acidic 9.jpg",
+        },
+        {
+            name: "Infinite",
+            price: 350,
+            img: "acidic 2.jpg",
+        },
+        {
+            name: "Infinite II",
+            price: 400,
+            img: "acidic 7.jpg",
+        },
+        {
+            name: "Acidic Effect",
+            price: 450,
+            img: "acidic m.jpg",
+        },
+        {
+            name: "Angelic",
+            price: 400,
+            img: "acidic 1.jpg",
+        },
+        {
+            name: "Rainbow",
+            price: 400,
+            img: "acidic 34.jpg",
+        },
+        {
+            name: "Butterfly effect",
+            price: 400,
+            img: "acidic.jpg",
+        },
+        {
+            name: "Infinite II",
+            price: 500,
+            img: "acidic 8.jpg",
+        },
+        {
+            name: "Feather rainbow",
+            price: 450,
+            img: "acidic 5.jpg",
+        },
+        {
+            name: "Hand Signature",
+            price: 450,
+            img: "acidic 24.jpg",
+        },
+        {
+            name: "Hand Signature II",
+            price: 450,
+            img: "acidic 23.jpg",
+        },
+        {
+            name: "Naruto",
+            price: 550,
+            img: "acidic 22.jpg",
+        },
+        {
+            name: "Angelic",
+            price: 450,
+            img: "acidic 25.jpg",
+        },
+        {
+            name: "Rainbow",
+            price: 450,
+            img: "acidic 27.jpg",
+        },
+        {
+            name: "Lightning",
+            price: 450,
+            img: "acidic 21.jpg",
+        },
+        {
+            name: "Infinite",
+            price: 400,
+            img: "acidic 32.jpg",
+        },
+        {
+            name: "Slim Fit Cargo",
+            price: 499,
+            img: "acidic 12.jpg",
+        },
+        {
+            name: "Street Joggers",
+            price: 459,
+            img: "acidic 13.jpg",
+        },
+        {
+            name: "Ladies Set",
+            price: 500,
+            img: "acidic 28.jpg",
+        },
+        {
+            name: "Infinite Set",
+            price: 500,
+            img: "acidic 29.jpg",
+        },
+        {
+            name: "Infinite Cap",
+            price: 300,
+            img: "acidic 31.jpg",
+        },
+        {
+            name: "Rainbow Cap",
+            price: 250,
+            img: "acidic 30.jpg",
+        }
+    ],
     tshirts: [
         {
             name: "Infinite",

@@ -13,6 +13,7 @@
       <h1>ACIDIC</h1>
       <nav>
         <ul>
+          <li onclick="showCategory('allproducts')">All Products</li>
           <li onclick="showCategory('tshirts')">T-Shirts</li>
           <li onclick="showCategory('sweaters')">Sweaters</li>
           <li onclick="showCategory('hoodies')">Hoodies</li>
@@ -539,34 +540,106 @@
               <div
                 class="color-option active"
                 style="background: #000"
-                onclick="selectColor(this, '#000')"
+                data-color="#000"
+                data-name="Black"
+                onclick="selectColor(this, '#000', 'Black')"
               ></div>
               <div
                 class="color-option"
                 style="background: #fff; border: 1px solid #ccc"
-                onclick="selectColor(this, '#fff')"
+                data-color="#fff"
+                data-name="White"
+                onclick="selectColor(this, '#fff', 'White')"
               ></div>
               <div
                 class="color-option"
                 style="background: #f4b400"
-                onclick="selectColor(this, '#f4b400')"
+                data-color="#f4b400"
+                data-name="Gold"
+                onclick="selectColor(this, '#f4b400', 'Gold')"
               ></div>
               <div
                 class="color-option"
                 style="background: #ff0000"
-                onclick="selectColor(this, '#ff0000')"
+                data-color="#ff0000"
+                data-name="Red"
+                onclick="selectColor(this, '#ff0000', 'Red')"
               ></div>
               <div
                 class="color-option"
                 style="background: #0000ff"
-                onclick="selectColor(this, '#0000ff')"
+                data-color="#0000ff"
+                data-name="Blue"
+                onclick="selectColor(this, '#0000ff', 'Blue')"
+              ></div>
+              <div
+                class="color-option"
+                style="background: #008000"
+                data-color="#008000"
+                data-name="Green"
+                onclick="selectColor(this, '#008000', 'Green')"
+              ></div>
+              <div
+                class="color-option"
+                style="background: #800080"
+                data-color="#800080"
+                data-name="Purple"
+                onclick="selectColor(this, '#800080', 'Purple')"
+              ></div>
+              <div
+                class="color-option"
+                style="background: #ffa500"
+                data-color="#ffa500"
+                data-name="Orange"
+                onclick="selectColor(this, '#ffa500', 'Orange')"
               ></div>
             </div>
+            <div class="selected-color-info" id="selected-color-info">
+              Selected color: <strong id="selected-color-name">Black</strong>
+            </div>
           </div>
-          <button class="add-to-cart" onclick="addCustomizationToCart()">
-            Add Customized Item to Cart
-          </button>
+          <div class="customization-actions">
+            <button class="add-to-cart" onclick="addCustomizationToCart()">
+              Add Customized Item to Cart
+            </button>
+            <button
+              class="back-to-home"
+              onclick="closeCustomize()"
+              style="background: #666; margin-top: 10px"
+            >
+              ← Back to Shopping
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- CART SIDEBAR -->
+    <div id="cart-sidebar" class="cart-sidebar">
+      <div class="cart-header">
+        <h2>Your Cart</h2>
+        <span class="close-cart" onclick="toggleCart(false)">×</span>
+      </div>
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-footer">
+        <p>Total: <span id="cart-total">R0</span></p>
+        <button
+          class="clear-cart-btn"
+          onclick="clearCartWithConfirmation()"
+          style="
+            background: #666;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+          "
+        >
+          Clear Cart
+        </button>
+        <button class="checkout-btn" onclick="checkout()">Checkout</button>
       </div>
     </div>
 
@@ -910,6 +983,10 @@
                 />
               </div>
             </div>
+          </div>
+          <div class="payment-security">
+            <span class="lock-icon">🔒</span>
+            Your payment is secure and encrypted
           </div>
           <button class="purchase--btn" type="submit">
             Pay <span id="payment-amount">R0</span>

@@ -557,3 +557,162 @@
     color: #666;
     font-size: 14px;
 }
+
+/* Payment button disabled states */
+.purchase--btn:disabled {
+    background-color: #cccccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+.payment--options button:disabled,
+.social-button:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Processing state */
+.purchase--btn.processing {
+    background: linear-gradient(45deg, #f4b400, #ffd700) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.purchase--btn.processing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Payment security notice */
+.payment-security {
+    text-align: center;
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #666;
+}
+
+.payment-security .lock-icon {
+    margin-right: 5px;
+    color: #4CAF50;
+}
+
+/* Enhanced rewards and order history styling */
+.reward-date {
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.order-history-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    background: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.order-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.order-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reward-points {
+    background: #f4b400;
+    color: black;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.active-tier {
+    border: 2px solid #f4b400 !important;
+    background: #fffaf0 !important;
+    transform: scale(1.05);
+}
+
+.benefit-item {
+    padding: 2px 0;
+    font-size: 11px;
+}
+
+.rewards-info {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 3px solid #f4b400;
+}
+
+/* Guest user styling */
+.guest-login-prompt {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loyalty program for logged-out users */
+.loyalty-guest-message {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.loyalty-guest-message h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.loyalty-guest-message p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Auth status indicators */
+.auth-status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.auth-status.logged-in {
+    background: #4CAF50;
+    color: white;
+}
+
+.auth-status.logged-out {
+    background: #ff9800;
+    color: white;
+}
