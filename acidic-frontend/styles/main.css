@@ -3017,3 +3017,538 @@ header nav ul li:hover {
         font-size: 20px;
     }
 }
+
+/* Enhanced Rewards Styling */
+.points-notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 5.5s forwards;
+    max-width: 350px;
+    border: 2px solid #f4b400;
+}
+
+.points-notification-content {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+}
+
+.points-icon {
+    font-size: 40px;
+    margin-right: 15px;
+    animation: bounce 1s ease infinite;
+}
+
+.points-details h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #fff;
+}
+
+.points-details p {
+    margin: 3px 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.points-details strong {
+    color: #f4b400;
+}
+
+.close-notification {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-notification:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Tier Styles */
+.claimable-tier {
+    border: 3px solid #f4b400 !important;
+    background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%) !important;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(244, 180, 0, 0.4) !important;
+    animation: pulse-glow 2s infinite;
+}
+
+.claimed-tier {
+    border: 2px solid #2ecc71 !important;
+    background: linear-gradient(135deg, #f0fff4 0%, #e6ffed 100%) !important;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 8px 25px rgba(244, 180, 0, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 35px rgba(244, 180, 0, 0.8);
+    }
+}
+
+/* Order History Styles */
+.order-history-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.order-history-item:hover {
+    background: #f0f0f0;
+    transform: translateX(5px);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.order-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.order-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.order-items {
+    font-size: 12px;
+    color: #666;
+}
+
+.reward-points {
+    background: #f4b400;
+    color: black;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Benefits Styling */
+.benefit-item {
+    padding: 5px 0;
+    font-size: 12px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.benefit-item:before {
+    content: "✓";
+    color: #2ecc71;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    margin: 15px 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress {
+    height: 100%;
+    background: linear-gradient(90deg, #f4b400, #ffd700);
+    width: 0%;
+    transition: width 1s ease-in-out;
+    position: relative;
+}
+
+.progress:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(
+        -45deg,
+        rgba(255,255,255,0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255,255,255,0.2) 50%,
+        rgba(255,255,255,0.2) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 50px 50px;
+    animation: move 2s linear infinite;
+}
+
+@keyframes move {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 50px 50px;
+    }
+}
+
+/* ====== FULLSCREEN SLIDESHOW BACKGROUND ====== */
+.fullscreen-slideshow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* Only cover viewport height */
+    z-index: -1; /* Behind everything */
+    overflow: hidden;
+}
+
+.slideshow-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.background-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    filter: brightness(0.7); /* Darken for better text readability */
+}
+
+.background-slide.active {
+    opacity: 1;
+}
+
+/* ====== TRANSPARENT HEADER ====== */
+header {
+    background: rgba(0, 0, 0, 0.4); /* Semi-transparent overlay */
+    backdrop-filter: blur(10px); /* Glass morphism effect */
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced header styles for slideshow background */
+header h1 {
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: #fff3c2;
+    animation: goldGlowFlicker 3s infinite alternate;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+}
+
+header nav ul {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+    align-items: center;
+}
+
+header nav li {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    border-radius: 5px;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+
+header nav li:hover {
+    color: #f4b400;
+    background: rgba(244, 180, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Cart icon in transparent header */
+.cart-icon-container {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cart-icon-container:hover {
+    background: rgba(244, 180, 0, 0.3);
+}
+
+.cart-icon {
+    color: white;
+}
+
+.cart-count {
+    background: #f4b400;
+    color: #000;
+    border: 2px solid white;
+}
+
+/* ====== HERO SECTION ON SLIDESHOW ====== */
+.hero {
+    position: relative;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 1;
+}
+
+.hero-content {
+    color: white;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+    z-index: 2;
+}
+
+/* ====== PRODUCTS SECTION - ENSURING VISIBILITY ====== */
+.products {
+    padding: 60px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    background: rgba(255, 255, 255, 0.95); /* Semi-transparent white background */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 2;
+    margin: 0;
+}
+
+/* Dark mode support for products */
+body.dark-mode .products {
+    background: rgba(18, 18, 18, 0.95);
+}
+
+/* ====== OTHER CONTENT SECTIONS ====== */
+.ai-stylist-section,
+.virtual-tryon,
+.sustainability,
+.community,
+.loyalty-program,
+.outfit-builder,
+.signup-section,
+.login-section {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    margin: 0;
+    padding: 60px 40px;
+}
+
+/* Dark mode support */
+body.dark-mode .ai-stylist-section,
+body.dark-mode .virtual-tryon,
+body.dark-mode .sustainability,
+body.dark-mode .community,
+body.dark-mode .loyalty-program,
+body.dark-mode .outfit-builder,
+body.dark-mode .signup-section,
+body.dark-mode .login-section {
+    background: rgba(18, 18, 18, 0.98);
+    color: #f4f4f4;
+}
+
+/* ====== SLIDESHOW CONTROLS ====== */
+.slideshow-controls {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 3;
+}
+
+.slideshow-nav {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.slideshow-nav:hover {
+    background: rgba(244, 180, 0, 0.7);
+    border-color: #f4b400;
+    transform: scale(1.1);
+}
+
+.slideshow-dots {
+    display: flex;
+    gap: 12px;
+}
+
+.slideshow-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.slideshow-dot:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: scale(1.2);
+}
+
+.slideshow-dot.active {
+    background: #f4b400;
+    transform: scale(1.2);
+    border-color: white;
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
+@media (max-width: 768px) {
+    .fullscreen-slideshow {
+        height: 100vh;
+    }
+    
+    header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    header nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    header nav li {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .products {
+        padding: 40px 20px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .slideshow-controls {
+        bottom: 20px;
+    }
+    
+    .slideshow-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .slideshow-dot {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 20px;
+    }
+    
+    header nav ul {
+        gap: 8px;
+    }
+    
+    header nav li {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .products {
+        padding: 30px 15px;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .slideshow-controls {
+        bottom: 15px;
+        gap: 15px;
+    }
+    
+    .slideshow-nav {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .slideshow-dots {
+        gap: 8px;
+    }
+    
+    .slideshow-dot {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+/* Animation for background slides */
+@keyframes backgroundSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(1.05);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.background-slide.active {
+    animation: backgroundSlideIn 1.5s ease-out;
+}

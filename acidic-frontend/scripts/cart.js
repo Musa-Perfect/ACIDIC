@@ -1511,3 +1511,650 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ensure home page is shown on load
     showHomePage();
 });
+
+// Enhanced Rewards System
+// Reuse existing cart (initialized at top of file) to avoid redeclaring the block-scoped variable
+cart = cart || JSON.parse(localStorage.getItem('cart')) || [];
+let paymentInProgress = false;
+let paymentProcessed = false;
+
+// Initialize rewards when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeUserData();
+    updateCartCount();
+    loadCartItems();
+    checkUserLoginStatus();
+    updateAuthUI();
+    updateLoyaltyProgramDisplay();
+    updateOrderHistoryDisplay();
+});
+
+// Initialize user data structure
+function initializeUserData() {
+    let userData = JSON.parse(localStorage.getItem('userData'));
+    
+    if (!userData) {
+        userData = {
+            points: 0,
+            tier: 'Bronze',
+            joinDate: new Date().toISOString(),
+            orderHistory: [],
+            rewardHistory: [],
+            totalSpent: 0,
+            lastPurchase: null
+        };
+        localStorage.setItem('userData', JSON.stringify(userData));
+    }
+    
+    return userData;
+}
+
+// Enhanced process payment with proper rewards linking
+function processPayment() {
+    if (paymentInProgress) {
+        alert('Payment is already being processed. Please wait...');
+        return;
+    }
+    
+    if (paymentProcessed) {
+        alert('Payment has already been processed for this order.');
+        return;
+    }
+    
+    const paymentButton = document.querySelector('.purchase--btn');
+    const originalText = paymentButton.innerHTML;
+    
+    paymentInProgress = true;
+    paymentButton.innerHTML = '🔄 Processing Payment...';
+    paymentButton.disabled = true;
+    
+    setTimeout(() => {
+        paymentProcessed = true;
+        paymentInProgress = false;
+        
+        // Process successful payment with rewards
+        processSuccessfulPayment();
+        
+        paymentButton.innerHTML = originalText;
+        paymentButton.disabled = false;
+    }, 3000);
+}
+
+// Enhanced successful payment processing
+function processSuccessfulPayment() {
+    closePayment();
+    
+    // Get user info from checkout form
+    const userEmail = document.getElementById('email')?.value || 'guest@example.com';
+    const userName = `${document.getElementById('fname')?.value || ''} ${document.getElementById('lname')?.value || ''}`.trim();
+    
+    // Create comprehensive order details
+    const orderDetails = {
+        orderId: 'ACD-' + Date.now().toString().slice(-8),
+        items: [...cart],
+        subtotal: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+        deliveryFee: 150,
+        total: getCartTotal(),
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }),
+        status: 'confirmed',
+        customer: {
+            email: userEmail,
+            name: userName,
+            address: document.getElementById('address')?.value || ''
+        },
+        paymentMethod: document.getElementById('payment-method')?.value || 'Card'
+    };
+    
+    // Save order to history
+    saveOrderToHistory(orderDetails);
+    
+    // Process rewards ONLY if user is logged in
+    if (checkUserLoginStatus()) {
+        const rewardsData = processRewardsForOrder(orderDetails);
+        updateConfirmationModal(orderDetails, rewardsData);
+        showRewardsNotification(rewardsData);
+    } else {
+        // Show confirmation without rewards for guest users
+        updateConfirmationModal(orderDetails, null);
+    }
+    
+    openConfirmation();
+    clearCartAfterPurchase();
+}
+
+// Process rewards for order (only for logged-in users)
+function processRewardsForOrder(orderDetails) {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+        return null;
+    }
+    
+    let userData = JSON.parse(localStorage.getItem('userData')) || initializeUserData();
+    
+    // Calculate points based on tier multiplier
+    const pointsMultiplier = getTierMultiplier(userData.tier);
+    const pointsEarned = Math.floor(orderDetails.total * pointsMultiplier);
+    
+    // Update user data
+    userData.points += pointsEarned;
+    userData.totalSpent = (userData.totalSpent || 0) + orderDetails.total;
+    userData.lastPurchase = orderDetails.timestamp;
+    
+    // Update tier based on total points
+    const newTier = calculateTier(userData.points);
+    const tierChanged = userData.tier !== newTier;
+    userData.tier = newTier;
+    
+    // Add reward transaction
+    const rewardTransaction = {
+        type: 'earned',
+        points: pointsEarned,
+        orderId: orderDetails.orderId,
+        date: orderDetails.timestamp,
+        description: `Purchase on ${orderDetails.date}`,
+        orderTotal: orderDetails.total,
+        tier: userData.tier
+    };
+    
+    userData.rewardHistory.unshift(rewardTransaction);
+    
+    // Add to order history in user data
+    userData.orderHistory.unshift({
+        orderId: orderDetails.orderId,
+        date: orderDetails.timestamp,
+        total: orderDetails.total,
+        items: orderDetails.items.length,
+        status: 'completed',
+        pointsEarned: pointsEarned
+    });
+    
+    // Save updated user data
+    localStorage.setItem('userData', JSON.stringify(userData));
+    
+    return {
+        pointsEarned: pointsEarned,
+        totalPoints: userData.points,
+        tier: userData.tier,
+        tierChanged: tierChanged,
+        oldTier: tierChanged ? userData.tier : null
+    };
+}
+
+// Get tier multiplier for points calculation
+function getTierMultiplier(tier) {
+    const multipliers = {
+        'Bronze': 0.1,   // 1 point per R10 spent
+        'Silver': 0.125, // 1.25 points per R10 spent
+        'Gold': 0.15     // 1.5 points per R10 spent
+    };
+    return multipliers[tier] || multipliers['Bronze'];
+}
+
+// Enhanced update confirmation modal
+function updateConfirmationModal(orderDetails, rewardsData) {
+    const confirmationOrderItems = document.getElementById('confirmation-order-items');
+    const confirmationTotal = document.getElementById('confirmation-total');
+    const trackingNumber = document.getElementById('tracking-number');
+    const confirmationAddress = document.getElementById('confirmation-address');
+    const rewardsSection = document.getElementById('rewards-earned-section');
+    
+    // Update order items
+    if (confirmationOrderItems) {
+        confirmationOrderItems.innerHTML = '';
+        orderDetails.items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'order-item';
+            itemElement.innerHTML = `
+                <span>${item.name} x${item.quantity}</span>
+                <span>R${(item.price * item.quantity).toFixed(2)}</span>
+            `;
+            confirmationOrderItems.appendChild(itemElement);
+        });
+        
+        const deliveryElement = document.createElement('div');
+        deliveryElement.className = 'order-item';
+        deliveryElement.innerHTML = `
+            <span>Delivery Fee</span>
+            <span>R150.00</span>
+        `;
+        confirmationOrderItems.appendChild(deliveryElement);
+    }
+    
+    if (confirmationTotal) {
+        confirmationTotal.textContent = `R${orderDetails.total.toFixed(2)}`;
+    }
+    
+    if (trackingNumber) {
+        trackingNumber.textContent = orderDetails.orderId;
+    }
+    
+    if (confirmationAddress) {
+        const address = [
+            document.getElementById('address')?.value,
+            document.getElementById('city')?.value,
+            document.getElementById('province')?.value,
+            document.getElementById('postal')?.value
+        ].filter(Boolean).join(', ');
+        confirmationAddress.textContent = address || 'Address not provided';
+    }
+    
+    // Update rewards section
+    if (rewardsSection) {
+        if (rewardsData && checkUserLoginStatus()) {
+            rewardsSection.style.display = 'block';
+            updateRewardsDisplayInConfirmation(rewardsData, orderDetails);
+        } else {
+            rewardsSection.style.display = 'none';
+        }
+    }
+}
+
+// Update rewards display in confirmation
+function updateRewardsDisplayInConfirmation(rewardsData, orderDetails) {
+    const pointsEarnedElement = document.getElementById('points-earned');
+    const totalPointsElement = document.getElementById('total-points');
+    const tierProgressElement = document.getElementById('tier-progress');
+    
+    if (pointsEarnedElement) pointsEarnedElement.textContent = rewardsData.pointsEarned;
+    if (totalPointsElement) totalPointsElement.textContent = rewardsData.totalPoints;
+    
+    if (tierProgressElement) {
+        if (rewardsData.tierChanged) {
+            tierProgressElement.innerHTML = `🎉 <strong>Congratulations! You've reached ${rewardsData.tier} tier!</strong>`;
+            tierProgressElement.style.color = '#2ecc71';
+        } else {
+            const nextTierInfo = getNextTierInfo(rewardsData.totalPoints);
+            if (nextTierInfo.pointsNeeded > 0) {
+                tierProgressElement.textContent = `${nextTierInfo.pointsNeeded} points needed for ${nextTierInfo.nextTier} tier`;
+            } else {
+                tierProgressElement.textContent = `You've reached ${rewardsData.tier} tier! 🎉`;
+            }
+        }
+    }
+    
+    // Add date information
+    const rewardsInfo = document.querySelector('.rewards-info');
+    if (rewardsInfo) {
+        let dateInfo = rewardsInfo.querySelector('.reward-date');
+        if (!dateInfo) {
+            dateInfo = document.createElement('p');
+            dateInfo.className = 'reward-date';
+            rewardsInfo.appendChild(dateInfo);
+        }
+        dateInfo.textContent = `Earned on ${orderDetails.date}`;
+    }
+}
+
+// Show rewards notification
+function showRewardsNotification(rewardsData) {
+    if (!rewardsData) return;
+    
+    const notification = document.createElement('div');
+    notification.className = 'points-notification';
+    notification.innerHTML = `
+        <div class="points-notification-content">
+            <button class="close-notification" onclick="this.parentElement.parentElement.remove()">×</button>
+            <div class="points-icon">🎁</div>
+            <div class="points-details">
+                <h4>Rewards Earned!</h4>
+                <p>You earned <strong>${rewardsData.pointsEarned} points</strong></p>
+                <p>Total points: <strong>${rewardsData.totalPoints}</strong></p>
+                ${rewardsData.tierChanged ? 
+                    `<p style="color: #f4b400; font-weight: bold;">🎉 Welcome to ${rewardsData.tier} Tier!</p>` : 
+                    `<p>Current tier: <strong>${rewardsData.tier}</strong></p>`
+                }
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 6 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 6000);
+}
+
+// Enhanced loyalty program display
+function updateLoyaltyProgramDisplay() {
+    const currentUser = getCurrentUser();
+    const userPointsElement = document.getElementById('user-points');
+    const pointsProgressElement = document.getElementById('points-progress');
+    const tierInfoElement = document.getElementById('tier-info');
+    const currentBenefitsElement = document.getElementById('current-benefits');
+    
+    if (!currentUser) {
+        // Show login prompt for guests
+        if (userPointsElement) userPointsElement.textContent = '0 Points';
+        if (pointsProgressElement) pointsProgressElement.style.width = '0%';
+        if (tierInfoElement) tierInfoElement.textContent = 'Sign in to earn rewards';
+        if (currentBenefitsElement) currentBenefitsElement.innerHTML = '<p>Create an account to start earning points!</p>';
+        updateTierHighlighting('Bronze');
+        return;
+    }
+    
+    const userData = JSON.parse(localStorage.getItem('userData')) || initializeUserData();
+    const userPoints = userData.points || 0;
+    const userTier = userData.tier || 'Bronze';
+    
+    if (userPointsElement) {
+        userPointsElement.textContent = `${userPoints} Points`;
+    }
+    
+    if (pointsProgressElement) {
+        const progress = calculateTierProgress(userPoints, userTier);
+        pointsProgressElement.style.width = `${progress}%`;
+    }
+    
+    if (tierInfoElement) {
+        tierInfoElement.textContent = getTierBenefitsText(userTier);
+    }
+    
+    if (currentBenefitsElement) {
+        currentBenefitsElement.innerHTML = getCurrentBenefits(userTier);
+    }
+    
+    updateTierHighlighting(userTier);
+    updateClaimableTiers(userPoints);
+}
+
+// Calculate tier progress percentage
+function calculateTierProgress(points, tier) {
+    switch (tier) {
+        case 'Bronze':
+            return Math.min((points / 100) * 100, 100);
+        case 'Silver':
+            return Math.min(((points - 100) / 400) * 100, 100);
+        case 'Gold':
+            return 100;
+        default:
+            return 0;
+    }
+}
+
+// Get next tier information
+function getNextTierInfo(currentPoints) {
+    if (currentPoints < 100) {
+        return { nextTier: 'Silver', pointsNeeded: 100 - currentPoints };
+    } else if (currentPoints < 500) {
+        return { nextTier: 'Gold', pointsNeeded: 500 - currentPoints };
+    } else {
+        return { nextTier: 'Gold', pointsNeeded: 0 };
+    }
+}
+
+// Calculate tier based on points
+function calculateTier(points) {
+    if (points >= 500) return 'Gold';
+    if (points >= 200) return 'Silver';
+    return 'Bronze';
+}
+
+// Get tier benefits text
+function getTierBenefitsText(tier) {
+    switch (tier) {
+        case 'Bronze':
+            return 'Earn 1 point per R10 spent • 10% Off Next Purchase';
+        case 'Silver':
+            return 'Earn 1.25 points per R10 spent • 10% Off + Free Delivery';
+        case 'Gold':
+            return 'Earn 1.5 points per R10 spent • 10% Off + Free Delivery + Exclusive Drops';
+        default:
+            return 'Earn 1 point per R10 spent';
+    }
+}
+
+// Get current benefits HTML
+function getCurrentBenefits(tier) {
+    const benefits = {
+        'Bronze': ['10% Off Next Purchase', 'Early Access to Sales'],
+        'Silver': ['10% Off All Purchases', 'Free Delivery', 'Priority Support'],
+        'Gold': ['15% Off All Purchases', 'Free Express Delivery', 'Exclusive Product Drops', 'Personal Stylist Access']
+    };
+    
+    const currentBenefits = benefits[tier] || benefits['Bronze'];
+    return currentBenefits.map(benefit => `<div class="benefit-item">✓ ${benefit}</div>`).join('');
+}
+
+// Update tier highlighting
+function updateTierHighlighting(currentTier) {
+    const tiers = ['bronze-tier', 'silver-tier', 'gold-tier'];
+    
+    tiers.forEach(tier => {
+        const element = document.getElementById(tier);
+        if (element) {
+            element.classList.remove('active-tier', 'claimable-tier', 'claimed-tier');
+            if (tier === `${currentTier.toLowerCase()}-tier`) {
+                element.classList.add('active-tier');
+            }
+        }
+    });
+}
+
+// Update claimable tiers
+function updateClaimableTiers(points) {
+    if (points >= 100) {
+        const silverTier = document.getElementById('silver-tier');
+        if (silverTier) silverTier.classList.add('claimable-tier');
+    }
+    if (points >= 500) {
+        const goldTier = document.getElementById('gold-tier');
+        if (goldTier) goldTier.classList.add('claimable-tier');
+    }
+}
+
+// Enhanced order history display
+function updateOrderHistoryDisplay() {
+    const orderHistoryList = document.getElementById('order-history-list');
+    if (!orderHistoryList) return;
+    
+    const currentUser = getCurrentUser();
+    
+    if (!currentUser) {
+        orderHistoryList.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #666;">
+                <p>Please log in to view your order history and rewards</p>
+                <button onclick="showSignUp()" style="
+                    background: #f4b400; 
+                    color: black; 
+                    border: none; 
+                    padding: 10px 20px; 
+                    border-radius: 5px; 
+                    cursor: pointer; 
+                    margin-top: 15px;
+                    font-weight: bold;
+                ">
+                    Sign In / Register
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    const userData = JSON.parse(localStorage.getItem('userData')) || initializeUserData();
+    const orderHistory = userData.orderHistory || [];
+    
+    if (orderHistory.length === 0) {
+        orderHistoryList.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #666;">
+                <p>No orders yet</p>
+                <p style="font-size: 14px; margin-top: 10px;">Start shopping to earn rewards!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    orderHistoryList.innerHTML = orderHistory.map(order => `
+        <div class="order-history-item">
+            <div class="order-header">
+                <strong>Order #${order.orderId}</strong>
+                <span class="order-date">${new Date(order.date).toLocaleDateString()}</span>
+            </div>
+            <div class="order-details">
+                <span>R${order.total?.toFixed(2) || '0.00'}</span>
+                ${order.pointsEarned ? `<span class="reward-points">+${order.pointsEarned} pts</span>` : ''}
+            </div>
+            <div class="order-items">${order.items || 0} items • ${order.status || 'completed'}</div>
+        </div>
+    `).join('');
+}
+
+// Enhanced user authentication functions
+function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    if (!email || !password) {
+        alert('Please enter both email and password');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        const currentUser = {
+            email: user.email,
+            name: user.name,
+            loggedIn: true,
+            loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        closeLogin();
+        updateAuthUI();
+        updateLoyaltyProgramDisplay();
+        updateOrderHistoryDisplay();
+        
+        // Show welcome back message with points if available
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        if (userData && userData.points > 0) {
+            alert(`Welcome back, ${user.name}! You have ${userData.points} reward points.`);
+        } else {
+            alert(`Welcome back, ${user.name}!`);
+        }
+    } else {
+        alert('Invalid email or password');
+    }
+}
+
+function signUp() {
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-confirm-password').value;
+    
+    if (!name || !email || !password || !confirmPassword) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+    }
+    
+    if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    
+    if (users.find(u => u.email === email)) {
+        alert('User with this email already exists');
+        return;
+    }
+    
+    const newUser = {
+        name: name,
+        email: email,
+        password: password,
+        joinDate: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    // Initialize user data for rewards
+    const userData = {
+        points: 100, // Welcome bonus
+        tier: 'Bronze',
+        joinDate: new Date().toISOString(),
+        orderHistory: [],
+        rewardHistory: [{
+            type: 'welcome',
+            points: 100,
+            date: new Date().toISOString(),
+            description: 'Welcome bonus'
+        }],
+        totalSpent: 0
+    };
+    localStorage.setItem('userData', JSON.stringify(userData));
+    
+    const currentUser = {
+        email: email,
+        name: name,
+        loggedIn: true,
+        loginTime: new Date().toISOString()
+    };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    closeSignUp();
+    updateAuthUI();
+    updateLoyaltyProgramDisplay();
+    updateOrderHistoryDisplay();
+    
+    alert(`Welcome to ACIDIC, ${name}! You've received 100 welcome points! 🎉`);
+}
+
+// Enhanced auth UI update
+function updateAuthUI() {
+    const currentUser = getCurrentUser();
+    const authLink = document.getElementById('auth-link');
+    
+    if (authLink) {
+        if (currentUser) {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            const points = userData?.points || 0;
+            authLink.innerHTML = `Hi, ${currentUser.name} <small style="color: #f4b400;">(${points} pts)</small>`;
+            authLink.onclick = function() {
+                if (confirm('Do you want to logout?')) {
+                    localStorage.removeItem('currentUser');
+                    updateAuthUI();
+                    updateLoyaltyProgramDisplay();
+                    updateOrderHistoryDisplay();
+                    alert('Logged out successfully');
+                }
+            };
+        } else {
+            authLink.textContent = 'Sign Up';
+            authLink.onclick = showSignUp;
+        }
+    }
+}
+
+// Check if user is logged in
+function checkUserLoginStatus() {
+    const currentUser = getCurrentUser();
+    const isLoggedIn = currentUser && currentUser.loggedIn === true;
+    return isLoggedIn;
+}
+
+// Get current logged in user
+function getCurrentUser() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser && currentUser.loggedIn === true) {
+        return currentUser;
+    }
+    return null;
+}

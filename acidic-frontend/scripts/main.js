@@ -282,3 +282,81 @@ function hideAllSections() {
     document.getElementById("signup-section").style.display = "none";
     document.getElementById("login-section").style.display = "none";
 }
+
+// Fullscreen Background Slideshow Functionality
+let currentBackgroundSlide = 0;
+let backgroundSlideInterval;
+const backgroundSlides = document.querySelectorAll('.background-slide');
+const totalBackgroundSlides = backgroundSlides.length;
+
+// Initialize background slideshow
+function initBackgroundSlideshow() {
+    if (backgroundSlides.length === 0) return;
+    
+    startBackgroundSlideshow();
+    updateBackgroundSlideshowDots();
+    goToBackgroundSlide(0);
+}
+
+// Start automatic background slideshow
+function startBackgroundSlideshow() {
+    clearInterval(backgroundSlideInterval);
+    backgroundSlideInterval = setInterval(() => {
+        nextBackgroundSlide();
+    }, 4000); // Change slide every 4 seconds
+}
+
+// Go to specific background slide
+function goToBackgroundSlide(slideIndex) {
+    if (slideIndex < 0 || slideIndex >= totalBackgroundSlides) return;
+    
+    // Remove active class from all slides
+    backgroundSlides.forEach(slide => {
+        slide.classList.remove('active');
+    });
+    
+    // Add active class to current slide
+    backgroundSlides[slideIndex].classList.add('active');
+    currentBackgroundSlide = slideIndex;
+    
+    // Update slideshow dots
+    updateBackgroundSlideshowDots();
+    
+    // Restart slideshow timer
+    startBackgroundSlideshow();
+}
+
+// Next background slide
+function nextBackgroundSlide() {
+    let nextSlideIndex = currentBackgroundSlide + 1;
+    if (nextSlideIndex >= totalBackgroundSlides) {
+        nextSlideIndex = 0;
+    }
+    goToBackgroundSlide(nextSlideIndex);
+}
+
+// Previous background slide
+function prevBackgroundSlide() {
+    let prevSlideIndex = currentBackgroundSlide - 1;
+    if (prevSlideIndex < 0) {
+        prevSlideIndex = totalBackgroundSlides - 1;
+    }
+    goToBackgroundSlide(prevSlideIndex);
+}
+
+// Update background slideshow dots
+function updateBackgroundSlideshowDots() {
+    const dots = document.querySelectorAll('.slideshow-dot');
+    dots.forEach((dot, index) => {
+        if (index === currentBackgroundSlide) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initBackgroundSlideshow();
+});
