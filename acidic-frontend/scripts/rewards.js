@@ -1,3 +1,38 @@
+class FirebaseRewardsSystem {
+    constructor() {
+        this.userData = null;
+    }
+    
+    async loadUserRewards() {
+        if (!firebaseAuth.isAuthenticated()) return;
+        
+        const user = firebaseAuth.getCurrentUser();
+        this.userData = await firebaseDB.getUserProfile(user.uid);
+        
+        if (this.userData) {
+            this.updateDisplay();
+        }
+    }
+    
+    async addPoints(points) {
+        if (!firebaseAuth.isAuthenticated()) return points;
+        
+        const user = firebaseAuth.getCurrentUser();
+        const currentPoints = this.userData?.points || 0;
+        const newPoints = currentPoints + points;
+        
+        await firebaseDB.updateUserProfile(user.uid, {
+            points: newPoints,
+            tier: this.calculateTier(newPoints)
+        });
+        
+        this.userData.points = newPoints;
+        this.userData.tier = this.calculateTier(newPoints);
+        
+        return points;
+    }
+}
+
 // ===== REWARDS SYSTEM =====
 class RewardsSystem {
     constructor() {

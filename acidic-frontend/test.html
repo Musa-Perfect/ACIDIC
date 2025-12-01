@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Firebase Test</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+  </head>
+  <body>
+    <h2>Firebase Test</h2>
+    <button onclick="testFirebase()">Test Connection</button>
+
+    <script>
+      // Your Firebase config here
+      const firebaseConfig = {
+        apiKey: "AIzaSyAYLaKO7I6bo1ThutemFtNW8SLM-AhF0lo",
+        authDomain: "acidic-cidica21.firebaseapp.com",
+        projectId: "acidic-cidica21",
+        storageBucket: "acidic-cidica21.firebasestorage.app",
+        messagingSenderId: "379641518",
+        appId: "1:379641518:web:c690d6d6e6154f7ae6573f",
+        measurementId: "G-1QF5S9P0HH",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      async function testFirebase() {
+        try {
+          // Test authentication
+          await auth.signInAnonymously();
+          console.log("Auth test passed!");
+
+          // Test database
+          await db
+            .collection("test")
+            .add({ test: "success", timestamp: new Date() });
+          console.log("Database test passed!");
+
+          alert("Firebase is working! Check console for details.");
+        } catch (error) {
+          console.error("Firebase test failed:", error);
+          alert("Firebase test failed. Check console for error.");
+        }
+      }
+    </script>
+  </body>
+</html>

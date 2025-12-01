@@ -336,6 +336,8 @@ const products = {
     ],
 };
 
+const productsBackup = JSON.parse(JSON.stringify(products.allproducts));
+
 // === IMAGE ERROR HANDLING ===
 function handleImageError(img) {
     console.log("Image failed to load:", img.src);
@@ -371,6 +373,54 @@ function showCategory(category) {
         }, 150);
     }
 }
+
+async function loadProductsFromFirebase() {
+    try {
+        console.log('Loading products from Firebase...');
+        
+        // Load all products
+        const firebaseProducts = await firebaseDB.getProducts();
+        
+        if (firebaseProducts.length > 0) {
+            // Use Firebase products
+            products.allproducts = firebaseProducts;
+        } else {
+            // Fallback to local products
+            console.log('No products in Firebase, using local data');
+            initializeLocalProducts();
+        }
+        
+        // Initialize categories
+        initializeCategories();
+        
+        // Update UI if we're on a product page
+        if (document.getElementById('product-section').style.display !== 'none') {
+            const currentCategory = localStorage.getItem('currentCategory') || 'allproducts';
+            showCategory(currentCategory);
+        }
+        
+        console.log(`Loaded ${products.allproducts.length} products`);
+    } catch (error) {
+        console.error('Error loading products:', error);
+        initializeLocalProducts();
+    }
+function initializeLocalProducts() {
+    // Restore from the snapshot of local products taken at script load
+    if (typeof productsBackup !== 'undefined' && Array.isArray(productsBackup)) {
+        products.allproducts = JSON.parse(JSON.stringify(productsBackup));
+    } else {
+        // If backup is not available, keep current products and warn
+        console.warn('productsBackup not found; keeping current local products.');
+    }
+    initializeCategories();
+}
+    initializeCategories();
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadProductsFromFirebase();
+});
 
 // Product modal functions
 let currentItem = null;

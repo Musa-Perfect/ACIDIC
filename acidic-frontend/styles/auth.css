@@ -331,3 +331,70 @@
     color: #0099ff;
     font-size: 9px;
 }
+
+/* Firebase Auth Messages */
+.auth-message {
+    padding: 12px 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+.auth-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.auth-error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.auth-info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #bbdefb;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* User Profile in Nav */
+#auth-link .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#auth-link .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#auth-link .logout-btn {
+    background: #666;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#auth-link .logout-btn:hover {
+    background: #f44336;
+}

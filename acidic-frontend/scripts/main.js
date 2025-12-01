@@ -434,6 +434,9 @@ function processPayment(event) {
     return false;
 }
 
+async function processPayment(event) {
+    if (event) event.preventDefault();
+
 // Validate payment form
 function validatePaymentForm(name, cardNumber, expiry, cvv) {
     console.log('Validating payment form...');
@@ -489,6 +492,52 @@ function validatePaymentForm(name, cardNumber, expiry, cvv) {
     }
     
     return isValid;
+}
+
+// Process payment
+    const paymentResult = await processPaymentTransaction(cardNumber, expiryDate, cvv, currentPaymentAmount);
+    
+    if (paymentResult.success) {
+        // Save order to Firebase
+        const orderData = {
+            items: cart,
+            total: currentPaymentAmount,
+            subtotal: calculateCartSubtotal(),
+            shipping: 150,
+            tax: 0,
+            shippingAddress: getShippingAddress(),
+            paymentMethod: document.getElementById('payment-method').value,
+            paymentStatus: 'completed',
+            transactionId: paymentResult.transactionId
+        };
+        
+        try {
+            const savedOrder = await firebaseDB.createOrder(orderData);
+            console.log('Order saved to Firebase:', savedOrder.id);
+            
+            // Save cart to Firebase for logged-in users
+            if (firebaseAuth.isAuthenticated()) {
+                await firebaseDB.saveUserCart(firebaseAuth.getCurrentUser().uid, []);
+            }
+            
+            // Log analytics event
+            await firebaseDB.logEvent('purchase', {
+                orderId: savedOrder.id,
+                amount: currentPaymentAmount,
+                itemCount: cart.length
+            });
+            
+        } catch (error) {
+            console.error('Error saving order to Firebase:', error);
+        }
+        
+        // Clear local cart
+        clearCart();
+        
+        // Show confirmation
+        showConfirmationModal(paymentResult, pointsEarned);
+    }
+
 }
 
 // Luhn algorithm for card validation
