@@ -1,44 +1,58 @@
 const express = require('express');
+const multer = require('multer');
+const { protect, authorize } = require('../middleware/auth');
+const path = require('path');
+
 const router = express.Router();
-const productController = require('../controllers/productController');
-const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
 
-// Public routes
-router.get('/', productController.getAllProducts);
-router.get('/search', productController.searchProducts);
-router.get('/featured', productController.getFeaturedProducts);
-router.get('/new-arrivals', productController.getNewArrivals);
-router.get('/best-sellers', productController.getBestSellers);
-router.get('/categories', productController.getCategories);
-router.get('/categories/:slug', productController.getCategoryProducts);
-router.get('/:id', productController.getProductById);
-router.get('/:id/related', productController.getRelatedProducts);
-router.get('/:id/reviews', productController.getProductReviews);
-router.get('/slug/:slug', productController.getProductBySlug);
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
 
-// Protected routes (require authentication)
-router.use(auth.authenticate);
-router.post('/:id/view', productController.recordView);
-router.post('/:id/wishlist', productController.toggleWishlist);
-router.post('/:id/reviews', productController.createReview);
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10000000 }, // 10MB limit
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  }
+});
 
-// Admin routes (require admin role)
-router.use(auth.authorize('admin'));
-router.post('/', upload.array('images', 10), productController.createProduct);
-router.put('/:id', upload.array('images', 10), productController.updateProduct);
-router.delete('/:id', productController.deleteProduct);
-router.put('/:id/status', productController.updateProductStatus);
-router.put('/:id/inventory', productController.updateInventory);
-router.post('/:id/images', upload.array('images', 10), productController.addProductImages);
-router.delete('/:id/images/:imageId', productController.removeProductImage);
-router.post('/:id/variants', productController.addVariant);
-router.put('/:id/variants/:variantId', productController.updateVariant);
-router.delete('/:id/variants/:variantId', productController.removeVariant);
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png|gif|webp/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
 
-// Bulk operations
-router.post('/bulk/create', upload.single('file'), productController.bulkCreateProducts);
-router.post('/bulk/update', upload.single('file'), productController.bulkUpdateProducts);
-router.post('/bulk/inventory', upload.single('file'), productController.bulkUpdateInventory);
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: Images Only!');
+  }
+}
+
+// @desc    Upload image
+// @route   POST /api/upload
+// @access  Private
+router.post('/', protect, upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please upload a file'
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      filename: req.file.filename,
+      path: `/uploads/${req.file.filename}`
+    }
+  });
+});
 
 module.exports = router;

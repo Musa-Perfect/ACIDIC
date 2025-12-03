@@ -2,37 +2,47 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Please add a name'],
+    trim: true,
+    maxlength: [50, 'Name cannot be more than 50 characters']
+  },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Please add an email'],
     unique: true,
     lowercase: true,
-    trim: true
+    match: [
+      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+      'Please add a valid email'
+    ]
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: [true, 'Please add a password'],
+    minlength: 6,
+    select: false
   },
-  name: {
+  role: {
     type: String,
-    required: true,
-    trim: true
+    enum: ['user', 'admin', 'moderator'],
+    default: 'user'
   },
-  phone: {
-    type: String,
-    trim: true
+  profile: {
+    phone: String,
+    avatar: String,
+    dateOfBirth: Date,
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other', 'prefer-not-to-say']
+    },
+    bio: {
+      type: String,
+      maxlength: [500, 'Bio cannot be more than 500 characters']
+    }
   },
-  avatar: {
-    type: String,
-    default: 'https://res.cloudinary.com/acidic/image/upload/v1/default-avatar.png'
-  },
-  dateOfBirth: Date,
-  gender: {
-    type: String,
-    enum: ['male', 'female', 'other', 'prefer-not-to-say']
-  },
-  addresses: [{
+  address: {
     street: String,
     city: String,
     province: String,
@@ -40,93 +50,42 @@ const userSchema = new mongoose.Schema({
     country: {
       type: String,
       default: 'South Africa'
-    },
-    isDefault: {
-      type: Boolean,
-      default: false
     }
-  }],
-  
-  // Enhanced profile fields
+  },
   preferences: {
-    style: [String],
-    colors: [String],
-    sizes: {
-      tops: String,
-      bottoms: String,
-      shoes: String
-    },
     newsletter: {
       type: Boolean,
       default: true
     },
-    marketingEmails: {
+    smsNotifications: {
       type: Boolean,
       default: false
+    },
+    sizePreference: {
+      type: String,
+      enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+    },
+    stylePreferences: [String]
+  },
+  loyalty: {
+    points: {
+      type: Number,
+      default: 0
+    },
+    tier: {
+      type: String,
+      enum: ['bronze', 'silver', 'gold'],
+      default: 'bronze'
+    },
+    joinDate: {
+      type: Date,
+      default: Date.now
     }
   },
-  
-  // Loyalty program
-  loyaltyPoints: {
-    type: Number,
-    default: 0
+  social: {
+    googleId: String,
+    facebookId: String
   },
-  loyaltyTier: {
-    type: String,
-    enum: ['Bronze', 'Silver', 'Gold', 'Platinum'],
-    default: 'Bronze'
-  },
-  rewardsEarned: {
-    type: Number,
-    default: 0
-  },
-  rewardsRedeemed: {
-    type: Number,
-    default: 0
-  },
-  
-  // Order stats
-  orderCount: {
-    type: Number,
-    default: 0
-  },
-  totalSpent: {
-    type: Number,
-    default: 0
-  },
-  averageOrderValue: {
-    type: Number,
-    default: 0
-  },
-  
-  // Wishlist & saved items
-  wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-  }],
-  recentlyViewed: [{
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product'
-    },
-    viewedAt: Date
-  }],
-  
-  // Social features
-  followers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  following: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  sharedOutfits: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Outfit'
-  }],
-  
-  // Account status
   isVerified: {
     type: Boolean,
     default: false
@@ -135,77 +94,39 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  verificationToken: String,
-  resetPasswordToken: String,
-  resetPasswordExpires: Date,
-  
-  // Timestamps
   lastLogin: Date,
-  lastActivity: Date
+  loginCount: {
+    type: Number,
+    default: 0
+  }
 }, {
   timestamps: true
 });
 
-// Hash password before saving
+// Encrypt password using bcrypt
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+  if (!this.isModified('password')) {
     next();
-  } catch (error) {
-    next(error);
   }
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+// Match user entered password to hashed password in database
+userSchema.methods.matchPassword = async function(enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Method to update loyalty tier
+// Update loyalty tier based on points
 userSchema.methods.updateLoyaltyTier = function() {
-  if (this.loyaltyPoints >= 1000) {
-    this.loyaltyTier = 'Platinum';
-  } else if (this.loyaltyPoints >= 500) {
-    this.loyaltyTier = 'Gold';
-  } else if (this.loyaltyPoints >= 200) {
-    this.loyaltyTier = 'Silver';
+  if (this.loyalty.points >= 500) {
+    this.loyalty.tier = 'gold';
+  } else if (this.loyalty.points >= 200) {
+    this.loyalty.tier = 'silver';
   } else {
-    this.loyaltyTier = 'Bronze';
+    this.loyalty.tier = 'bronze';
   }
-  return this.save();
 };
 
-// Method to add loyalty points
-userSchema.methods.addLoyaltyPoints = async function(points, reason) {
-  this.loyaltyPoints += points;
-  this.rewardsEarned += points;
-  await this.updateLoyaltyTier();
-  
-  // Log the points transaction
-  await this.model('LoyaltyTransaction').create({
-    user: this._id,
-    points: points,
-    type: 'earned',
-    reason: reason,
-    balance: this.loyaltyPoints
-  });
-  
-  return this.save();
-};
-
-// Virtual for full name
-userSchema.virtual('fullName').get(function() {
-  return this.name;
-});
-
-// Indexes for better performance
-userSchema.index({ email: 1 });
-userSchema.index({ loyaltyPoints: -1 });
-userSchema.index({ totalSpent: -1 });
-
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
