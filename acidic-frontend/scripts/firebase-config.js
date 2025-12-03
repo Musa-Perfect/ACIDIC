@@ -566,3 +566,443 @@ window.db = db;
 window.storage = storage;
 
 console.log("Firebase services initialized");
+
+// === DATABASE INITIALIZATION ===
+async function initializeFirestore() {
+    try {
+        // Check if collections exist and create them if not
+        await initializeProductsCollection();
+        await initializeUsersCollection();
+        console.log("Firestore initialized successfully");
+    } catch (error) {
+        console.error("Error initializing Firestore:", error);
+    }
+}
+
+async function initializeProductsCollection() {
+    const productsRef = db.collection('products');
+    const snapshot = await productsRef.limit(1).get();
+    
+    if (snapshot.empty) {
+        console.log("Creating products collection with sample data...");
+        
+        // Add your products to Firestore
+        const sampleProducts = [
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            {
+                id: 'infinite-1',
+                name: "Infinite",
+                price: 250,
+                category: "tshirts",
+                imageUrl: "acidic 3.jpg",
+                description: "Classic Infinite design t-shirt",
+                stock: 50,
+                active: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+        ];
+        
+        for (const product of sampleProducts) {
+            await productsRef.doc(product.id).set(product);
+        }
+        
+        console.log("Added sample products to Firestore");
+    }
+}
+
+async function initializeUsersCollection() {
+    // This ensures users collection structure is ready
+    console.log("Users collection ready");
+}
+
+// Call this when Firebase is ready
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        initializeFirestore();
+    }, 2000);
+});
+
+// ===== REALTIME UPDATES =====
+class RealtimeUpdates {
+    constructor() {
+        this.unsubscribeFunctions = [];
+    }
+
+    // Subscribe to cart changes
+    subscribeToCart(userId, callback) {
+        if (!userId) return;
+        
+        const unsubscribe = db.collection('userCarts').doc(userId)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    callback(doc.data().cart || []);
+                }
+            }, (error) => {
+                console.error("Cart subscription error:", error);
+            });
+        
+        this.unsubscribeFunctions.push(unsubscribe);
+    }
+
+    // Subscribe to order status
+    subscribeToOrder(orderId, callback) {
+        const unsubscribe = db.collection('orders').doc(orderId)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    callback(doc.data());
+                }
+            });
+        
+        this.unsubscribeFunctions.push(unsubscribe);
+    }
+
+    // Subscribe to product stock
+    subscribeToProduct(productId, callback) {
+        const unsubscribe = db.collection('products').doc(productId)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    callback(doc.data());
+                }
+            });
+        
+        this.unsubscribeFunctions.push(unsubscribe);
+    }
+
+    // Clean up all subscriptions
+    cleanup() {
+        this.unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
+        this.unsubscribeFunctions = [];
+    }
+}
+
+const realtimeUpdates = new RealtimeUpdates();
+window.realtimeUpdates = realtimeUpdates;

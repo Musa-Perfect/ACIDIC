@@ -494,3 +494,16 @@ function calculateSize() {
 
     document.getElementById("size-result").textContent = `Recommended Size: ${size}`;
 }
+
+// Load products from localStorage or fall back to JS object
+function loadProductsStorage() {
+    const saved = localStorage.getItem("products");
+    if (saved) {
+        products = JSON.parse(saved);
+    }
+}
+
+// Save to localStorage
+function saveProductsStorage() {
+    localStorage.setItem("products", JSON.stringify(products));
+}

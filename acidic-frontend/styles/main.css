@@ -3689,3 +3689,82 @@ body.dark-mode .login-section {
         opacity: 1;
     }
 }
+
+/* Loading States */
+.loading {
+    position: relative;
+    min-height: 100px;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Error States */
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ffcdd2;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Success States */
+.success-message {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9;
+    margin: 20px 0;
+    text-align: center;
+}
+
+#admin-dashboard {
+    padding: 20px;
+}
+
+#admin-dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#admin-dashboard th, 
+#admin-dashboard td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+#admin-dashboard img {
+    width: 50px;
+    border-radius: 5px;
+}
+
+#admin-product-form input,
+#admin-product-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+#admin-product-form button {
+    margin-right: 10px;
+}
