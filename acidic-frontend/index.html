@@ -7,15 +7,6 @@
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="stylesheet" href="styles/auth.css" />
     <link rel="stylesheet" href="styles/payment.css" />
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
-
-    <!-- Your Firebase config -->
-    <script src="scripts/firebase-config.js"></script>
   </head>
   <body>
     <!-- FULLSCREEN SLIDESHOW BACKGROUND -->
@@ -1132,60 +1123,10 @@
       </div>
     </div>
 
-    <!-- ADMIN DASHBOARD -->
-    <section id="admin-dashboard" style="display: none">
-      <h2>Admin Dashboard</h2>
-
-      <div class="admin-controls">
-        <button onclick="showAddProductForm()">Add Product</button>
-        <button onclick="loadAdminProducts()">Refresh</button>
-      </div>
-
-      <div id="admin-product-form" style="display: none; margin-top: 20px">
-        <h3 id="form-title">Add Product</h3>
-
-        <label>Product Name</label>
-        <input type="text" id="admin-name" />
-
-        <label>Price (R)</label>
-        <input type="number" id="admin-price" />
-
-        <label>Image URL</label>
-        <input type="text" id="admin-img" />
-
-        <label>Category</label>
-        <select id="admin-category">
-          <option value="tshirts">T-Shirts</option>
-          <option value="hoodies">Hoodies</option>
-          <option value="pants">Pants</option>
-          <option value="accessories">Accessories</option>
-        </select>
-
-        <button onclick="saveProduct()">Save</button>
-        <button onclick="cancelProduct()">Cancel</button>
-
-        <input type="hidden" id="admin-edit-index" />
-      </div>
-
-      <table id="admin-product-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Image</th>
-            <th>Category</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
     <script src="scripts/products.js"></script>
     <script src="scripts/cart.js"></script>
     <script src="scripts/auth.js"></script>
     <script src="scripts/rewards.js"></script>
     <script src="scripts/main.js"></script>
-    <script src="scripts/admin.js"></script>
   </body>
 </html>
