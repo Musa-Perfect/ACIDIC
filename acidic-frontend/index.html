@@ -160,24 +160,15 @@
           </div>
           <div class="tryon-products">
             <div class="tryon-item" onclick="tryOnProduct('hoodie')">
-              <img
-                src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
-                alt="Hoodie"
-              />
+              <img src="acidic 5.jpg" alt="Hoodie" />
               <span>Try This Hoodie</span>
             </div>
             <div class="tryon-item" onclick="tryOnProduct('tshirt')">
-              <img
-                src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1480&q=80"
-                alt="T-Shirt"
-              />
+              <img src="acidic 9.jpg" alt="T-Shirt" />
               <span>Try This T-Shirt</span>
             </div>
             <div class="tryon-item" onclick="tryOnProduct('sweater')">
-              <img
-                src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?ixlib=rb-4.0.3&auto=format&fit=crop&w=1452&q=80"
-                alt="Sweater"
-              />
+              <img src="acidic m.jpg" alt="Sweater" />
               <span>Try This Sweater</span>
             </div>
           </div>
@@ -1122,6 +1113,17 @@
         Processing your payment...
       </div>
     </div>
+
+    <script>
+      function accessAdmin() {
+        const password = prompt("Enter admin access code:");
+        if (password === "acidic123") {
+          window.location.href = "admin.html";
+        } else {
+          alert("Access denied");
+        }
+      }
+    </script>
 
     <script src="scripts/products.js"></script>
     <script src="scripts/cart.js"></script>

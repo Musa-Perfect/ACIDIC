@@ -861,6 +861,41 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Payment system ready');
 });
 
+// ===== PRODUCT INTEGRATION =====
+
+// Load products from Product Manager
+function loadProductsFromManager() {
+    const productManager = {
+        products: JSON.parse(localStorage.getItem('acidicProducts')) || []
+    };
+    
+    return productManager.products;
+}
+
+// Update product display in main site
+function updateProductDisplay() {
+    const products = loadProductsFromManager();
+    
+    // Update your existing product display logic
+    // This will use the products managed by the admin system
+    
+    console.log('Products loaded from Product Manager:', products.length);
+}
+
+// Apply promotions to products
+function applyPromotions() {
+    const promotions = JSON.parse(localStorage.getItem('acidicPromotions')) || [];
+    const now = new Date();
+    
+    const activePromotions = promotions.filter(promo => {
+        const start = new Date(promo.startDate);
+        const end = new Date(promo.endDate);
+        return now >= start && now <= end && promo.status === 'active';
+    });
+    
+    return activePromotions;
+}
+
 // Make functions globally available
 window.processPayment = processPayment;
 window.cancelPayment = cancelPayment;

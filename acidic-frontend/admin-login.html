@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACIDIC Admin Access</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .login-header {
+        margin-bottom: 30px;
+      }
+
+      .login-header i {
+        font-size: 48px;
+        color: #f4b400;
+        margin-bottom: 15px;
+      }
+
+      .login-header h1 {
+        color: #000;
+        margin: 0 0 10px 0;
+      }
+
+      .login-header p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .login-form {
+        margin-top: 20px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .input-group label {
+        display: block;
+        color: #333;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      .input-group input:focus {
+        border-color: #f4b400;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.1);
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 15px;
+        background: #000;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+      }
+
+      .login-btn:hover {
+        background: #f4b400;
+        color: #000;
+      }
+
+      .error-message {
+        color: #ff4444;
+        margin-top: 15px;
+        display: none;
+      }
+
+      .security-notice {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .security-notice i {
+        color: #4caf50;
+        margin-right: 5px;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: translateX(-5px);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: translateX(5px);
+        }
+      }
+
+      .shake {
+        animation: shake 0.5s;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-header">
+        <i class="fas fa-crown"></i>
+        <h1>ACIDIC Admin</h1>
+        <p>Secure Admin Portal Access</p>
+      </div>
+
+      <form class="login-form" id="adminLoginForm">
+        <div class="input-group">
+          <label for="accessCode">Access Code</label>
+          <input
+            type="password"
+            id="accessCode"
+            required
+            placeholder="Enter your access code"
+          />
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">
+          <i class="fas fa-lock"></i> Access Admin Dashboard
+        </button>
+
+        <div class="error-message" id="errorMessage">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span id="errorText">Invalid access code</span>
+        </div>
+      </form>
+
+      <div class="security-notice">
+        <p>
+          <i class="fas fa-shield-alt"></i> This page is for authorized
+          personnel only
+        </p>
+        <p>All access attempts are logged</p>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("adminLoginForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const accessCode = document.getElementById("accessCode").value;
+          const errorDiv = document.getElementById("errorMessage");
+          const loginBtn = document.getElementById("loginBtn");
+          const originalBtnText = loginBtn.innerHTML;
+
+          // Show loading
+          loginBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+          loginBtn.disabled = true;
+
+          // Simulate API call delay
+          setTimeout(() => {
+            // Valid access codes (change these!)
+            const validCodes = ["ACIDIC2025", "ADMIN_ACCESS", "LETMEIN123"];
+
+            if (validCodes.includes(accessCode.toUpperCase())) {
+              // Successful login - redirect to admin dashboard
+              window.location.href = "admin.html";
+
+              // Log the successful access (in a real app, send to server)
+              console.log(
+                `[ADMIN ACCESS] Successful login at ${new Date().toISOString()}`
+              );
+            } else {
+              // Failed login
+              errorDiv.style.display = "block";
+              document.getElementById("accessCode").classList.add("shake");
+
+              // Log failed attempt
+              console.log(
+                `[ADMIN ACCESS] Failed login attempt with code: ${accessCode}`
+              );
+
+              // Reset button
+              loginBtn.innerHTML = originalBtnText;
+              loginBtn.disabled = false;
+
+              // Clear input and focus
+              setTimeout(() => {
+                document.getElementById("accessCode").value = "";
+                document.getElementById("accessCode").focus();
+                document.getElementById("accessCode").classList.remove("shake");
+              }, 500);
+            }
+          }, 1000);
+        });
+
+      // Focus on input when page loads
+      document.getElementById("accessCode").focus();
+
+      // Log page view
+      console.log(`[ADMIN ACCESS] Page loaded at ${new Date().toISOString()}`);
+    </script>
+  </body>
+</html>
