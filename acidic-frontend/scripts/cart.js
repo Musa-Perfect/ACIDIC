@@ -1,11 +1,29 @@
-// Cart initialization
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+// Cart initialization - USE CONSISTENT KEY
+let cart = JSON.parse(localStorage.getItem('acidicCart')) || []; // Changed from 'cart' to 'acidicCart'
 
 // Initialize cart when page loads
 document.addEventListener('DOMContentLoaded', function() {
+    // First try to load from 'acidicCart', then from 'cart' (for backward compatibility)
+    const acidicCart = JSON.parse(localStorage.getItem('acidicCart'));
+    const oldCart = JSON.parse(localStorage.getItem('cart'));
+    
+    if (acidicCart) {
+        cart = acidicCart;
+    } else if (oldCart) {
+        cart = oldCart;
+        // Migrate to new key
+        localStorage.setItem('acidicCart', JSON.stringify(cart));
+        localStorage.removeItem('cart');
+    }
+    
     updateCartCount();
     loadCartItems();
 });
+
+// Save cart to localStorage - USE CONSISTENT KEY
+function saveCart() {
+    localStorage.setItem('acidicCart', JSON.stringify(cart));
+}
 
 // Update cart count in header
 function updateCartCount() {

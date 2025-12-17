@@ -896,6 +896,55 @@ function applyPromotions() {
     return activePromotions;
 }
 
+// === UNIFIED PRODUCT VIEW FUNCTION ===
+function viewProduct(productId, event) {
+    if (event) event.stopPropagation();
+    
+    console.log('Opening product page for ID:', productId);
+    
+    // First check if product exists in productData
+    let product = window.productData.allproducts.find(p => p.id == productId);
+    
+    // If not found, check localStorage
+    if (!product) {
+        const storedProducts = JSON.parse(localStorage.getItem('acidicProducts')) || [];
+        product = storedProducts.find(p => p.id == productId);
+    }
+    
+    if (!product) {
+        console.error('Product not found with ID:', productId);
+        showNotification('Product not found', 'error');
+        return;
+    }
+    
+    // Create a simplified version for the product page
+    const simplifiedProduct = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        comparePrice: product.comparePrice,
+        description: product.description,
+        material: product.material,
+        images: product.images,
+        category: product.category,
+        variants: product.variants || [],
+        inventory: product.inventory || [],
+        totalStock: product.totalStock,
+        sku: product.sku
+    };
+    
+    // Store product data in localStorage with a unique key
+    const productKey = `acidic_product_${productId}`;
+    localStorage.setItem(productKey, JSON.stringify(simplifiedProduct));
+    localStorage.setItem('lastViewedProductId', productId.toString());
+    
+    console.log('Product data saved:', simplifiedProduct.name);
+    console.log('Redirecting to product page...');
+    
+    // Open product page in SAME TAB (not new tab)
+    window.location.href = `product.html?id=${productId}&key=${productKey}`;
+}
+
 // Make functions globally available
 window.processPayment = processPayment;
 window.cancelPayment = cancelPayment;

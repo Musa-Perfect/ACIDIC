@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACIDIC Clothing - Product</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+        background: #fff;
+        color: #000;
+      }
+
+      /* Header */
+      .header {
+        background: #000;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .logo {
+        color: #fff;
+        font-size: 28px;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .cart-icon {
+        position: relative;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .cart-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #f4b400;
+        color: #000;
+        font-size: 12px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Product Container */
+      .product-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+      }
+
+      /* Product Gallery */
+      .product-gallery {
+        display: flex;
+        gap: 20px;
+      }
+
+      .thumbnail-images {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 80px;
+      }
+
+      .thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        opacity: 0.7;
+        transition: all 0.3s;
+      }
+
+      .thumbnail:hover,
+      .thumbnail.active {
+        opacity: 1;
+        border-color: #000;
+      }
+
+      .main-image-container {
+        flex: 1;
+        position: relative;
+      }
+
+      .main-image {
+        width: 100%;
+        height: 600px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .zoom-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: zoom-in;
+        background: rgba(255, 255, 255, 0);
+        transition: background 0.3s;
+      }
+
+      .zoom-overlay:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Product Info */
+      .product-info {
+        padding-top: 20px;
+      }
+
+      .breadcrumb {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+      }
+
+      .breadcrumb a {
+        color: #666;
+        text-decoration: none;
+      }
+
+      .breadcrumb a:hover {
+        color: #000;
+      }
+
+      .product-title {
+        font-size: 32px;
+        font-weight: 400;
+        margin-bottom: 10px;
+        line-height: 1.2;
+      }
+
+      .product-price {
+        font-size: 24px;
+        font-weight: 500;
+        margin-bottom: 20px;
+      }
+
+      .compare-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 18px;
+        margin-left: 10px;
+      }
+
+      .product-description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        font-size: 15px;
+      }
+
+      /* Color Selection */
+      .color-selection {
+        margin-bottom: 30px;
+      }
+
+      .option-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .option-title h3 {
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .color-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .color-option {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+        overflow: hidden;
+      }
+
+      .color-option:hover {
+        transform: scale(1.05);
+      }
+
+      .color-option.selected {
+        border-color: #000;
+      }
+
+      .color-swatch {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+
+      .color-name {
+        position: absolute;
+        bottom: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      /* Size Selection */
+      .size-selection {
+        margin-bottom: 30px;
+      }
+
+      .size-guide {
+        color: #666;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .size-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .size-option {
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+        background: #fff;
+      }
+
+      .size-option:hover {
+        border-color: #000;
+      }
+
+      .size-option.selected {
+        background: #000;
+        color: #fff;
+        border-color: #000;
+      }
+
+      .size-option.unavailable {
+        color: #ccc;
+        cursor: not-allowed;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .size-option.unavailable::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #ccc;
+        transform: rotate(-45deg);
+      }
+
+      /* Quantity */
+      .quantity-selector {
+        margin-bottom: 30px;
+      }
+
+      .quantity-control {
+        display: inline-flex;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .quantity-btn {
+        width: 40px;
+        height: 40px;
+        background: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .quantity-btn:hover {
+        background: #f5f5f5;
+      }
+
+      .quantity-input {
+        width: 60px;
+        height: 40px;
+        border: none;
+        text-align: center;
+        font-size: 16px;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+      }
+
+      /* Actions */
+      .product-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .add-to-cart-btn {
+        flex: 1;
+        padding: 16px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: background 0.3s;
+      }
+
+      .add-to-cart-btn:hover {
+        background: #333;
+      }
+
+      .add-to-cart-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .wishlist-btn {
+        width: 56px;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.3s;
+      }
+
+      .wishlist-btn:hover {
+        border-color: #000;
+        color: #000;
+      }
+
+      /* Product Details */
+      .product-details {
+        border-top: 1px solid #eee;
+        padding-top: 30px;
+      }
+
+      .details-tabs {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .tab-btn {
+        padding: 10px 0;
+        background: none;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        position: relative;
+        color: #666;
+      }
+
+      .tab-btn.active {
+        color: #000;
+      }
+
+      .tab-btn.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #000;
+      }
+
+      .tab-content {
+        display: none;
+        line-height: 1.6;
+        color: #666;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Size Guide Modal */
+      .size-guide-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .size-guide-content {
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .size-guide-content h2 {
+        margin-bottom: 20px;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+      }
+
+      /* Related Products */
+      .related-products {
+        max-width: 1400px;
+        margin: 60px auto;
+        padding: 0 40px;
+      }
+
+      .related-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 30px;
+      }
+
+      .related-product {
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.3s;
+      }
+
+      .related-product:hover {
+        transform: translateY(-5px);
+      }
+
+      .related-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 15px;
+      }
+
+      .related-name {
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+
+      .related-price {
+        font-weight: 500;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .product-container {
+          grid-template-columns: 1fr;
+          gap: 40px;
+          padding: 20px;
+        }
+
+        .main-image {
+          height: 500px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          padding: 15px 20px;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .main-image {
+          height: 400px;
+        }
+
+        .product-actions {
+          flex-direction: column;
+        }
+
+        .wishlist-btn {
+          width: 100%;
+        }
+      }
+
+      /* Loading State */
+      .loading {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      /* Success Message */
+      .success-message {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease;
+        z-index: 1000;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <a href="index.html" class="logo">ACIDIC</a>
+      <nav class="nav-links">
+        <a href="index.html#tshirts">T-Shirts</a>
+        <a href="index.html#sweaters">Sweaters</a>
+        <a href="index.html#hoodies">Hoodies</a>
+        <a href="index.html#pants">Pants</a>
+        <a href="index.html#accessories">Accessories</a>
+        <div class="cart-icon" onclick="window.location.href='index.html#cart'">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count" id="cart-count">0</span>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Product Container -->
+    <div class="product-container" id="product-container">
+      <!-- Left: Product Images -->
+      <div class="product-gallery">
+        <div class="thumbnail-images" id="thumbnail-images">
+          <!-- Thumbnails will be loaded here -->
+        </div>
+        <div class="main-image-container">
+          <img id="main-image" class="main-image" src="" alt="Product Image" />
+          <div class="zoom-overlay" onclick="zoomImage()"></div>
+        </div>
+      </div>
+
+      <!-- Right: Product Info -->
+      <div class="product-info">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+          <a href="index.html">Home</a> / <a id="category-link"></a> /
+          <span id="product-name-breadcrumb"></span>
+        </div>
+
+        <!-- Product Title -->
+        <h1 class="product-title" id="product-title">Loading...</h1>
+
+        <!-- Price -->
+        <div class="product-price" id="product-price">
+          <span id="current-price"></span>
+          <span id="compare-price" class="compare-price"></span>
+        </div>
+
+        <!-- Description -->
+        <p class="product-description" id="product-description"></p>
+
+        <!-- Color Selection -->
+        <div class="color-selection">
+          <div class="option-title">
+            <h3>Color</h3>
+            <span id="selected-color-name">Select a color</span>
+          </div>
+          <div class="color-options" id="color-options">
+            <!-- Color options will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Size Selection -->
+        <div class="size-selection">
+          <div class="option-title">
+            <h3>Size</h3>
+            <span class="size-guide" onclick="showSizeGuide()">Size Guide</span>
+          </div>
+          <div class="size-options" id="size-options">
+            <!-- Size options will be loaded here -->
+          </div>
+          <div
+            id="size-error"
+            style="color: #ff4444; margin-top: 10px; display: none"
+          >
+            Please select a size
+          </div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="quantity-selector">
+          <h3>Quantity</h3>
+          <div class="quantity-control">
+            <button class="quantity-btn" onclick="updateQuantity(-1)">-</button>
+            <input
+              type="number"
+              class="quantity-input"
+              id="quantity"
+              value="1"
+              min="1"
+              max="10"
+              title="Quantity"
+              placeholder="1"
+            />
+            <button class="quantity-btn" onclick="updateQuantity(1)">+</button>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="product-actions">
+          <button
+            class="add-to-cart-btn"
+            id="add-to-cart"
+            onclick="addToCart()"
+            disabled
+          >
+            <i class="fas fa-shopping-bag"></i> Add to Cart
+          </button>
+          <button
+            class="wishlist-btn"
+            id="add-to-wishlist"
+            onclick="addToWishlist()"
+          >
+            <i class="far fa-heart"></i> Add to Wishlist
+          </button>
+        </div>
+
+        <!-- Product Details Tabs -->
+        <div class="product-details">
+          <div class="details-tabs">
+            <button class="tab-btn active" onclick="switchTab('description')">
+              Description
+            </button>
+            <button class="tab-btn" onclick="switchTab('details')">
+              Details
+            </button>
+            <button class="tab-btn" onclick="switchTab('shipping')">
+              Shipping & Returns
+            </button>
+          </div>
+          <div class="tab-content active" id="tab-description">
+            <p id="full-description"></p>
+          </div>
+          <div class="tab-content" id="tab-details">
+            <div id="product-details-content"></div>
+          </div>
+          <div class="tab-content" id="tab-shipping">
+            <h4>Shipping</h4>
+            <p>
+              Free shipping on orders over R1000. Standard delivery: 3-5
+              business days. Express delivery: 1-2 business days.
+            </p>
+            <h4>Returns</h4>
+            <p>
+              Easy 30-day return policy. Items must be unworn and in original
+              packaging.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <section class="related-products" id="related-products">
+      <h2 class="related-title">You May Also Like</h2>
+      <div class="related-grid" id="related-grid">
+        <!-- Related products will be loaded here -->
+      </div>
+    </section>
+
+    <!-- Size Guide Modal -->
+    <div class="size-guide-modal" id="size-guide-modal">
+      <div class="size-guide-content">
+        <button class="close-modal" onclick="closeSizeGuide()">×</button>
+        <h2>Size Guide</h2>
+        <p>Find your perfect fit with our size guide:</p>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px">
+          <thead>
+            <tr style="background: #f5f5f5">
+              <th
+                style="padding: 10px; text-align: left; border: 1px solid #ddd"
+              >
+                Size
+              </th>
+              <th
+                style="padding: 10px; text-align: left; border: 1px solid #ddd"
+              >
+                Chest (cm)
+              </th>
+              <th
+                style="padding: 10px; text-align: left; border: 1px solid #ddd"
+              >
+                Waist (cm)
+              </th>
+              <th
+                style="padding: 10px; text-align: left; border: 1px solid #ddd"
+              >
+                Length (cm)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd">Small (S)</td>
+              <td style="padding: 10px; border: 1px solid #ddd">91-96</td>
+              <td style="padding: 10px; border: 1px solid #ddd">76-81</td>
+              <td style="padding: 10px; border: 1px solid #ddd">69</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd">Medium (M)</td>
+              <td style="padding: 10px; border: 1px solid #ddd">96-101</td>
+              <td style="padding: 10px; border: 1px solid #ddd">81-86</td>
+              <td style="padding: 10px; border: 1px solid #ddd">71</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd">Large (L)</td>
+              <td style="padding: 10px; border: 1px solid #ddd">101-106</td>
+              <td style="padding: 10px; border: 1px solid #ddd">86-91</td>
+              <td style="padding: 10px; border: 1px solid #ddd">73</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd">XL</td>
+              <td style="padding: 10px; border: 1px solid #ddd">106-111</td>
+              <td style="padding: 10px; border: 1px solid #ddd">91-96</td>
+              <td style="padding: 10px; border: 1px solid #ddd">75</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div
+          style="
+            margin-top: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 4px;
+          "
+        >
+          <h4>How to Measure</h4>
+          <p>
+            <strong>Chest:</strong> Measure around the fullest part of your
+            chest.
+          </p>
+          <p><strong>Waist:</strong> Measure around your natural waistline.</p>
+          <p>
+            <strong>Length:</strong> Measure from the highest point of the
+            shoulder to the bottom hem.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Message (hidden by default) -->
+    <div class="success-message" id="success-message" style="display: none">
+      <i class="fas fa-check-circle"></i>
+      <span>Added to cart!</span>
+    </div>
+
+    <script src="scripts/product-page.js"></script>
+  </body>
+</html>
