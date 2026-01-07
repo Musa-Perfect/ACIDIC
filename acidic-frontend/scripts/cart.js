@@ -83,6 +83,196 @@ function addToCart(product, size = 'Medium', customization = null) {
     setTimeout(() => toggleCart(true), 300);
 }
 
+// Enhanced add to cart function with color and size tracking
+function addToCartWithDetails(product, color, size, quantity = 1) {
+    const existingItemIndex = cart.findIndex(item => 
+        item.id === product.id && 
+        item.size === size && 
+        item.color === color
+    );
+
+    if (existingItemIndex > -1) {
+        // Item exists, update quantity
+        cart[existingItemIndex].quantity += quantity;
+    } else {
+        // Add new item with color and size details
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.images?.[0] || product.image || 'acidic 1.jpg',
+            size: size || 'Medium',
+            color: color || 'Black',
+            quantity: quantity,
+            category: product.category,
+            variantId: `${product.id}-${color || 'default'}-${size || 'M'}`,
+            selectedAt: new Date().toISOString(),
+            addedAt: new Date().toISOString(),
+            // Additional metadata for admin
+            sku: product.sku || `ACID-${product.category?.slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-6)}`,
+            productId: product.id,
+            colorName: color || 'Black',
+            sizeCode: size || 'M',
+            originalPrice: product.price,
+            // For customization
+            isCustomized: product.customization ? true : false,
+            customization: product.customization || null
+        };
+        cart.push(cartItem);
+    }
+
+    saveCart();
+    updateCartCount();
+    showAddToCartAnimation(product.name, color, size);
+    
+    return cart.length - 1; // Return index of added item
+}
+
+// Enhanced quick add to cart function
+function processQuickAdd(productId) {
+    console.log('Processing quick add for product:', productId);
+    
+    const product = productData.allproducts.find(p => p.id === productId);
+    if (!product) {
+        showNotification('Product not found', 'error');
+        return;
+    }
+    
+    const quantity = parseInt(document.getElementById('quick-add-qty').value);
+    
+    // Validate quantity
+    if (quantity < 1 || quantity > 10) {
+        showNotification('Quantity must be between 1 and 10', 'error');
+        return;
+    }
+    
+    // Get selected variants
+    const selectedColor = window.selectedVariant?.color || 
+                         product.variants?.find(v => v.name === 'Color')?.options[0] || 
+                         'Black';
+    const selectedSize = window.selectedVariant?.size || 
+                        product.variants?.find(v => v.name === 'Size')?.options[0] || 
+                        'M';
+    
+    // Check if size selected (if product has sizes)
+    const hasSizes = product.variants?.some(v => v.name === 'Size');
+    if (hasSizes && (!selectedSize || selectedSize === 'Select Size')) {
+        showNotification('Please select a size', 'error');
+        return;
+    }
+    
+    // Check stock
+    let stockAvailable = true;
+    let stockQuantity = product.totalStock;
+    
+    if (product.inventory) {
+        const inventoryItem = product.inventory.find(item => 
+            item.color === selectedColor && 
+            item.size === selectedSize
+        );
+        
+        if (inventoryItem) {
+            stockQuantity = inventoryItem.stock;
+            stockAvailable = inventoryItem.stock >= quantity;
+        }
+    }
+    
+    if (!stockAvailable) {
+        showNotification(`Only ${stockQuantity} items available in stock`, 'error');
+        return;
+    }
+    
+    // Add to cart with details
+    const itemIndex = addToCartWithDetails(product, selectedColor, selectedSize, quantity);
+    
+    // Close modal
+    closeQuickAddModal();
+    
+    // Show success message with details
+    showNotification(`${quantity} x ${product.name} (${selectedColor}, ${selectedSize}) added to cart!`, 'success');
+}
+
+// Enhanced customization to cart
+function addCustomizationToCart() {
+    // Get product details safely
+    const productName = document.getElementById('modal-name');
+    const productPrice = document.getElementById('modal-price');
+    const productImage = document.getElementById('modal-img');
+    
+    if (!productName || !productPrice || !productImage) {
+        console.error('Required modal elements not found');
+        alert('Error: Product information not found. Please try again.');
+        return;
+    }
+    
+    // Get selected color safely
+    const selectedColorOption = document.querySelector('.color-option.active');
+    if (!selectedColorOption) {
+        alert('Please select a color first');
+        return;
+    }
+    
+    const selectedColor = selectedColorOption.getAttribute('data-color') || '#000';
+    const selectedColorName = selectedColorOption.getAttribute('data-name') || 'Black';
+    const size = document.getElementById('size')?.value || 'Medium';
+    
+    // Parse price safely
+    let price;
+    try {
+        price = parseFloat(productPrice.textContent.replace('R', '').replace(',', ''));
+        if (isNaN(price)) {
+            throw new Error('Invalid price');
+        }
+    } catch (error) {
+        console.error('Error parsing price:', error);
+        alert('Error: Invalid product price');
+        return;
+    }
+    
+    // Find product in product data
+    const productId = productName.textContent.toLowerCase().replace(/\s+/g, '-');
+    let product = productData.allproducts.find(p => p.name === productName.textContent);
+    
+    if (!product) {
+        product = {
+            id: productId,
+            name: productName.textContent + ' (Custom)',
+            price: price + 50, // Customization fee
+            images: [productImage.src],
+            category: 'custom',
+            customization: {
+                color: selectedColor,
+                colorName: selectedColorName,
+                custom: true,
+                type: 'color-customization'
+            }
+        };
+    }
+    
+    // Add to cart with customization details
+    const itemIndex = addToCartWithDetails(
+        product, 
+        selectedColorName, 
+        size, 
+        1
+    );
+    
+    // Mark as customized
+    if (cart[itemIndex]) {
+        cart[itemIndex].isCustomized = true;
+        cart[itemIndex].customizationDetails = {
+            originalColor: 'Default',
+            customColor: selectedColorName,
+            colorCode: selectedColor,
+            customFee: 50
+        };
+        saveCart();
+    }
+    
+    closeCustomize();
+    showCustomizationSuccess(selectedColorName);
+}
+
 // Add selected product from modal to cart
 function addSelectedToCart() {
     const product = {
@@ -202,7 +392,9 @@ function loadCartItems() {
         cartItemsContainer.innerHTML = `
             <div class="empty-cart">
                 <p>Your cart is empty</p>
-                <button class="continue-shopping" onclick="toggleCart(false)">Continue Shopping</button>
+                <button class="continue-shopping" onclick="toggleCart(false); showHomePage()">
+                    Continue Shopping
+                </button>
             </div>
         `;
         if (cartTotalElement) cartTotalElement.textContent = 'R0';
@@ -216,31 +408,143 @@ function loadCartItems() {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
         
+        // Get color display
+        let colorDisplay = '';
+        if (item.color) {
+            const colorHexMap = {
+                'Black': '#000000',
+                'White': '#ffffff',
+                'Red': '#ff0000',
+                'Blue': '#0000ff',
+                'Lime': '#00ff00',
+                'Cyan': '#00ffff',
+                'Cream': '#fffdd0',
+                'Green': '#008000',
+                'Brown': '#964b00',
+                'Pink': '#ffc0cb'
+            };
+            const hex = colorHexMap[item.color] || '#cccccc';
+            const needsBorder = item.color === 'White' || item.color === 'Cream';
+            
+            colorDisplay = `
+                <div class="cart-item-color">
+                    <span>Color:</span>
+                    <div class="color-display">
+                        <div class="color-dot" style="background: ${hex}; ${needsBorder ? 'border: 1px solid #ccc' : ''}"></div>
+                        <span class="color-name">${item.color}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Get size display
+        let sizeDisplay = item.size ? `
+            <div class="cart-item-size">
+                <span>Size:</span>
+                <span class="size-value">${item.size}</span>
+            </div>
+        ` : '';
+        
+        // Customization badge
+        const customBadge = item.isCustomized ? `<span class="custom-badge">Custom</span>` : '';
+        
         const cartItemElement = document.createElement('div');
         cartItemElement.className = 'cart-item';
+        cartItemElement.setAttribute('data-item-index', index);
+        cartItemElement.setAttribute('data-variant-id', item.variantId || '');
         cartItemElement.innerHTML = `
-            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+            <div class="cart-item-image">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+                ${item.quantity > 1 ? `<span class="quantity-badge">${item.quantity}</span>` : ''}
+            </div>
             <div class="cart-item-details">
-                <h4>${item.name}</h4>
-                <p class="cart-item-price">R${item.price.toFixed(2)}</p>
-                <div class="cart-item-meta">
-                    ${item.size ? `<span>Size: ${item.size}</span>` : ''}
-                    ${item.customization ? `<span class="custom-badge">Custom</span>` : ''}
-                    ${item.bundle ? `<span class="bundle-badge">Bundle</span>` : ''}
+                <h4 class="cart-item-name">${item.name} ${customBadge}</h4>
+                <p class="cart-item-price">R${item.price.toFixed(2)} each</p>
+                <p class="cart-item-total">R${(item.price * item.quantity).toFixed(2)} total</p>
+                
+                <div class="cart-item-variants">
+                    ${sizeDisplay}
+                    ${colorDisplay}
                 </div>
-                <div class="quantity-controls">
-                    <button onclick="updateQuantity(${index}, -1)">-</button>
-                    <span>${item.quantity}</span>
-                    <button onclick="updateQuantity(${index}, 1)">+</button>
+                
+                <div class="cart-item-meta">
+                    ${item.sku ? `<div class="cart-item-sku">SKU: ${item.sku}</div>` : ''}
+                    ${item.category ? `<div class="cart-item-category">${formatCategory(item.category)}</div>` : ''}
+                </div>
+                
+                <div class="cart-item-actions">
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, -1)" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                        <span class="quantity-display">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                    </div>
                 </div>
             </div>
-            <button class="remove-item" onclick="removeFromCart(${index})">×</button>
+            <button class="remove-item" onclick="confirmRemoveItem(${index})" title="Remove item from cart">
+                ×
+            </button>
         `;
         
         cartItemsContainer.appendChild(cartItemElement);
     });
     
-    if (cartTotalElement) cartTotalElement.textContent = `R${total.toFixed(2)}`;
+    if (cartTotalElement) {
+        cartTotalElement.textContent = `R${total.toFixed(2)}`;
+    }
+}
+
+// Update confirmation with order details
+function updateConfirmationWithOrderDetails(order) {
+    const confirmationOrderItems = document.getElementById('confirmation-order-items');
+    const confirmationTotal = document.getElementById('confirmation-total');
+    const trackingNumber = document.getElementById('tracking-number');
+    
+    if (confirmationOrderItems) {
+        confirmationOrderItems.innerHTML = '';
+        order.variantDetails.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'confirmation-order-item';
+            itemElement.innerHTML = `
+                <div class="item-details">
+                    <div class="item-name">${item.product}</div>
+                    <div class="item-variants">
+                        ${item.color ? `<span>Color: ${item.color}</span>` : ''}
+                        ${item.size ? `<span>Size: ${item.size}</span>` : ''}
+                        ${item.isCustomized ? `<span class="custom-tag">Custom</span>` : ''}
+                    </div>
+                </div>
+                <div class="item-quantity-price">
+                    <span class="quantity">x${item.quantity}</span>
+                    <span class="price">R${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `;
+            confirmationOrderItems.appendChild(itemElement);
+        });
+        
+        // Add delivery
+        const deliveryElement = document.createElement('div');
+        deliveryElement.className = 'confirmation-order-item';
+        deliveryElement.innerHTML = `
+            <div class="item-details">
+                <div class="item-name">Delivery Fee</div>
+                <div class="item-variants">
+                    <span>Standard Delivery</span>
+                </div>
+            </div>
+            <div class="item-quantity-price">
+                <span class="price">R150.00</span>
+            </div>
+        `;
+        confirmationOrderItems.appendChild(deliveryElement);
+    }
+    
+    if (confirmationTotal) {
+        confirmationTotal.textContent = `R${order.total.toFixed(2)}`;
+    }
+    
+    if (trackingNumber) {
+        trackingNumber.textContent = order.orderId;
+    }
 }
 
 // Update item quantity

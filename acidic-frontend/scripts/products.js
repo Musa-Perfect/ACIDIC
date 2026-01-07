@@ -5,31 +5,115 @@ function generateProductId() {
     return Date.now() + Math.floor(Math.random() * 1000);
 }
 
-// Define colors with hex values
-const colorOptions = [
-    { name: 'Black', hex: '#000000' },
-    { name: 'White', hex: '#ffffff' },
-    { name: 'Grey', hex: '#808080' },
-    { name: 'Navy', hex: '#000080' },
-    { name: 'Red', hex: '#ff0000' },
-    { name: 'Blue', hex: '#0000ff' },
-    { name: 'Green', hex: '#008000' }
-];
+/* ===============================
+   COLOR SYSTEM – SINGLE SOURCE
+================================ */
+
+const COLOR_MAP = {
+  Black: "#000000",
+  White: "#ffffff",
+  Red: "#ff0000",
+  Blue: "#0000ff",
+  Lime: "#00ff00",
+  Cyan: "#00ffff",
+  Cream: "#fffdd0",
+  Green: "#008000",
+  Brown: "#964b00",
+  Pink: "#ffc0cb"
+};
+
+const COLOR_LIST = Object.keys(COLOR_MAP);
+const colorOptions = COLOR_LIST.map(colorName => ({ name: colorName }));
 
 // Define size options
 const sizeOptions = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+function getColorSwatchHTML(colorName, selected = false) {
+  const hex = COLOR_MAP[colorName];
+
+  return `
+    <button
+      class="color-swatch-btn ${selected ? "selected" : ""}"
+      data-color="${colorName}"
+      onclick="selectColorSwatch(this)"
+      aria-label="${colorName}"
+      type="button"
+    >
+      <span 
+        class="color-swatch-circle"
+        style="
+          background-color: ${hex};
+          ${colorName === "White" || colorName === "Cream"
+            ? "border: 1px solid #ccc;"
+            : ""}
+        ">
+      </span>
+    </button>
+  `;
+}
+
+let selectedColor = COLOR_LIST[0];
+
+function selectColorSwatch(btn) {
+  const parent = btn.closest(".color-swatch-group");
+
+  parent.querySelectorAll(".color-swatch-btn").forEach(b => {
+    b.classList.remove("selected");
+  });
+
+  btn.classList.add("selected");
+  selectedColor = btn.dataset.color;
+
+  // Optional live label update
+  const label = parent.querySelector(".selected-color-label");
+  if (label) label.textContent = selectedColor;
+}
+
+function renderColorOptions(product) {
+  return `
+    <div class="variant-group">
+      <label>Color</label>
+      <div class="color-swatch-group">
+        ${COLOR_LIST.map((color, i) =>
+          getColorSwatchHTML(color, i === 0)
+        ).join("")}
+      </div>
+      <div class="selected-color-label">${COLOR_LIST[0]}</div>
+    </div>
+  `;
+}
+
+function renderMiniColors() {
+  return `
+    <div class="mini-colors">
+      ${COLOR_LIST.map(color => `
+        <span 
+          class="mini-color"
+          style="
+            background:${COLOR_MAP[color]};
+            ${color === "White" || color === "Cream"
+              ? "border:1px solid #ccc"
+              : ""}
+          "
+          title="${color}">
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
+variants: [
+  { name: "Color", options: COLOR_LIST },
+  { name: "Size", options: sizeOptions }
+]
+
 
 // Generate inventory for a product
 function generateInventory(productName, category, baseStock = 20) {
     const inventory = [];
     
-    // Determine available colors based on product
-    let availableColors = ['Black', 'White'];
-    if (category === 'tshirts') {
-        availableColors = ['Black', 'White', 'Grey', 'Navy'];
-    } else if (category === 'hoodies') {
-        availableColors = ['Black', 'Grey', 'Navy'];
-    }
+    // Use ALL colors for ALL products
+    const availableColors = colorOptions.map(color => color.name);
     
     // Determine available sizes
     const availableSizes = category === 'accessories' ? ['One Size'] : sizeOptions;
@@ -75,7 +159,7 @@ function createProductObject(name, price, img, category, id = null) {
     const inventory = generateInventory(name, category);
     const totalStock = calculateTotalStock(inventory);
     
-    const colors = Array.from(new Set(inventory.map(item => item.color)));
+    const colors = colorOptions.map(c => c.name); // ALL COLORS
     const sizes = Array.from(new Set(inventory.map(item => item.size)));
     
     return {
@@ -84,7 +168,7 @@ function createProductObject(name, price, img, category, id = null) {
         category: category,
         price: price,
         comparePrice: Math.round(price * 1.3), // Add 30% for compare price
-        description: `Premium ${category} from ACIDIC Clothing. ${name} features unique design and high-quality materials.`,
+        description: `Premium ${category} from ACIDIC Clothing. ${name} features unique design and high-quality materials. Available in ${colors.length} colors.`,
         material: '100% Cotton',
         images: [img],
         variants: [
@@ -186,6 +270,14 @@ twopiecesData.forEach(item => {
 accessoriesData.forEach(item => {
     // Accessories have different inventory (no sizes)
     const productId = generateProductId();
+    const inventory = colorOptions.map(color => ({
+        sku: `ACID-ACC-${color.name.slice(0, 3).toUpperCase()}-OS`,
+        color: color.name,
+        size: 'One Size',
+        stock: Math.floor(Math.random() * 10) + 5,
+        lowStock: 5
+    }));
+    
     const product = {
         id: productId,
         name: item.name,
@@ -196,13 +288,10 @@ accessoriesData.forEach(item => {
         material: 'Cotton/Polyester',
         images: [item.img],
         variants: [
-            { name: 'Color', options: ['Black', 'White'] }
+            { name: 'Color', options: colorOptions.map(c => c.name) }
         ],
-        inventory: [
-            { sku: `ACID-ACC-BLK-OS`, color: 'Black', size: 'One Size', stock: 15, lowStock: 5 },
-            { sku: `ACID-ACC-WHT-OS`, color: 'White', size: 'One Size', stock: 10, lowStock: 5 }
-        ],
-        totalStock: 25,
+        inventory: inventory,
+        totalStock: inventory.reduce((sum, item) => sum + item.stock, 0),
         lowStockThreshold: 5,
         status: 'active',
         sku: `ACID-ACC-${productId.toString().slice(-4)}`,
@@ -224,6 +313,342 @@ function saveProductsToLocalStorage() {
     console.log('Products saved to localStorage:', productData.allproducts.length);
 }
 
+// === COLOR SWATCH HELPER ===
+function getColorSwatchHTML(colorName) {
+    // Color hex mapping for all colors
+    const colorHexMap = {
+        'Black': '#000000',
+        'White': '#ffffff',
+        'Red': '#ff0000',
+        'Blue': '#0000ff',
+        'Lime': '#00ff00',
+        'Cyan': '#00ffff',
+        'Cream': '#fffdd0',
+        'Green': '#008000',
+        'Brown': '#964b00',
+        'Pink': '#ffc0cb'
+    };
+    
+    const hex = colorHexMap[colorName] || '#cccccc';
+    const needsBorder = colorName === 'White' || colorName === 'Cream';
+    
+    return `
+        <div class="color-swatch" style="background: ${hex} !important; ${needsBorder ? 'border: 2px solid #ccc !important' : 'border: 1px solid #eee'}"></div>
+        <span class="variant-label">${colorName}</span>
+    `;
+}
+
+// === GET VARIANT HTML ===
+function getVariantHTML(product) {
+    let html = '';
+    
+    // Color selection
+    const colorVariant = product.variants?.find(v => v.name === 'Color');
+    if (colorVariant) {
+        html += `
+            <div class="variant-group">
+                <label>Color:</label>
+                <div class="variant-options" id="color-options">
+                    ${colorVariant.options.map((color, index) => `
+                        <div class="variant-option ${index === 0 ? 'selected' : ''}" 
+                             data-type="color" 
+                             data-value="${color}"
+                             onclick="selectVariantOption(this, 'color')">
+                            ${getColorSwatchHTML(color)}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Size selection
+    const sizeVariant = product.variants?.find(v => v.name === 'Size');
+    if (sizeVariant) {
+        html += `
+            <div class="variant-group">
+                <label>Size:</label>
+                <div class="variant-options" id="size-options">
+                    ${sizeVariant.options.map((size, index) => {
+                        // Check if size is available for selected color
+                        const isAvailable = checkSizeAvailability(product, size);
+                        return `
+                            <div class="variant-option ${index === 0 && isAvailable ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}" 
+                                 data-type="size" 
+                                 data-value="${size}"
+                                 ${isAvailable ? 'onclick="selectVariantOption(this, \'size\')"' : ''}
+                                 title="${!isAvailable ? 'Out of stock' : ''}">
+                                <span class="variant-label">${size}</span>
+                                ${!isAvailable ? '<span class="unavailable-badge">Out</span>' : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+// === ADD CSS FOR COLOR SWATCHES ===
+function addColorSwatchStyles() {
+    const styles = `
+        /* Color Swatch Styles */
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-block !important;
+            vertical-align: middle;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .variant-option.selected .color-swatch {
+            border-color: #000 !important;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        
+        .variant-option:hover .color-swatch {
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* Ensure ALL colors display correctly */
+        [data-value="Black"] .color-swatch { background: #000000 !important; }
+        [data-value="White"] .color-swatch { background: #ffffff !important; border: 2px solid #ccc !important; }
+        [data-value="Red"] .color-swatch { background: #ff0000 !important; }
+        [data-value="Blue"] .color-swatch { background: #0000ff !important; }
+        [data-value="Lime"] .color-swatch { background: #00ff00 !important; }
+        [data-value="Cyan"] .color-swatch { background: #00ffff !important; }
+        [data-value="Cream"] .color-swatch { background: #fffdd0 !important; border: 2px solid #ccc !important; }
+        [data-value="Green"] .color-swatch { background: #008000 !important; }
+        [data-value="Brown"] .color-swatch { background: #964b00 !important; }
+        [data-value="Pink"] .color-swatch { background: #ffc0cb !important; }
+        
+        .variant-label {
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Color display in product cards */
+        .product-colors {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .mini-color-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid #eee;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .mini-color-swatch:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Color tags in product info */
+        .color-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .color-tag[data-color="Black"] { background: #000; color: white; }
+        .color-tag[data-color="White"] { background: #fff; color: #000; border: 1px solid #ddd; }
+        .color-tag[data-color="Red"] { background: #ff0000; color: white; }
+        .color-tag[data-color="Blue"] { background: #0000ff; color: white; }
+        .color-tag[data-color="Lime"] { background: #00ff00; color: #000; }
+        .color-tag[data-color="Cyan"] { background: #00ffff; color: #000; }
+        .color-tag[data-color="Cream"] { background: #fffdd0; color: #000; border: 1px solid #ddd; }
+        .color-tag[data-color="Green"] { background: #008000; color: white; }
+        .color-tag[data-color="Brown"] { background: #964b00; color: white; }
+        .color-tag[data-color="Pink"] { background: #ffc0cb; color: #000; }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
+}
+
+// === UPDATE PRODUCT DISPLAY TO SHOW COLORS ===
+function showCategory(category) {
+    hideAllSections();
+    const section = document.getElementById("product-section");
+    const mainContent = document.getElementById("main-content");
+    section.style.display = "grid";
+    mainContent.style.display = "block";
+    section.classList.remove("active");
+    section.innerHTML = "";
+
+    if (productData[category]) {
+        setTimeout(() => {
+            productData[category].forEach((product) => {
+                const div = document.createElement("div");
+                div.classList.add("product");
+                div.dataset.productId = product.id;
+                
+                // Get available colors
+                const colors = product.variants?.find(v => v.name === 'Color')?.options || [];
+                
+                div.innerHTML = `
+                    <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="price">R${product.price}</p>
+                        ${product.comparePrice ? `<p class="compare-price">R${product.comparePrice}</p>` : ''}
+                        
+                        <!-- COLOR SWATCHES DISPLAY -->
+                        ${colors.length > 0 ? `
+                            <div class="product-colors">
+                                <span style="font-size: 12px; color: #666; margin-right: 5px;">Colors:</span>
+                                ${colors.map(color => {
+                                    const colorMap = {
+                                        'Black': '#000000',
+                                        'White': '#ffffff',
+                                        'Red': '#ff0000',
+                                        'Blue': '#0000ff',
+                                        'Lime': '#00ff00',
+                                        'Cyan': '#00ffff',
+                                        'Cream': '#fffdd0',
+                                        'Green': '#008000',
+                                        'Brown': '#964b00',
+                                        'Pink': '#ffc0cb'
+                                    };
+                                    const hex = colorMap[color] || '#ccc';
+                                    const needsBorder = color === 'White' || color === 'Cream';
+                                    return `
+                                        <div class="mini-color-swatch" 
+                                             title="${color}"
+                                             style="background: ${hex}; ${needsBorder ? 'border: 1px solid #ccc' : ''}"></div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <p class="stock-status ${getStockStatusClass(product.totalStock, product.lowStockThreshold)}">
+                            ${getStockStatus(product.totalStock, product.lowStockThreshold)}
+                        </p>
+                        <div class="product-actions">
+                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
+                                <i class="fas fa-cart-plus"></i> Quick Add
+                            </button>
+                        </div>
+                    </div>`;
+                section.appendChild(div);
+            });
+            requestAnimationFrame(() => section.classList.add("active"));
+        }, 150);
+    }
+}
+
+// === FORCE UPDATE EXISTING PRODUCTS WITH ALL COLORS ===
+function forceColorUpdateOnAllProducts() {
+    console.log('Updating all products with complete color range...');
+    
+    // Update each product in productData
+    Object.keys(productData).forEach(category => {
+        if (Array.isArray(productData[category])) {
+            productData[category].forEach(product => {
+                if (!product || typeof product !== 'object') return;
+                
+                // Regenerate inventory with all colors
+                const inventory = [];
+                const sizes = product.category === 'accessories' ? ['One Size'] : sizeOptions;
+                
+                colorOptions.forEach(color => {
+                    sizes.forEach(size => {
+                        const sku = `ACID-${product.category?.slice(0, 3).toUpperCase() || 'PRO'}-${color.name.slice(0, 3).toUpperCase()}-${size}`;
+                        const stock = Math.floor(Math.random() * 10) + 5;
+                        
+                        inventory.push({
+                            sku,
+                            color: color.name,
+                            size,
+                            stock,
+                            lowStock: 5
+                        });
+                    });
+                });
+                
+                // Update product
+                product.inventory = inventory;
+                product.totalStock = calculateTotalStock(inventory);
+                product.variants = [
+                    { name: 'Color', options: colorOptions.map(c => c.name) },
+                    { name: 'Size', options: sizes }
+                ];
+            });
+        }
+    });
+    
+    // Save to localStorage
+    localStorage.setItem('acidicProducts', JSON.stringify(productData.allproducts));
+    
+    console.log(`Updated ${productData.allproducts.length} products with all colors`);
+}
+
+// === INITIALIZATION ===
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing ACIDIC Clothing store...');
+    
+    // Add color swatch styles
+    addColorSwatchStyles();
+    addModalStyles();
+    addCartFeedbackStyles();
+    
+    // Force update products with all colors
+    forceColorUpdateOnAllProducts();
+    
+    // Save products to localStorage
+    saveProductsToLocalStorage();
+    
+    // Update cart count
+    updateCartCount();
+    
+    // Make sure productData is globally available
+    window.productData = productData;
+    
+    // Show all products by default
+    if (document.getElementById("product-section")) {
+        showCategory('allproducts');
+    }
+    
+    // Add global event listener for product clicks
+    document.addEventListener('click', function(e) {
+        // Handle product card clicks (except buttons)
+        if (e.target.closest('.product') && !e.target.closest('button')) {
+            const productElement = e.target.closest('.product');
+            const productId = productElement.dataset.productId;
+            
+            if (productId) {
+                viewProduct(parseInt(productId), e);
+            }
+        }
+    });
+    
+    console.log('Product system initialized successfully');
+});
+
 // === IMAGE ERROR HANDLING ===
 function handleImageError(img) {
     console.log("Image failed to load:", img.src);
@@ -231,7 +656,6 @@ function handleImageError(img) {
     img.alt = "ACIDIC Clothing";
 }
 
-// === PRODUCT DISPLAY FUNCTIONS ===
 // === PRODUCT DISPLAY FUNCTIONS ===
 function showCategory(category) {
     // Hide all sections first
@@ -538,6 +962,476 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
 });
 
+// === PAGINATION SYSTEM ===
+let currentPage = {};
+let productsPerPage = 8;
+
+// Initialize pagination for all categories
+function initPagination() {
+    const categories = ['allproducts', 'tshirts', 'sweaters', 'hoodies', 'pants', 'twopieces', 'accessories'];
+    categories.forEach(category => {
+        currentPage[category] = 1;
+    });
+}
+
+// Calculate total pages for a category
+function getTotalPages(category) {
+    if (!productData[category]) return 1;
+    return Math.ceil(productData[category].length / productsPerPage);
+}
+
+// Get products for current page
+function getProductsForPage(category, page) {
+    if (!productData[category]) return [];
+    
+    const startIndex = (page - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    
+    return productData[category].slice(startIndex, endIndex);
+}
+
+// Create pagination controls
+function createPaginationControls(category) {
+    const totalPages = getTotalPages(category);
+    if (totalPages <= 1) return '';
+    
+    let html = '<div class="pagination-controls">';
+    
+    // Previous button
+    html += `<button class="pagination-btn ${currentPage[category] === 1 ? 'disabled' : ''}" 
+                      onclick="changePage('${category}', ${currentPage[category] - 1})"
+                      ${currentPage[category] === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i> Previous
+             </button>`;
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage[category] - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're at the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // First page
+    if (startPage > 1) {
+        html += `<button class="pagination-btn" onclick="changePage('${category}', 1)">1</button>`;
+        if (startPage > 2) html += '<span class="pagination-dots">...</span>';
+    }
+    
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="pagination-btn ${currentPage[category] === i ? 'active' : ''}" 
+                         onclick="changePage('${category}', ${i})">
+                    ${i}
+                 </button>`;
+    }
+    
+    // Last page
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += '<span class="pagination-dots">...</span>';
+        html += `<button class="pagination-btn" onclick="changePage('${category}', ${totalPages})">${totalPages}</button>`;
+    }
+    
+    // Next button
+    html += `<button class="pagination-btn ${currentPage[category] === totalPages ? 'disabled' : ''}" 
+                      onclick="changePage('${category}', ${currentPage[category] + 1})"
+                      ${currentPage[category] === totalPages ? 'disabled' : ''}>
+                Next <i class="fas fa-chevron-right"></i>
+             </button>`;
+    
+    html += '</div>';
+    
+    return html;
+}
+
+// Change page
+function changePage(category, page) {
+    const totalPages = getTotalPages(category);
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage[category] = page;
+    showCategory(category);
+}
+
+// === UPDATED SHOWCATEGORY FUNCTION WITH PAGINATION ===
+function showCategory(category) {
+    hideAllSections();
+    const section = document.getElementById("product-section");
+    const mainContent = document.getElementById("main-content");
+    section.style.display = "block";
+    mainContent.style.display = "block";
+    section.classList.remove("active");
+    section.innerHTML = "";
+
+    if (productData[category]) {
+        setTimeout(() => {
+            // Get products for current page
+            const products = getProductsForPage(category, currentPage[category]);
+            
+            // Create products container
+            const productsContainer = document.createElement('div');
+            productsContainer.className = 'products-container';
+            productsContainer.style.display = 'grid';
+            productsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+            productsContainer.style.gap = '20px';
+            productsContainer.style.padding = '20px';
+            
+            products.forEach((product) => {
+                const div = document.createElement("div");
+                div.classList.add("product");
+                div.dataset.productId = product.id;
+                
+                // Get available colors
+                const colors = product.variants?.find(v => v.name === 'Color')?.options || [];
+                
+                div.innerHTML = `
+                    <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="price">R${product.price}</p>
+                        ${product.comparePrice ? `<p class="compare-price">R${product.comparePrice}</p>` : ''}
+                        
+                        <!-- COLOR SWATCHES DISPLAY -->
+                        ${colors.length > 0 ? `
+                            <div class="product-colors">
+                                <span style="font-size: 12px; color: #666; margin-right: 5px;">Colors:</span>
+                                ${colors.slice(0, 5).map(color => {
+                                    const colorMap = {
+                                        'Black': '#000000',
+                                        'White': '#ffffff',
+                                        'Red': '#ff0000',
+                                        'Blue': '#0000ff',
+                                        'Lime': '#00ff00',
+                                        'Cyan': '#00ffff',
+                                        'Cream': '#fffdd0',
+                                        'Green': '#008000',
+                                        'Brown': '#964b00',
+                                        'Pink': '#ffc0cb'
+                                    };
+                                    const hex = colorMap[color] || '#ccc';
+                                    const needsBorder = color === 'White' || color === 'Cream';
+                                    return `
+                                        <div class="mini-color-swatch" 
+                                             title="${color}"
+                                             style="background: ${hex}; ${needsBorder ? 'border: 1px solid #ccc' : ''}"></div>
+                                    `;
+                                }).join('')}
+                                ${colors.length > 5 ? `<span style="font-size: 11px; color: #999;">+${colors.length - 5} more</span>` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <p class="stock-status ${getStockStatusClass(product.totalStock, product.lowStockThreshold)}">
+                            ${getStockStatus(product.totalStock, product.lowStockThreshold)}
+                        </p>
+                        <div class="product-actions">
+                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
+                                <i class="fas fa-cart-plus"></i> Quick Add
+                            </button>
+                        </div>
+                    </div>`;
+                productsContainer.appendChild(div);
+            });
+            
+            section.appendChild(productsContainer);
+            
+            // Add pagination controls
+            const paginationContainer = document.createElement('div');
+            paginationContainer.className = 'pagination-container';
+            paginationContainer.innerHTML = createPaginationControls(category);
+            section.appendChild(paginationContainer);
+            
+            // Add page info
+            const totalProducts = productData[category].length;
+            const startProduct = ((currentPage[category] - 1) * productsPerPage) + 1;
+            const endProduct = Math.min(currentPage[category] * productsPerPage, totalProducts);
+            
+            const pageInfo = document.createElement('div');
+            pageInfo.className = 'page-info';
+            pageInfo.innerHTML = `
+                <div style="text-align: center; margin: 20px 0; color: #666; font-size: 14px;">
+                    Showing ${startProduct}-${endProduct} of ${totalProducts} products
+                    <span style="margin: 0 10px;">•</span>
+                    Page ${currentPage[category]} of ${getTotalPages(category)}
+                </div>
+            `;
+            section.appendChild(pageInfo);
+            
+            requestAnimationFrame(() => section.classList.add("active"));
+        }, 150);
+    }
+}
+
+// === ADD PAGINATION STYLES ===
+function addPaginationStyles() {
+    const styles = `
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 36px;
+        }
+        
+        .pagination-btn:hover:not(.disabled) {
+            border-color: #000;
+            color: #000;
+            background: #f8f8f8;
+        }
+        
+        .pagination-btn.active {
+            background: #000;
+            color: white;
+            border-color: #000;
+        }
+        
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-btn i {
+            font-size: 12px;
+        }
+        
+        .pagination-dots {
+            padding: 0 10px;
+            color: #999;
+        }
+        
+        .page-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Products per page selector */
+        .products-per-page {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: flex-end;
+        }
+        
+        .products-per-page label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .products-per-page select {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .pagination-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+                min-height: 32px;
+            }
+            
+            .pagination-controls {
+                gap: 4px;
+            }
+            
+            .pagination-dots {
+                padding: 0 5px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .pagination-btn {
+                padding: 5px 8px;
+                font-size: 12px;
+                min-height: 30px;
+            }
+            
+            .pagination-btn span {
+                display: none;
+            }
+            
+            .pagination-btn i {
+                margin: 0;
+            }
+        }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
+}
+
+// === PRODUCTS PER PAGE SELECTOR ===
+function createProductsPerPageSelector() {
+    const selector = document.createElement('div');
+    selector.className = 'products-per-page';
+    selector.innerHTML = `
+        <label for="products-per-page-select">Products per page:</label>
+        <select id="products-per-page-select" onchange="updateProductsPerPage(this.value)">
+            <option value="4" ${productsPerPage === 4 ? 'selected' : ''}>4</option>
+            <option value="8" ${productsPerPage === 8 ? 'selected' : ''}>8</option>
+            <option value="12" ${productsPerPage === 12 ? 'selected' : ''}>12</option>
+            <option value="16" ${productsPerPage === 16 ? 'selected' : ''}>16</option>
+            <option value="20" ${productsPerPage === 20 ? 'selected' : ''}>20</option>
+        </select>
+    `;
+    return selector;
+}
+
+// Update products per page
+function updateProductsPerPage(value) {
+    productsPerPage = parseInt(value);
+    
+    // Reset all categories to page 1
+    Object.keys(currentPage).forEach(category => {
+        currentPage[category] = 1;
+    });
+    
+    // Refresh current view
+    const activeCategory = getActiveCategory();
+    if (activeCategory) {
+        showCategory(activeCategory);
+    }
+}
+
+// Get active category from navigation
+function getActiveCategory() {
+    // Check which nav item is active
+    const navItems = document.querySelectorAll('nav ul li');
+    for (const item of navItems) {
+        if (item.classList.contains('active')) {
+            const onclick = item.getAttribute('onclick');
+            if (onclick) {
+                const match = onclick.match(/showCategory\('(.+?)'\)/);
+                if (match) return match[1];
+            }
+        }
+    }
+    
+    // Fallback to current URL or default
+    return 'allproducts';
+}
+
+// Update navigation click handlers to reset pagination
+function updateNavHandlers() {
+    document.querySelectorAll('nav ul li').forEach(item => {
+        const onclick = item.getAttribute('onclick');
+        if (onclick && onclick.includes('showCategory')) {
+            const match = onclick.match(/showCategory\('(.+?)'\)/);
+            if (match) {
+                const category = match[1];
+                item.setAttribute('onclick', `showCategoryWithPagination('${category}')`);
+            }
+        }
+    });
+}
+
+// New showCategory function that resets pagination
+function showCategoryWithPagination(category) {
+    // Reset to page 1 when switching categories
+    currentPage[category] = 1;
+    
+    // Update active nav item
+    document.querySelectorAll('nav ul li').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.closest('li').classList.add('active');
+    
+    // Show the category
+    showCategory(category);
+}
+
+// === UPDATED INITIALIZATION ===
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing ACIDIC Clothing store with pagination...');
+    
+    // Initialize pagination
+    initPagination();
+    
+    // Add styles
+    addPaginationStyles();
+    addColorSwatchStyles();
+    addModalStyles();
+    addCartFeedbackStyles();
+    
+    // Force update products with all colors
+    forceColorUpdateOnAllProducts();
+    
+    // Save products to localStorage
+    saveProductsToLocalStorage();
+    
+    // Update cart count
+    updateCartCount();
+    
+    // Make sure productData is globally available
+    window.productData = productData;
+    
+    // Update navigation handlers
+    updateNavHandlers();
+    
+    // Show all products by default
+    if (document.getElementById("product-section")) {
+        showCategory('allproducts');
+    }
+    
+    // Add global event listener for product clicks
+    document.addEventListener('click', function(e) {
+        // Handle product card clicks (except buttons)
+        if (e.target.closest('.product') && !e.target.closest('button')) {
+            const productElement = e.target.closest('.product');
+            const productId = productElement.dataset.productId;
+            
+            if (productId) {
+                viewProduct(parseInt(productId), e);
+            }
+        }
+    });
+    
+    console.log('Product system with pagination initialized successfully');
+});
+
+// === UPDATE THE HTML NAVIGATION ===
+// You need to update your HTML navigation to use showCategoryWithPagination
+// Replace all onclick="showCategory('category')" with onclick="showCategoryWithPagination('category')"
+
 // === LEGACY FUNCTIONS (keep for compatibility) ===
 function openProductPage(item) {
     // Find the product by name
@@ -613,13 +1507,206 @@ function calculateSize() {
 // Make products available globally
 window.productData = productData;
 
-// === PRODUCT DISPLAY FUNCTIONS ===
+function getStockStatusClass(stock, threshold) {
+    if (stock === 0) return 'out-of-stock';
+    if (stock <= threshold) return 'low-stock';
+    return 'in-stock';
+}
+
+// === UPDATED SHOWCATEGORY FUNCTION WITHOUT COMPARE PRICES ===
 function showCategory(category) {
     hideAllSections();
     const section = document.getElementById("product-section");
     const mainContent = document.getElementById("main-content");
-    section.style.display = "grid";
+    section.style.display = "block";
     mainContent.style.display = "block";
+    section.classList.remove("active");
+    section.innerHTML = "";
+
+    if (productData[category]) {
+        setTimeout(() => {
+            // Get products for current page
+            const products = getProductsForPage(category, currentPage[category]);
+            
+            // Create products container
+            const productsContainer = document.createElement('div');
+            productsContainer.className = 'products-container';
+            productsContainer.style.display = 'grid';
+            productsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+            productsContainer.style.gap = '20px';
+            productsContainer.style.padding = '20px';
+            
+            products.forEach((product) => {
+                const div = document.createElement("div");
+                div.classList.add("product");
+                div.dataset.productId = product.id;
+                
+                // Get available colors
+                const colors = product.variants?.find(v => v.name === 'Color')?.options || [];
+                
+                // REMOVED comparePrice from product display
+                div.innerHTML = `
+                    <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="price">R${product.price}</p>
+                        
+                        <!-- COLOR SWATCHES DISPLAY -->
+                        ${colors.length > 0 ? `
+                            <div class="product-colors">
+                                <span style="font-size: 12px; color: #666; margin-right: 5px;">Colors:</span>
+                                ${colors.slice(0, 5).map(color => {
+                                    const colorMap = {
+                                        'Black': '#000000',
+                                        'White': '#ffffff',
+                                        'Red': '#ff0000',
+                                        'Blue': '#0000ff',
+                                        'Lime': '#00ff00',
+                                        'Cyan': '#00ffff',
+                                        'Cream': '#fffdd0',
+                                        'Green': '#008000',
+                                        'Brown': '#964b00',
+                                        'Pink': '#ffc0cb'
+                                    };
+                                    const hex = colorMap[color] || '#ccc';
+                                    const needsBorder = color === 'White' || color === 'Cream';
+                                    return `
+                                        <div class="mini-color-swatch" 
+                                             title="${color}"
+                                             style="background: ${hex}; ${needsBorder ? 'border: 1px solid #ccc' : ''}"></div>
+                                    `;
+                                }).join('')}
+                                ${colors.length > 5 ? `<span style="font-size: 11px; color: #999;">+${colors.length - 5} more</span>` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <p class="stock-status ${getStockStatusClass(product.totalStock, product.lowStockThreshold)}">
+                            ${getStockStatus(product.totalStock, product.lowStockThreshold)}
+                        </p>
+                        <div class="product-actions">
+                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
+                                <i class="fas fa-cart-plus"></i> Quick Add
+                            </button>
+                        </div>
+                    </div>`;
+                productsContainer.appendChild(div);
+            });
+            
+            section.appendChild(productsContainer);
+            
+            // Add pagination controls
+            const paginationContainer = document.createElement('div');
+            paginationContainer.className = 'pagination-container';
+            paginationContainer.innerHTML = createPaginationControls(category);
+            section.appendChild(paginationContainer);
+            
+            // Add page info
+            const totalProducts = productData[category].length;
+            const startProduct = ((currentPage[category] - 1) * productsPerPage) + 1;
+            const endProduct = Math.min(currentPage[category] * productsPerPage, totalProducts);
+            
+            const pageInfo = document.createElement('div');
+            pageInfo.className = 'page-info';
+            pageInfo.innerHTML = `
+                <div style="text-align: center; margin: 20px 0; color: #666; font-size: 14px;">
+                    Showing ${startProduct}-${endProduct} of ${totalProducts} products
+                    <span style="margin: 0 10px;">•</span>
+                    Page ${currentPage[category]} of ${getTotalPages(category)}
+                </div>
+            `;
+            section.appendChild(pageInfo);
+            
+            requestAnimationFrame(() => section.classList.add("active"));
+        }, 150);
+    }
+}
+
+// === UPDATE CREATE PRODUCT OBJECT FUNCTION ===
+function createProductObject(name, price, img, category, id = null) {
+    const productId = id || generateProductId();
+    const inventory = generateInventory(name, category);
+    const totalStock = calculateTotalStock(inventory);
+    
+    const colors = colorOptions.map(c => c.name); // ALL COLORS
+    const sizes = Array.from(new Set(inventory.map(item => item.size)));
+    
+    return {
+        id: productId,
+        name: name,
+        category: category,
+        price: price,
+        // REMOVED comparePrice completely
+        description: `Premium ${category} from ACIDIC Clothing. ${name} features unique design and high-quality materials. Available in ${colors.length} colors.`,
+        material: '100% Cotton',
+        images: [img],
+        variants: [
+            { name: 'Color', options: colors },
+            { name: 'Size', options: sizes }
+        ],
+        inventory: inventory,
+        totalStock: totalStock,
+        lowStockThreshold: 5,
+        status: 'active',
+        sku: `ACID-${category.slice(0, 3).toUpperCase()}-${productId.toString().slice(-4)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+}
+
+// === UPDATE ACCESSORY PRODUCT CREATION ===
+accessoriesData.forEach(item => {
+    // Accessories have different inventory (no sizes)
+    const productId = generateProductId();
+    const inventory = colorOptions.map(color => ({
+        sku: `ACID-ACC-${color.name.slice(0, 3).toUpperCase()}-OS`,
+        color: color.name,
+        size: 'One Size',
+        stock: Math.floor(Math.random() * 10) + 5,
+        lowStock: 5
+    }));
+    
+    const product = {
+        id: productId,
+        name: item.name,
+        category: 'accessories',
+        price: item.price,
+        // REMOVED comparePrice
+        description: `${item.name} from ACIDIC. Premium accessory to complete your look.`,
+        material: 'Cotton/Polyester',
+        images: [item.img],
+        variants: [
+            { name: 'Color', options: colorOptions.map(c => c.name) }
+        ],
+        inventory: inventory,
+        totalStock: inventory.reduce((sum, item) => sum + item.stock, 0),
+        lowStockThreshold: 5,
+        status: 'active',
+        sku: `ACID-ACC-${productId.toString().slice(-4)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    productData.accessories.push(product);
+    productData.allproducts.push(product);
+});
+
+// === UPDATE THE OLDER SHOWCATEGORY FUNCTION (for compatibility) ===
+// This is the legacy function that might still be called
+function showCategory_legacy(category) {
+    const sections = document.querySelectorAll('.product-section, #product-section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+        section.classList.remove('active');
+    });
+    
+    const section = document.getElementById("product-section");
+    const mainContent = document.getElementById("main-content");
+    if (!section) return;
+    
+    section.style.display = "grid";
+    if (mainContent) mainContent.style.display = "block";
     section.classList.remove("active");
     section.innerHTML = "";
 
@@ -628,18 +1715,16 @@ function showCategory(category) {
             productData[category].forEach((product) => {
                 const div = document.createElement("div");
                 div.classList.add("product");
-                div.dataset.productId = product.id; // Add product ID to dataset
+                div.dataset.productId = product.id;
                 div.innerHTML = `
                     <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
                     <div class="product-info">
                         <h3>${product.name}</h3>
                         <p class="price">R${product.price}</p>
-                        ${product.comparePrice ? `<p class="compare-price">R${product.comparePrice}</p>` : ''}
-                        <p class="stock-status ${getStockStatusClass(product.totalStock, product.lowStockThreshold)}">
-                            ${getStockStatus(product.totalStock, product.lowStockThreshold)}
-                        </p>
+                        <!-- REMOVED comparePrice line -->
+                        <p class="stock-status">${getStockStatus(product.totalStock, product.lowStockThreshold)}</p>
                         <div class="product-actions">
-                            <button class="view-details" onclick="viewProductDetails(${product.id})">
+                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
                                 <i class="fas fa-eye"></i> View Details
                             </button>
                             <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
@@ -647,21 +1732,216 @@ function showCategory(category) {
                             </button>
                         </div>
                     </div>`;
+                
+                div.addEventListener('click', function(e) {
+                    if (!e.target.closest('.product-actions') && !e.target.closest('button')) {
+                        viewProduct(product.id, e);
+                    }
+                });
+                
                 section.appendChild(div);
             });
-            requestAnimationFrame(() => section.classList.add("active"));
+            
+            if (section.classList) {
+                requestAnimationFrame(() => section.classList.add("active"));
+            }
         }, 150);
     }
 }
 
-function getStockStatusClass(stock, threshold) {
-    if (stock === 0) return 'out-of-stock';
-    if (stock <= threshold) return 'low-stock';
-    return 'in-stock';
+// === UPDATE QUICK ADD MODAL TO REMOVE COMPARE PRICE ===
+function createQuickAddModal(product) {
+    // Remove existing modal
+    const existingModal = document.getElementById('quick-add-modal');
+    if (existingModal) existingModal.remove();
+    
+    // Create modal HTML WITHOUT compare price
+    const modalHTML = `
+        <div id="quick-add-modal" class="quick-add-modal">
+            <div class="quick-add-content">
+                <div class="modal-header">
+                    <h3>Add ${product.name} to Cart</h3>
+                    <span class="close-modal" onclick="closeQuickAddModal()">×</span>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="product-preview">
+                        <img src="${product.images[0]}" alt="${product.name}">
+                        <div class="preview-info">
+                            <h4>${product.name}</h4>
+                            <p class="price">R${product.price}</p>
+                            <!-- REMOVED compare price from modal -->
+                            <p class="category">${formatCategory(product.category)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-selection">
+                        ${getVariantHTML(product)}
+                    </div>
+                    
+                    <div class="quantity-selection">
+                        <label>Quantity:</label>
+                        <div class="quantity-control">
+                            <button class="qty-btn" onclick="updateQuickAddQty(-1)">-</button>
+                            <input type="number" id="quick-add-qty" value="1" min="1" max="10">
+                            <button class="qty-btn" onclick="updateQuickAddQty(1)">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-info" id="quick-add-stock-info">
+                        <i class="fas fa-box"></i>
+                        <span>${product.totalStock} in stock</span>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="cancel-btn" onclick="closeQuickAddModal()">Cancel</button>
+                    <button class="add-btn" onclick="processQuickAdd(${product.id})">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart - R${product.price}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer.firstElementChild);
+    
+    // Add event listeners for variant selection
+    setupVariantSelection(product);
 }
 
+// === UPDATE PRODUCT PAGE DISPLAY (if you have product.html) ===
+// If you have a separate product detail page, you should also update it there
+// Add this function to handle product page display
+function displayProductDetails(product) {
+    // This function would be used in product.html
+    const productDetailHTML = `
+        <div class="product-detail">
+            <div class="product-images">
+                <img src="${product.images[0]}" alt="${product.name}">
+            </div>
+            <div class="product-info">
+                <h1>${product.name}</h1>
+                <p class="product-price">R${product.price}</p>
+                <!-- NO compare price here -->
+                <p class="product-description">${product.description}</p>
+                <p class="product-material"><strong>Material:</strong> ${product.material}</p>
+                <p class="product-sku"><strong>SKU:</strong> ${product.sku}</p>
+                
+                ${product.variants ? `
+                    <div class="product-variants">
+                        ${getVariantHTML(product)}
+                    </div>
+                ` : ''}
+                
+                <div class="product-actions">
+                    <button class="add-to-cart-btn" onclick="addToCartFromDetail(${product.id})">
+                        Add to Cart - R${product.price}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return productDetailHTML;
+}
+
+// === ADD CSS TO REMOVE COMPARE PRICE STYLES ===
+function addCleanPriceStyles() {
+    const styles = `
+        /* Remove compare price styles */
+        .compare-price {
+            display: none !important;
+        }
+        
+        /* Clean up price display */
+        .price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+            margin: 10px 0;
+        }
+        
+        .product-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        /* Quick add modal price */
+        .preview-info .price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            margin: 5px 0;
+        }
+        
+        /* Add to cart button price */
+        .add-btn {
+            font-weight: 600;
+        }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
+}
+
+// === UPDATE INITIALIZATION ===
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing ACIDIC Clothing store...');
+    
+    // Initialize pagination
+    initPagination();
+    
+    // Add styles
+    addPaginationStyles();
+    addColorSwatchStyles();
+    addModalStyles();
+    addCartFeedbackStyles();
+    addCleanPriceStyles(); // Add this new style function
+    
+    // Force update products with all colors
+    forceColorUpdateOnAllProducts();
+    
+    // Save products to localStorage
+    saveProductsToLocalStorage();
+    
+    // Update cart count
+    updateCartCount();
+    
+    // Make sure productData is globally available
+    window.productData = productData;
+    
+    // Update navigation handlers
+    updateNavHandlers();
+    
+    // Show all products by default
+    if (document.getElementById("product-section")) {
+        showCategory('allproducts');
+    }
+    
+    // Add global event listener for product clicks
+    document.addEventListener('click', function(e) {
+        // Handle product card clicks (except buttons)
+        if (e.target.closest('.product') && !e.target.closest('button')) {
+            const productElement = e.target.closest('.product');
+            const productId = productElement.dataset.productId;
+            
+            if (productId) {
+                viewProduct(parseInt(productId), e);
+            }
+        }
+    });
+    
+    console.log('Product system with clean pricing initialized successfully');
+});
+
 // === VIEW PRODUCT DETAILS FUNCTION ===
-// === UNIFIED PRODUCT VIEW FUNCTION ===
 function viewProduct(productId, event) {
     if (event) event.stopPropagation();
     
@@ -807,67 +2087,6 @@ function createQuickAddModal(product) {
     
     // Add event listeners for variant selection
     setupVariantSelection(product);
-}
-
-// === GET VARIANT HTML ===
-function getVariantHTML(product) {
-    let html = '';
-    
-    // Color selection
-    const colorVariant = product.variants?.find(v => v.name === 'Color');
-    if (colorVariant) {
-        html += `
-            <div class="variant-group">
-                <label>Color:</label>
-                <div class="variant-options" id="color-options">
-                    ${colorVariant.options.map((color, index) => `
-                        <div class="variant-option ${index === 0 ? 'selected' : ''}" 
-                             data-type="color" 
-                             data-value="${color}"
-                             onclick="selectVariantOption(this, 'color')">
-                            ${color === 'Black' ? '<div class="color-swatch" style="background: #000"></div>' : ''}
-                            ${color === 'White' ? '<div class="color-swatch" style="background: #fff; border: 1px solid #ddd"></div>' : ''}
-                            ${color === 'Grey' ? '<div class="color-swatch" style="background: #808080"></div>' : ''}
-                            ${color === 'Navy' ? '<div class="color-swatch" style="background: #000080"></div>' : ''}
-                            ${color === 'Red' ? '<div class="color-swatch" style="background: #ff0000"></div>' : ''}
-                            ${color === 'Blue' ? '<div class="color-swatch" style="background: #0000ff"></div>' : ''}
-                            ${color === 'Green' ? '<div class="color-swatch" style="background: #008000"></div>' : ''}
-                            ${!['Black','White','Grey','Navy','Red','Blue','Green'].includes(color) ? 
-                              `<span class="variant-label">${color}</span>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Size selection
-    const sizeVariant = product.variants?.find(v => v.name === 'Size');
-    if (sizeVariant) {
-        html += `
-            <div class="variant-group">
-                <label>Size:</label>
-                <div class="variant-options" id="size-options">
-                    ${sizeVariant.options.map((size, index) => {
-                        // Check if size is available for selected color
-                        const isAvailable = checkSizeAvailability(product, size);
-                        return `
-                            <div class="variant-option ${index === 0 && isAvailable ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}" 
-                                 data-type="size" 
-                                 data-value="${size}"
-                                 ${isAvailable ? 'onclick="selectVariantOption(this, \'size\')"' : ''}
-                                 title="${!isAvailable ? 'Out of stock' : ''}">
-                                <span class="variant-label">${size}</span>
-                                ${!isAvailable ? '<span class="unavailable-badge">Out</span>' : ''}
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    return html;
 }
 
 // === VARIANT SELECTION FUNCTIONS ===
@@ -1031,7 +2250,6 @@ function processQuickAdd(productId) {
     updateProductInventory(cartItem);
 }
 
-// === ADD ITEM TO CART (Fixed) ===
 // === ADD ITEM TO CART (Fixed) ===
 function addItemToCart(cartItem) {
     console.log('Adding item to cart:', cartItem);
@@ -2179,6 +3397,78 @@ function addModalStyles() {
         .quick-add:hover {
             background: #ffcc33;
         }
+
+        .color-swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid #f0f0f0;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+    
+    .variant-option.selected .color-swatch {
+        border-color: #000;
+        transform: scale(1.1);
+    }
+    
+    .variant-option:hover .color-swatch {
+        transform: scale(1.05);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    
+    /* Force specific colors to show correctly */
+    .variant-option[data-value="Lime"] .color-swatch {
+        background: #00ff00 !important;
+    }
+    
+    .variant-option[data-value="Cyan"] .color-swatch {
+        background: #00ffff !important;
+    }
+    
+    .variant-option[data-value="Cream"] .color-swatch {
+        background: #fffdd0 !important;
+        border: 2px solid #ccc !important;
+    }
+    
+    .variant-option[data-value="Brown"] .color-swatch {
+        background: #964b00 !important;
+    }
+    
+    .variant-option[data-value="Pink"] .color-swatch {
+        background: #ffc0cb !important;
+    }
+    
+    .variant-option[data-value="White"] .color-swatch {
+        background: #ffffff !important;
+        border: 2px solid #ccc !important;
+    }
+    
+    .variant-option[data-value="Red"] .color-swatch {
+        background: #ff0000 !important;
+    }
+    
+    .variant-option[data-value="Blue"] .color-swatch {
+        background: #0000ff !important;
+    }
+    
+    .variant-option[data-value="Green"] .color-swatch {
+        background: #008000 !important;
+    }
+    
+    .variant-option[data-value="Black"] .color-swatch {
+        background: #000000 !important;
+    }
+    
+    .variant-label {
+        display: inline-block;
+        vertical-align: middle;
+        font-size: 14px;
+        font-weight: 500;
+    }
         
         /* Product Card Hover */
         .product:hover .product-actions {
@@ -2211,6 +3501,151 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show all products by default
     showCategory('allproducts');
+});
+
+// Add CSS for enhanced cart and variant display
+function addEnhancedCartStyles() {
+    const styles = `
+        /* Enhanced cart styles */
+        .cart-item-variants {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .cart-item-color, .cart-item-size {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .color-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid #eee;
+        }
+        
+        .color-name {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .size-value {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .cart-item-meta {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .cart-item-sku, .cart-item-category {
+            font-size: 11px;
+            color: #888;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .custom-badge {
+            background: #f4b400;
+            color: #000;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        /* Confirmation order items */
+        .confirmation-order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .item-variants {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .item-variants span {
+            font-size: 12px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .custom-tag {
+            background: #f4b400 !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+        
+        .item-quantity-price {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Admin report styling */
+        .admin-report {
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
+}
+
+// Initialize enhanced system
+document.addEventListener('DOMContentLoaded', function() {
+    // Add enhanced styles
+    addEnhancedCartStyles();
+    
+    // Load existing cart with enhanced data
+    const acidicCart = JSON.parse(localStorage.getItem('acidicCart'));
+    const oldCart = JSON.parse(localStorage.getItem('cart'));
+    
+    if (acidicCart) {
+        cart = acidicCart;
+    } else if (oldCart) {
+        cart = oldCart;
+        // Migrate old cart items to include variant data
+        cart = cart.map(item => ({
+            ...item,
+            color: item.color || 'Black',
+            size: item.size || 'Medium',
+            variantId: `${item.id || ''}-${item.color || 'default'}-${item.size || 'M'}`,
+            colorName: item.color || 'Black',
+            sizeCode: item.size || 'M'
+        }));
+        localStorage.setItem('acidicCart', JSON.stringify(cart));
+        localStorage.removeItem('cart');
+    }
+    
+    updateCartCount();
+    loadCartItems();
 });
 
 // Debug function to check cart status

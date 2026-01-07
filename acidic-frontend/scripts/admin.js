@@ -2328,3 +2328,318 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 100);
 });
+
+// Enhanced checkout function with admin data
+function checkout() {
+    if (cart.length === 0) {
+        alert('Your cart is empty. Add some items before checking out.');
+        return;
+    }
+    
+    // Generate order data with variant details for admin
+    const orderData = {
+        orderId: 'ACD-' + Date.now().toString().slice(-8),
+        items: cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            size: item.size,
+            color: item.color,
+            colorName: item.colorName,
+            sizeCode: item.sizeCode,
+            variantId: item.variantId,
+            sku: item.sku,
+            category: item.category,
+            isCustomized: item.isCustomized || false,
+            customizationDetails: item.customizationDetails || null,
+            image: item.image,
+            total: item.price * item.quantity
+        })),
+        subtotal: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+        deliveryFee: 150,
+        total: cart.reduce((total, item) => total + (item.price * item.quantity), 0) + 150,
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }),
+        status: 'pending',
+        paymentMethod: 'pending',
+        customerInfo: {
+            // Will be filled from checkout form
+        },
+        variantSummary: generateVariantSummary(cart)
+    };
+    
+    // Save order data for admin access
+    saveOrderForAdmin(orderData);
+    
+    // Close cart and open checkout
+    toggleCart(false);
+    setTimeout(() => {
+        openCheckout();
+    }, 300);
+}
+
+// Generate summary of variants for admin
+function generateVariantSummary(cartItems) {
+    const summary = {
+        totalItems: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+        uniqueItems: cartItems.length,
+        sizeBreakdown: {},
+        colorBreakdown: {},
+        categoryBreakdown: {},
+        customizedItems: 0
+    };
+    
+    cartItems.forEach(item => {
+        // Size breakdown
+        summary.sizeBreakdown[item.size] = (summary.sizeBreakdown[item.size] || 0) + item.quantity;
+        
+        // Color breakdown
+        summary.colorBreakdown[item.color] = (summary.colorBreakdown[item.color] || 0) + item.quantity;
+        
+        // Category breakdown
+        summary.categoryBreakdown[item.category] = (summary.categoryBreakdown[item.category] || 0) + item.quantity;
+        
+        // Customized items
+        if (item.isCustomized) {
+            summary.customizedItems += item.quantity;
+        }
+    });
+    
+    return summary;
+}
+
+// Save order for admin access
+function saveOrderForAdmin(orderData) {
+    // Get existing orders
+    let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
+    
+    // Add new order
+    orders.unshift(orderData);
+    
+    // Keep only last 100 orders
+    if (orders.length > 100) {
+        orders = orders.slice(0, 100);
+    }
+    
+    // Save to localStorage (admin can access this)
+    localStorage.setItem('adminOrders', JSON.stringify(orders));
+    
+    // Also save individual order for easy access
+    localStorage.setItem('currentOrder', JSON.stringify(orderData));
+    
+    console.log('Order saved for admin:', orderData);
+}
+
+// Enhanced payment processing with admin data
+function processPayment() {
+    if (paymentInProgress) {
+        alert('Payment is already being processed. Please wait...');
+        return;
+    }
+    
+    const paymentButton = document.querySelector('.purchase--btn');
+    const originalText = paymentButton.innerHTML;
+    
+    paymentInProgress = true;
+    paymentButton.innerHTML = '🔄 Processing Payment...';
+    paymentButton.disabled = true;
+    
+    // Get customer info from form
+    const customerInfo = {
+        name: `${document.getElementById('fname')?.value || ''} ${document.getElementById('lname')?.value || ''}`.trim(),
+        email: document.getElementById('email')?.value || '',
+        phone: document.getElementById('phone')?.value || '',
+        address: document.getElementById('address')?.value || '',
+        city: document.getElementById('city')?.value || '',
+        province: document.getElementById('province')?.value || '',
+        postalCode: document.getElementById('postal')?.value || '',
+        country: document.getElementById('country')?.value || 'South Africa'
+    };
+    
+    setTimeout(() => {
+        // Get current order
+        const currentOrder = JSON.parse(localStorage.getItem('currentOrder')) || {};
+        
+        // Update order with payment info
+        const completedOrder = {
+            ...currentOrder,
+            status: 'paid',
+            paymentMethod: document.getElementById('payment-method')?.value || 'Card',
+            paymentDate: new Date().toISOString(),
+            paymentId: 'PAY-' + Date.now().toString().slice(-10),
+            customerInfo: customerInfo,
+            // Include variant details for admin
+            variantDetails: cart.map(item => ({
+                product: item.name,
+                color: item.color,
+                size: item.size,
+                quantity: item.quantity,
+                price: item.price,
+                sku: item.sku,
+                variantId: item.variantId,
+                isCustomized: item.isCustomized || false
+            }))
+        };
+        
+        // Save completed order for admin
+        saveCompletedOrder(completedOrder);
+        
+        // Close payment and show confirmation
+        paymentInProgress = false;
+        closePayment();
+        openConfirmation();
+        
+        // Update confirmation with order details
+        updateConfirmationWithOrderDetails(completedOrder);
+        
+        paymentButton.innerHTML = originalText;
+        paymentButton.disabled = false;
+        
+    }, 2000);
+}
+
+// Save completed order for admin
+function saveCompletedOrder(order) {
+    // Get completed orders
+    let completedOrders = JSON.parse(localStorage.getItem('completedOrders')) || [];
+    
+    // Add new completed order
+    completedOrders.unshift(order);
+    
+    // Keep only last 50 orders
+    if (completedOrders.length > 50) {
+        completedOrders = completedOrders.slice(0, 50);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('completedOrders', JSON.stringify(completedOrders));
+    
+    // Also update admin orders
+    let adminOrders = JSON.parse(localStorage.getItem('adminOrders')) || [];
+    const orderIndex = adminOrders.findIndex(o => o.orderId === order.orderId);
+    if (orderIndex !== -1) {
+        adminOrders[orderIndex] = order;
+        localStorage.setItem('adminOrders', JSON.stringify(adminOrders));
+    }
+    
+    console.log('Completed order saved for admin:', order);
+}
+
+// Admin function to view all orders with variant details
+function viewAdminOrders() {
+    const password = prompt('Enter admin password:');
+    if (password !== 'acidic123') {
+        alert('Access denied');
+        return;
+    }
+    
+    const completedOrders = JSON.parse(localStorage.getItem('completedOrders')) || [];
+    const pendingOrders = JSON.parse(localStorage.getItem('adminOrders')) || [];
+    
+    if (completedOrders.length === 0 && pendingOrders.length === 0) {
+        alert('No orders found');
+        return;
+    }
+    
+    let report = '=== ACIDIC CLOTHING ADMIN REPORT ===\n\n';
+    report += `TOTAL ORDERS: ${completedOrders.length + pendingOrders.length}\n`;
+    report += `COMPLETED: ${completedOrders.length}\n`;
+    report += `PENDING: ${pendingOrders.length}\n\n`;
+    
+    report += '=== RECENT ORDERS ===\n\n';
+    
+    [...completedOrders, ...pendingOrders].slice(0, 10).forEach(order => {
+        report += `Order: ${order.orderId}\n`;
+        report += `Date: ${order.date}\n`;
+        report += `Status: ${order.status}\n`;
+        report += `Customer: ${order.customerInfo?.name || 'N/A'}\n`;
+        report += `Total: R${order.total?.toFixed(2) || '0.00'}\n`;
+        
+        report += 'Items:\n';
+        order.variantDetails?.forEach(item => {
+            report += `  - ${item.product} (${item.color}, ${item.size}) x${item.quantity} - R${item.price.toFixed(2)} each\n`;
+        });
+        
+        report += '\n---\n\n';
+    });
+    
+    // Create modal to show report
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 10px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Admin Orders Report</h2>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+            </div>
+            <pre style="white-space: pre-wrap; font-family: monospace; font-size: 12px; line-height: 1.4;">${report}</pre>
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="exportOrdersToCSV()" style="background: #000; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">Export CSV</button>
+                <button onclick="clearAllOrders()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Clear All Orders</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Export orders to CSV
+function exportOrdersToCSV() {
+    const orders = JSON.parse(localStorage.getItem('completedOrders')) || [];
+    
+    if (orders.length === 0) {
+        alert('No orders to export');
+        return;
+    }
+    
+    let csv = 'Order ID,Date,Customer,Email,Phone,Total,Payment Method,Status,Items\n';
+    
+    orders.forEach(order => {
+        const items = order.variantDetails?.map(item => 
+            `${item.product} (${item.color}, ${item.size}) x${item.quantity}`
+        ).join('; ') || '';
+        
+        csv += `"${order.orderId}","${order.date}","${order.customerInfo?.name || ''}","${order.customerInfo?.email || ''}","${order.customerInfo?.phone || ''}",${order.total},"${order.paymentMethod}","${order.status}","${items}"\n`;
+    });
+    
+    // Create download link
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `acidic-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// Clear all orders (admin only)
+function clearAllOrders() {
+    if (confirm('Are you sure you want to clear ALL order data? This cannot be undone.')) {
+        localStorage.removeItem('adminOrders');
+        localStorage.removeItem('completedOrders');
+        localStorage.removeItem('currentOrder');
+        alert('All orders have been cleared');
+        document.querySelector('.modal').remove();
+    }
+}
