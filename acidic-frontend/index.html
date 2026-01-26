@@ -90,9 +90,21 @@
       </div>
 
       <div class="hero-content">
-        <h2 id="glow-text">Elevate Your Streetwear</h2>
-        <p id="tracking-text">Modern. Minimal. Bold.</p>
-      </div>
+  <h2 class="hero-title">ACIDIC®</h2>
+  <p class="hero-subtitle">
+    Streetwear for the bold. Designed to stand out.
+  </p>
+
+  <div class="hero-actions">
+    <button class="primary-btn" onclick="showCategory('allproducts')">
+      Shop New Drop
+    </button>
+    <button class="secondary-btn" onclick="showCategory('hoodies')">
+      Hoodies
+    </button>
+  </div>
+</div>
+
 
       <!-- Slideshow Controls -->
       <button class="slideshow-nav slideshow-prev" onclick="prevSlide()">
@@ -110,6 +122,65 @@
         <div class="slideshow-dot" onclick="goToSlide(4)"></div>
       </div>
     </section>
+
+    <section class="home-categories">
+  <h2 class="section-title">Shop by Category</h2>
+
+  <div class="category-grid">
+    <div class="category-card" onclick="showCategory('tshirts')">
+      <img src="acidic 9.jpg" />
+      <span>T-Shirts</span>
+    </div>
+
+    <div class="category-card" onclick="showCategory('hoodies')">
+      <img src="acidic 8.jpg" />
+      <span>Hoodies</span>
+    </div>
+
+    <div class="category-card" onclick="showCategory('sweaters')">
+      <img src="acidic.jpg" />
+      <span>Sweaters</span>
+    </div>
+
+    <div class="category-card" onclick="showCategory('sweaters')">
+      <img src="acidic 10.jpg" />
+      <span>Two Pieces</span>
+    </div>
+
+
+    <div class="category-card" onclick="showCategory('pants')">
+      <img src="acidic 13.jpg" />
+      <span>Pants</span>
+    </div>
+  </div>
+</section>
+
+<section class="new-arrivals">
+  <h2 class="section-title">New Arrivals</h2>
+
+  <div class="arrival-grid" id="home-new-arrivals">
+    <!-- JS will auto-fill from productData -->
+  </div>
+
+  <button class="view-all-btn" onclick="showCategory('allproducts')">
+    View All Products →
+  </button>
+</section>
+
+<section class="brand-story">
+  <div class="story-content">
+    <h2>Designed in the Streets</h2>
+    <p>
+      ACIDIC is more than clothing — it’s culture.
+      Built for creators, rebels, and trendsetters.
+    </p>
+
+    <button class="secondary-btn" onclick="showCommunity()">
+      Join the Community
+    </button>
+  </div>
+</section>
+
 
     <!-- AI STYLIST SECTION -->
     <section
@@ -508,43 +579,70 @@
       </div>
     </div>
 
-    <!-- PRODUCT MODAL -->
-    <div id="product-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">×</span>
-        <img
-          id="modal-img"
-          src=""
-          alt=""
-          style="
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
-          "
-        />
-        <h3 id="modal-name"></h3>
-        <p id="modal-price"></p>
+    <!-- PRODUCT DETAILS MODAL -->
+<div id="product-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeModal()">×</span>
+    
+    <!-- Product Images Carousel -->
+    <div class="product-images-carousel">
+      <div class="main-image-container">
+        <img id="modal-img" src="" alt="" class="main-product-image">
+      </div>
+      <div class="image-thumbnails" id="image-thumbnails">
+        <!-- Thumbnails will be populated dynamically -->
+      </div>
+    </div>
+    
+    <!-- Product Info -->
+    <div class="product-modal-info">
+      <h3 id="modal-name"></h3>
+      <p id="modal-price" class="product-price"></p>
+      <p id="modal-description" class="product-description"></p>
+      
+      <!-- Color Selection -->
+      <div class="color-selection-section">
+        <h4>Select Color</h4>
+        <div class="color-options-grid" id="modal-color-options">
+          <!-- Color options will be populated dynamically -->
+        </div>
+        <div class="selected-color-info" id="modal-selected-color-info">
+          Selected: <span id="selected-color-name">Black</span>
+        </div>
+      </div>
+      
+      <!-- Size Selection -->
+      <div class="size-selection-section">
         <label for="size">Select Size:</label>
-        <select id="size">
+        <select id="size" class="size-selector">
           <option value="Small">Small</option>
-          <option value="Medium">Medium</option>
+          <option value="Medium" selected>Medium</option>
           <option value="Large">Large</option>
           <option value="Extra Large">Extra Large</option>
         </select>
-        <button class="add-to-cart" onclick="addSelectedToCart()">
-          Add to Cart
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="product-modal-actions">
+        <button class="add-to-cart-btn" onclick="addSelectedToCart()">
+          <span class="cart-icon">🛒</span> Add to Cart
         </button>
-        <button
-          class="add-to-cart"
-          onclick="showCustomizeModal()"
-          style="background: #f4b400; color: #000; margin-top: 10px"
-        >
-          Customize This Item
+        <button class="customize-btn" onclick="showCustomizeModal()">
+          <span class="paint-icon">🎨</span> Customize This Item
+        </button>
+        <button class="quick-add-btn" onclick="openQuickAddModal()">
+          <span class="lightning-icon">⚡</span> Quick Add
         </button>
       </div>
+      
+      <!-- Product Details -->
+      <div class="product-details-section">
+        <h4>Details</h4>
+        <div id="modal-details"></div>
+      </div>
     </div>
+  </div>
+</div>
 
     <!-- CUSTOMIZATION MODAL -->
     <div id="customize-modal" class="modal">

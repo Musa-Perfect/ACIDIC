@@ -2121,6 +2121,27 @@ if (typeof addVirtualTryOnStyles !== 'undefined') {
     addVirtualTryOnStyles();
 }
 
+function loadHomeNewArrivals() {
+  const container = document.getElementById("home-new-arrivals");
+  if (!container || !window.productData) return;
+
+  container.innerHTML = Object.values(productData)
+    .slice(0, 4)
+    .map(
+      (p) => `
+      <div class="product-card" onclick="openProductModal('${p.id}')">
+        <img src="${p.images[0]}" />
+        <h4>${p.name}</h4>
+        <p>R${p.price}</p>
+      </div>
+    `
+    )
+    .join("");
+}
+
+document.addEventListener("DOMContentLoaded", loadHomeNewArrivals);
+
+
 // Make functions globally available
 window.processPayment = processPayment;
 window.cancelPayment = cancelPayment;
