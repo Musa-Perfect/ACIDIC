@@ -36,7 +36,7 @@
     </div>
 
     <header>
-      <h1>ACIDIC</h1>
+      <h1 onclick="openHomePage()" style="cursor:pointer;">ACIDIC</h1>
       <nav>
         <ul>
           <li onclick="showCategory('allproducts')">All Products</li>
@@ -63,6 +63,7 @@
       </nav>
     </header>
 
+<section id="home-page">
     <!-- HERO SLIDESHOW -->
     <section class="hero" id="main-content">
       <div class="hero-slides">
@@ -96,8 +97,8 @@
   </p>
 
   <div class="hero-actions">
-    <button class="primary-btn" onclick="showCategory('allproducts')">
-      Shop New Drop
+    <button class="primary-btn" onclick="openShopPage()">
+  Shop New Drop
     </button>
     <button class="secondary-btn" onclick="showCategory('hoodies')">
       Hoodies
@@ -162,9 +163,9 @@
     <!-- JS will auto-fill from productData -->
   </div>
 
-  <button class="view-all-btn" onclick="showCategory('allproducts')">
-    View All Products →
-  </button>
+  <button class="view-all-btn" onclick="openShopPage()">
+  View All Products →
+</button>
 </section>
 
 <section class="brand-story">
@@ -180,7 +181,15 @@
     </button>
   </div>
 </section>
+</section>
 
+<section id="shop-page" style="display:none;">
+  <h2 class="section-title">All Products</h2>
+
+  <div id="product-grid" class="products-grid">
+    <!-- Products render here -->
+  </div>
+</section>
 
     <!-- AI STYLIST SECTION -->
     <section
@@ -610,7 +619,7 @@
           Selected: <span id="selected-color-name">Black</span>
         </div>
       </div>
-      
+
       <!-- Size Selection -->
       <div class="size-selection-section">
         <label for="size">Select Size:</label>

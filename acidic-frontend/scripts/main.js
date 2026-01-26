@@ -2141,6 +2141,22 @@ function loadHomeNewArrivals() {
 
 document.addEventListener("DOMContentLoaded", loadHomeNewArrivals);
 
+function openShopPage() {
+  document.getElementById("home-page").style.display = "none";
+  document.getElementById("shop-page").style.display = "block";
+
+  // Default load all products
+  if (typeof showCategory === "function") {
+    showCategory("allproducts");
+  }
+}
+
+function openHomePage() {
+  document.getElementById("shop-page").style.display = "none";
+  document.getElementById("home-page").style.display = "block";
+}
+
+
 
 // Make functions globally available
 window.processPayment = processPayment;
