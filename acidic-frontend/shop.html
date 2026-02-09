@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ACIDIC® | Shop</title>
+  <link rel="stylesheet" href="main.css" />
+</head>
+<body>
+
+<header class="header">
+  <h1 onclick="window.location.href='home.html'" style="cursor:pointer;">
+    ACIDIC®
+  </h1>
+
+  <nav>
+    <button onclick="window.location.href='home.html'">Home</button>
+  </nav>
+</header>
+
+<section class="shop-page">
+  <h2 class="section-title">All Products</h2>
+
+  <div id="product-grid" class="products-grid"></div>
+
+  <!-- PRODUCT DETAILS MODAL -->
+<div id="product-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeModal()">×</span>
+    
+    <!-- Product Images Carousel -->
+    <div class="product-images-carousel">
+      <div class="main-image-container">
+        <img id="modal-img" src="" alt="" class="main-product-image">
+      </div>
+      <div class="image-thumbnails" id="image-thumbnails">
+        <!-- Thumbnails will be populated dynamically -->
+      </div>
+    </div>
+    
+    <!-- Product Info -->
+    <div class="product-modal-info">
+      <h3 id="modal-name"></h3>
+      <p id="modal-price" class="product-price"></p>
+      <p id="modal-description" class="product-description"></p>
+      
+      <!-- Color Selection -->
+      <div class="color-selection-section">
+        <h4>Select Color</h4>
+        <div class="color-options-grid" id="modal-color-options">
+          <!-- Color options will be populated dynamically -->
+        </div>
+        <div class="selected-color-info" id="modal-selected-color-info">
+          Selected: <span id="selected-color-name">Black</span>
+        </div>
+      </div>
+
+      <!-- Size Selection -->
+      <div class="size-selection-section">
+        <label for="size">Select Size:</label>
+        <select id="size" class="size-selector">
+          <option value="Small">Small</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="Large">Large</option>
+          <option value="Extra Large">Extra Large</option>
+        </select>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="product-modal-actions">
+        <button class="add-to-cart-btn" onclick="addSelectedToCart()">
+          <span class="cart-icon">🛒</span> Add to Cart
+        </button>
+        <button class="customize-btn" onclick="showCustomizeModal()">
+          <span class="paint-icon">🎨</span> Customize This Item
+        </button>
+        <button class="quick-add-btn" onclick="openQuickAddModal()">
+          <span class="lightning-icon">⚡</span> Quick Add
+        </button>
+      </div>
+      
+      <!-- Product Details -->
+      <div class="product-details-section">
+        <h4>Details</h4>
+        <div id="modal-details"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="shop-info">
+        <h3>About ACIDIC</h3>
+        <p>
+            ACIDIC is a streetwear brand that blends bold designs with sustainable practices. Our collections are crafted for those who dare to stand out while caring for the planet. From graphic tees to cozy hoodies, each piece reflects our commitment to quality, style, and environmental responsibility. Join us in making a statement that matters.
+            </p>
+        <p>
+            Founded in 2021, ACIDIC® has quickly become a favorite among streetwear enthusiasts who value both aesthetics and ethics. Our designs are inspired by urban culture, art, and the vibrant energy of city life. We believe that fashion should not only look good but also do good.
+            </p>
+        <p>
+            At ACIDIC®, sustainability is at the core of everything we do. We use eco-friendly materials, ethical manufacturing processes, and are constantly exploring new ways to reduce our environmental footprint. When you wear ACIDIC®, you're not just making a fashion statement; you're supporting a movement towards a more sustainable future.
+            </p>
+        <p>
+            Explore our latest collections and discover streetwear that speaks to your style and values. ACIDIC® is more than clothing — it’s culture.
+            </p>
+            </div>
+</section>
+</body>
+</html>

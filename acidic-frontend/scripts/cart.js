@@ -38,15 +38,127 @@ function updateCartCount() {
 
 // Toggle cart sidebar
 function toggleCart(show = true) {
-    const cartSidebar = document.getElementById('cart-sidebar');
-    if (cartSidebar) {
-        if (show) {
-            cartSidebar.style.right = '0';
-            loadCartItems();
-        } else {
-            cartSidebar.style.right = '-400px';
-        }
+  console.log('Toggle cart called with:', show);
+  
+  const cartSidebar = document.getElementById('cart-sidebar');
+  const cartOverlay = document.getElementById('cart-overlay') || createCartOverlay();
+  
+  if (cartSidebar) {
+    if (show) {
+      // Open cart
+      cartSidebar.style.right = '0';
+      cartOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      
+      // Load cart items
+      if (typeof loadCartItems === 'function') {
+        loadCartItems();
+      }
+      
+      console.log('Cart opened');
+    } else {
+      // Close cart
+      cartSidebar.style.right = '-400px';
+      cartOverlay.classList.remove('active');
+      document.body.style.overflow = ''; // Restore scrolling
+      
+      console.log('Cart closed');
     }
+  } else {
+    console.error('Cart sidebar element not found!');
+    // Fallback: alert or create cart modal
+    alert('Cart is empty. Add some items first!');
+  }
+}
+
+// Create overlay if it doesn't exist
+function createCartOverlay() {
+  const overlay = document.createElement('div');
+  overlay.id = 'cart-overlay';
+  overlay.className = 'cart-overlay';
+  overlay.onclick = () => toggleCart(false);
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+// Close cart when clicking outside (if using overlay)
+document.addEventListener('click', function(event) {
+  const cartSidebar = document.getElementById('cart-sidebar');
+  const cartOverlay = document.getElementById('cart-overlay');
+  
+  if (cartOverlay && cartOverlay.classList.contains('active') && 
+      event.target === cartOverlay) {
+    toggleCart(false);
+  }
+});
+
+// Close cart with Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    const cartSidebar = document.getElementById('cart-sidebar');
+    if (cartSidebar && cartSidebar.style.right === '0px') {
+      toggleCart(false);
+    }
+  }
+});
+
+// Trigger cart from header button
+function triggerCart() {
+  console.log('Menu: Cart clicked');
+  
+  // First check if cart has items
+  const cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+  
+  if (cart.length === 0) {
+    // Show empty cart message
+    showNotification('Your cart is empty. Add some items first!', 'info');
+    
+    // Optional: Auto-open shop
+    setTimeout(() => {
+      if (typeof triggerShop === 'function') {
+        triggerShop();
+      }
+    }, 1500);
+    
+    return;
+  }
+  
+  // Open cart
+  if (typeof toggleCart === 'function') {
+    toggleCart(true);
+  } else {
+    // Fallback: show cart items in alert
+    showCartItemsAlert();
+  }
+}
+
+// Fallback function
+function showCartItemsAlert() {
+  const cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+  
+  if (cart.length === 0) {
+    alert('Your cart is empty!');
+    return;
+  }
+  
+  let message = 'Your Cart:\n\n';
+  let total = 0;
+  
+  cart.forEach(item => {
+    const itemTotal = item.price * item.quantity;
+    total += itemTotal;
+    message += `• ${item.quantity}x ${item.name} - R${itemTotal}\n`;
+  });
+  
+  message += `\nTotal: R${total}`;
+  
+  if (confirm(message + '\n\nProceed to checkout?')) {
+    if (typeof checkout === 'function') {
+      checkout();
+    } else {
+      alert('Checkout would proceed here.');
+    }
+  }
 }
 
 // Add product to cart
@@ -2875,3 +2987,154 @@ function loadCartStyles() {
         document.head.appendChild(link);
     }
 }
+
+// Emergency cart modal function
+function openCartModal() {
+  const cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+  
+  if (cart.length === 0) {
+    alert('Your cart is empty!');
+    return;
+  }
+  
+  // Create modal HTML
+  const modalHTML = `
+    <div id="cart-modal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: flex-end;
+      z-index: 2000;
+    ">
+      <div style="
+        background: white;
+        width: 90%;
+        max-width: 400px;
+        height: 100%;
+        overflow-y: auto;
+        padding: 20px;
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0;">Your Cart</h2>
+          <button onclick="closeCartModal()" style="
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+          ">×</button>
+        </div>
+        
+        <div id="cart-modal-items">
+          ${cart.map(item => `
+            <div style="
+              display: flex;
+              padding: 10px 0;
+              border-bottom: 1px solid #eee;
+            ">
+              <img src="${item.image || 'acidic 1.jpg'}" style="
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                margin-right: 15px;
+              ">
+              <div style="flex: 1;">
+                <div style="font-weight: bold;">${item.name}</div>
+                <div style="color: #666; font-size: 14px;">
+                  ${item.size ? `Size: ${item.size}` : ''}
+                  ${item.color ? ` • Color: ${item.color}` : ''}
+                </div>
+                <div style="margin-top: 5px;">
+                  <span>R${item.price}</span>
+                  <span style="margin-left: 10px; color: #999;">x${item.quantity}</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #000;">
+          <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
+            <span>Total:</span>
+            <span>R${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)}</span>
+          </div>
+          <button onclick="checkout()" style="
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            color: white;
+            border: none;
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+          ">Checkout</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  const modal = document.createElement('div');
+  modal.innerHTML = modalHTML;
+  document.body.appendChild(modal.firstElementChild);
+}
+
+function closeCartModal() {
+  const modal = document.getElementById('cart-modal');
+  if (modal) modal.remove();
+}
+
+// Update triggerCart to use modal if sidebar doesn't exist
+function triggerCart() {
+  const cartSidebar = document.getElementById('cart-sidebar');
+  
+  if (cartSidebar && typeof toggleCart === 'function') {
+    toggleCart(true);
+  } else {
+    openCartModal();
+  }
+}
+
+// Test cart functionality
+function testCart() {
+  console.log('=== Testing Cart ===');
+  
+  // Check if cart sidebar exists
+  const cartSidebar = document.getElementById('cart-sidebar');
+  console.log('Cart sidebar exists:', !!cartSidebar);
+  
+  // Check if toggleCart function exists
+  console.log('toggleCart function exists:', typeof toggleCart === 'function');
+  
+  // Test with a mock item
+  const testItem = {
+    id: 'test-' + Date.now(),
+    name: 'Test Product',
+    price: 100,
+    quantity: 1,
+    size: 'M',
+    color: 'Black'
+  };
+  
+  // Add test item to cart
+  let cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+  cart.push(testItem);
+  localStorage.setItem('acidicCart', JSON.stringify(cart));
+  
+  // Try to open cart
+  toggleCart(true);
+  
+  // Remove test item after 5 seconds
+  setTimeout(() => {
+    cart = cart.filter(item => item.id !== testItem.id);
+    localStorage.setItem('acidicCart', JSON.stringify(cart));
+    console.log('Test item removed');
+  }, 5000);
+}
+
+// Run test on load (optional)
+// document.addEventListener('DOMContentLoaded', function() {
+//   setTimeout(testCart, 1000);
+// });

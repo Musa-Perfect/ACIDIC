@@ -2156,7 +2156,391 @@ function openHomePage() {
   document.getElementById("home-page").style.display = "block";
 }
 
+ function getQueryParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
 
+  document.addEventListener("DOMContentLoaded", () => {
+    const category = getQueryParam("category");
+    const product = getQueryParam("product");
+
+    if (product && typeof openProductModal === "function") {
+      openProductModal(product);
+    } else if (category && typeof showCategory === "function") {
+      showCategory(category);
+    } else {
+      showCategory("allproducts");
+    }
+  });
+
+  function toggleExperience(card) {
+  const grid = document.querySelector(".experience-grid");
+  const isActive = card.classList.contains("active");
+
+  // Close all
+  document.querySelectorAll(".experience-card").forEach(c => {
+    c.classList.remove("active");
+  });
+  grid.classList.remove("has-active");
+
+  // Open selected if it wasn't active
+  if (!isActive) {
+    card.classList.add("active");
+    grid.classList.add("has-active");
+  }
+}
+
+function openExperienceModal(type) {
+  const modal = document.getElementById("experience-modal");
+  const body = document.getElementById("experience-modal-body");
+
+  body.innerHTML = getExperienceContent(type);
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeExperienceModal() {
+  document.getElementById("experience-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function getExperienceContent(type) {
+  switch (type) {
+    case "ai-stylist":
+      return document.querySelector(".ai-stylist-section").innerHTML;
+
+    case "visual-tryon":
+      return document.querySelector(".virtual-tryon").innerHTML;
+
+    case "sustainability":
+      return document.querySelector(".sustainability").innerHTML;
+
+    case "community":
+      return document.querySelector(".community").innerHTML;
+
+    case "rewards":
+      return document.querySelector(".loyalty-program").innerHTML;
+
+    case "outfit-builder":
+      return document.querySelector(".outfit-builder").innerHTML;
+
+    case "size-finder":
+      return document.getElementById("size-recommender-modal").innerHTML;
+  }
+}
+
+function goToShop() {
+  // If using separate pages
+  if (window.location.pathname.includes("home.html")) {
+    window.location.href = "shop.html";
+  } else {
+    // If already on shop page
+    showCategory("allproducts");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+function openSearch() {
+  alert("Search coming soon 🔍");
+}
+
+const header = document.querySelector(".main-header");
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 80) {
+    header.classList.add("scrolled");
+    header.classList.remove("transparent");
+  } else {
+    header.classList.add("transparent");
+    header.classList.remove("scrolled");
+  }
+});
+
+function openHomePage() {
+  const home = document.getElementById("home-section");
+  const shop = document.getElementById("shop-section");
+
+  home.style.display = "block";
+  shop.style.display = "none";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+function goToShop() {
+  const home = document.getElementById("home-section");
+  const shop = document.getElementById("shop-section");
+
+  home.style.display = "none";
+  shop.style.display = "block";
+
+  showCategory("allproducts");
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+// === MENU TRIGGER FUNCTIONS ===
+
+function triggerHome() {
+  console.log('Menu: Home clicked');
+  if (typeof openHomePage === 'function') {
+    openHomePage();
+  } else if (typeof showHomePage === 'function') {
+    showHomePage();
+  } else {
+    // Fallback: scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Show home content
+    const homeSection = document.getElementById('home-section') || document.getElementById('main-content');
+    if (homeSection) {
+      hideAllSections();
+      homeSection.style.display = 'block';
+    }
+  }
+}
+
+function triggerShop() {
+  console.log('Menu: Shop clicked');
+  if (typeof goToShop === 'function') {
+    goToShop();
+  } else if (typeof showCategory === 'function') {
+    hideAllSections();
+    showCategory('allproducts');
+  } else {
+    // Fallback: show all products
+    const shopSection = document.getElementById('shop-section') || document.getElementById('product-section');
+    if (shopSection) {
+      hideAllSections();
+      shopSection.style.display = 'block';
+      if (typeof showCategory === 'function') {
+        showCategory('allproducts');
+      }
+    }
+  }
+}
+
+function triggerCart() {
+  console.log('Menu: Cart clicked');
+  if (typeof toggleCart === 'function') {
+    toggleCart(true);
+  } else if (typeof openCart === 'function') {
+    openCart();
+  } else {
+    // Fallback: alert or show cart modal
+    alert('Cart functionality');
+    // Try to load cart items
+    if (typeof loadCartItems === 'function') {
+      loadCartItems();
+    }
+  }
+}
+
+function triggerSignUp() {
+  console.log('Menu: Sign Up clicked');
+  if (typeof showSignUp === 'function') {
+    showSignUp();
+  } else if (typeof showSignUpModal === 'function') {
+    showSignUpModal();
+  } else {
+    // Fallback: scroll to sign up section or show modal
+    const signUpSection = document.getElementById('signup-section');
+    if (signUpSection) {
+      hideAllSections();
+      signUpSection.style.display = 'block';
+    } else {
+      alert('Sign Up/Login');
+    }
+  }
+}
+
+function triggerSearch() {
+  console.log('Menu: Search clicked');
+  if (typeof openSearch === 'function') {
+    openSearch();
+  } else {
+    // Create search modal if function doesn't exist
+    createSearchModal();
+  }
+}
+
+// === SEARCH MODAL (if openSearch doesn't exist) ===
+function createSearchModal() {
+  // Remove existing modal
+  const existing = document.getElementById('search-modal');
+  if (existing) existing.remove();
+  
+  const modalHTML = `
+    <div id="search-modal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      z-index: 2000;
+      padding-top: 100px;
+    ">
+      <div style="
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0;">Search Products</h3>
+          <button onclick="closeSearchModal()" style="
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+          ">×</button>
+        </div>
+        <input type="text" id="search-input" placeholder="Search for products..." style="
+          width: 100%;
+          padding: 12px 15px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 16px;
+          margin-bottom: 15px;
+        ">
+        <button onclick="performSearch()" style="
+          width: 100%;
+          padding: 12px;
+          background: #000;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          font-weight: bold;
+          cursor: pointer;
+        ">
+          Search
+        </button>
+        <div id="search-results" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+      </div>
+    </div>
+  `;
+  
+  const modal = document.createElement('div');
+  modal.innerHTML = modalHTML;
+  document.body.appendChild(modal.firstElementChild);
+  
+  // Focus on input
+  setTimeout(() => {
+    document.getElementById('search-input').focus();
+  }, 100);
+}
+
+function closeSearchModal() {
+  const modal = document.getElementById('search-modal');
+  if (modal) modal.remove();
+}
+
+function performSearch() {
+  const query = document.getElementById('search-input').value.toLowerCase();
+  const resultsContainer = document.getElementById('search-results');
+  
+  if (!query.trim()) {
+    resultsContainer.innerHTML = '<p style="color: #666; text-align: center;">Enter a search term</p>';
+    return;
+  }
+  
+  // Search in productData
+  const results = window.productData?.allproducts?.filter(product => 
+    product.name.toLowerCase().includes(query) ||
+    product.category.toLowerCase().includes(query) ||
+    (product.description && product.description.toLowerCase().includes(query))
+  ) || [];
+  
+  if (results.length === 0) {
+    resultsContainer.innerHTML = '<p style="color: #666; text-align: center;">No products found</p>';
+    return;
+  }
+  
+  resultsContainer.innerHTML = results.map(product => `
+    <div style="
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    " onclick="viewProduct(${product.id})">
+      <img src="${product.images[0]}" alt="${product.name}" style="
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 5px;
+      ">
+      <div>
+        <div style="font-weight: bold;">${product.name}</div>
+        <div style="color: #666; font-size: 14px;">R${product.price}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// === ENHANCED SCROLL EFFECT FOR HEADER ===
+function initHeaderScroll() {
+  const header = document.querySelector('.main-header');
+  
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      header.classList.add('scrolled');
+      header.classList.remove('transparent');
+    } else {
+      header.classList.remove('scrolled');
+      header.classList.add('transparent');
+    }
+  });
+}
+
+// === UPDATE CART COUNT IN MENU ===
+function updateMenuCartCount() {
+  const cartCount = document.getElementById('cart-count');
+  if (!cartCount) return;
+  
+  const cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+  const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  
+  cartCount.textContent = totalItems;
+  cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+}
+
+// === INITIALIZE MENU ===
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Initializing menu system...');
+  
+  // Initialize header scroll effect
+  initHeaderScroll();
+  
+  // Update cart count in menu
+  updateMenuCartCount();
+  
+  // Listen for cart updates
+  setInterval(updateMenuCartCount, 1000);
+  
+  // Make sure cart updates trigger menu update
+  const originalSaveCart = window.saveCart;
+  if (typeof originalSaveCart === 'function') {
+    window.saveCart = function() {
+      originalSaveCart.apply(this, arguments);
+      updateMenuCartCount();
+    };
+  }
+  
+  console.log('Menu system initialized');
+});
 
 // Make functions globally available
 window.processPayment = processPayment;
