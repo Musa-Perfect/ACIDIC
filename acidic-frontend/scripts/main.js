@@ -1248,6 +1248,7 @@ async function startWebcam() {
         if (stopBtn) stopBtn.disabled = false;
         if (startBtn) startBtn.disabled = true;
         
+
     } catch (error) {
         console.error('Error accessing webcam:', error);
         if (error.name === 'NotAllowedError') {
@@ -2141,19 +2142,155 @@ function loadHomeNewArrivals() {
 
 document.addEventListener("DOMContentLoaded", loadHomeNewArrivals);
 
-function openShopPage() {
-  document.getElementById("home-page").style.display = "none";
-  document.getElementById("shop-page").style.display = "block";
-
-  // Default load all products
-  if (typeof showCategory === "function") {
-    showCategory("allproducts");
-  }
+// === FIXED: Unified Home Page Navigation ===
+function openHomePage() {
+    console.log('Opening home page');
+    
+    // Hide all sections first
+    const sections = [
+        'home-page',
+        'shop-page',
+        'ai-stylist-section',
+        'virtual-tryon',
+        'sustainability',
+        'community',
+        'loyalty-program',
+        'outfit-builder',
+        'signup-section',
+        'login-section',
+        'product-section'
+    ];
+    
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    
+    // Show home page
+    const homePage = document.getElementById('home-page');
+    if (homePage) {
+        homePage.style.display = 'block';
+        console.log('Home page displayed');
+    } else {
+        console.error('Home page element not found');
+    }
+    
+    // Update active states
+    localStorage.setItem('currentPage', 'home');
+    
+    // Scroll to top smoothly
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 }
 
-function openHomePage() {
-  document.getElementById("shop-page").style.display = "none";
-  document.getElementById("home-page").style.display = "block";
+// === FIXED: Unified Shop Page Navigation ===
+function goToShop() {
+    console.log('Opening shop page');
+    
+    // Hide all sections first
+    const sections = [
+        'home-page',
+        'shop-page',
+        'ai-stylist-section',
+        'virtual-tryon',
+        'sustainability',
+        'community',
+        'loyalty-program',
+        'outfit-builder',
+        'signup-section',
+        'login-section',
+        'product-section'
+    ];
+    
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    
+    // Show shop page
+    const shopPage = document.getElementById('shop-page');
+    if (shopPage) {
+        shopPage.style.display = 'block';
+        console.log('Shop page displayed');
+        
+        // Load products
+        if (typeof showCategory === 'function') {
+            showCategory('allproducts');
+        }
+    } else {
+        console.error('Shop page element not found');
+    }
+    
+    // Update active states
+    localStorage.setItem('currentPage', 'shop');
+    
+    // Scroll to top smoothly
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// === FIXED: Shop button alias for consistency ===
+function openShopPage() {
+    goToShop();
+}
+
+// === FIXED: Menu trigger functions ===
+function triggerHome() {
+    console.log('Menu: Home clicked');
+    openHomePage();
+}
+
+function triggerShop() {
+    console.log('Menu: Shop clicked');
+    goToShop();
+}
+
+function triggerCart() {
+    console.log('Menu: Cart clicked');
+    if (typeof toggleCart === 'function') {
+        toggleCart(true);
+    } else {
+        console.error('toggleCart function not found');
+        // Fallback: create cart sidebar if it doesn't exist
+        if (typeof initializeCart === 'function') {
+            initializeCart();
+            toggleCart(true);
+        }
+    }
+}
+
+function triggerSignUp() {
+    console.log('Menu: Sign Up clicked');
+    if (typeof showSignUp === 'function') {
+        showSignUp();
+    } else {
+        // Hide all sections and show signup
+        const sections = ['home-page', 'shop-page', 'ai-stylist-section', 'virtual-tryon', 
+                         'sustainability', 'community', 'loyalty-program', 'outfit-builder', 
+                         'login-section'];
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        
+        const signupSection = document.getElementById('signup-section');
+        if (signupSection) {
+            signupSection.style.display = 'block';
+        }
+    }
+}
+
+function triggerSearch() {
+    console.log('Menu: Search clicked');
+    if (typeof openSearch === 'function') {
+        openSearch();
+    } else {
+        createSearchModal();
+    }
 }
 
  function getQueryParam(name) {
@@ -2229,17 +2366,6 @@ function getExperienceContent(type) {
   }
 }
 
-function goToShop() {
-  // If using separate pages
-  if (window.location.pathname.includes("home.html")) {
-    window.location.href = "shop.html";
-  } else {
-    // If already on shop page
-    showCategory("allproducts");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}
-
 function openSearch() {
   alert("Search coming soon 🔍");
 }
@@ -2255,118 +2381,6 @@ window.addEventListener("scroll", () => {
     header.classList.remove("scrolled");
   }
 });
-
-function openHomePage() {
-  const home = document.getElementById("home-section");
-  const shop = document.getElementById("shop-section");
-
-  home.style.display = "block";
-  shop.style.display = "none";
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-
-function goToShop() {
-  const home = document.getElementById("home-section");
-  const shop = document.getElementById("shop-section");
-
-  home.style.display = "none";
-  shop.style.display = "block";
-
-  showCategory("allproducts");
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-
-// === MENU TRIGGER FUNCTIONS ===
-
-function triggerHome() {
-  console.log('Menu: Home clicked');
-  if (typeof openHomePage === 'function') {
-    openHomePage();
-  } else if (typeof showHomePage === 'function') {
-    showHomePage();
-  } else {
-    // Fallback: scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Show home content
-    const homeSection = document.getElementById('home-section') || document.getElementById('main-content');
-    if (homeSection) {
-      hideAllSections();
-      homeSection.style.display = 'block';
-    }
-  }
-}
-
-function triggerShop() {
-  console.log('Menu: Shop clicked');
-  if (typeof goToShop === 'function') {
-    goToShop();
-  } else if (typeof showCategory === 'function') {
-    hideAllSections();
-    showCategory('allproducts');
-  } else {
-    // Fallback: show all products
-    const shopSection = document.getElementById('shop-section') || document.getElementById('product-section');
-    if (shopSection) {
-      hideAllSections();
-      shopSection.style.display = 'block';
-      if (typeof showCategory === 'function') {
-        showCategory('allproducts');
-      }
-    }
-  }
-}
-
-function triggerCart() {
-  console.log('Menu: Cart clicked');
-  if (typeof toggleCart === 'function') {
-    toggleCart(true);
-  } else if (typeof openCart === 'function') {
-    openCart();
-  } else {
-    // Fallback: alert or show cart modal
-    alert('Cart functionality');
-    // Try to load cart items
-    if (typeof loadCartItems === 'function') {
-      loadCartItems();
-    }
-  }
-}
-
-function triggerSignUp() {
-  console.log('Menu: Sign Up clicked');
-  if (typeof showSignUp === 'function') {
-    showSignUp();
-  } else if (typeof showSignUpModal === 'function') {
-    showSignUpModal();
-  } else {
-    // Fallback: scroll to sign up section or show modal
-    const signUpSection = document.getElementById('signup-section');
-    if (signUpSection) {
-      hideAllSections();
-      signUpSection.style.display = 'block';
-    } else {
-      alert('Sign Up/Login');
-    }
-  }
-}
-
-function triggerSearch() {
-  console.log('Menu: Search clicked');
-  if (typeof openSearch === 'function') {
-    openSearch();
-  } else {
-    // Create search modal if function doesn't exist
-    createSearchModal();
-  }
-}
 
 // === SEARCH MODAL (if openSearch doesn't exist) ===
 function createSearchModal() {
@@ -2518,28 +2532,60 @@ function updateMenuCartCount() {
 }
 
 // === INITIALIZE MENU ===
+// === SINGLE DOMContentLoaded LISTENER ===
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Initializing menu system...');
-  
-  // Initialize header scroll effect
-  initHeaderScroll();
-  
-  // Update cart count in menu
-  updateMenuCartCount();
-  
-  // Listen for cart updates
-  setInterval(updateMenuCartCount, 1000);
-  
-  // Make sure cart updates trigger menu update
-  const originalSaveCart = window.saveCart;
-  if (typeof originalSaveCart === 'function') {
-    window.saveCart = function() {
-      originalSaveCart.apply(this, arguments);
-      updateMenuCartCount();
-    };
-  }
-  
-  console.log('Menu system initialized');
+    console.log('Application initializing...');
+    
+    // Initialize background slideshow
+    initBackgroundSlideshow();
+    
+    // Initialize payment system
+    initPaymentSystem();
+    
+    // Update order history
+    updateOrderHistoryDisplay();
+    
+    // Initialize header scroll effect
+    initHeaderScroll();
+    
+    // Update cart count in menu
+    updateMenuCartCount();
+    
+    // Update auth link
+    updateAuthLink();
+    
+    // Show default category
+    showCategory("tshirts");
+    
+    // Check URL parameters
+    const category = getQueryParam("category");
+    const product = getQueryParam("product");
+
+    if (product && typeof openProductModal === "function") {
+        openProductModal(product);
+    } else if (category && typeof showCategory === "function") {
+        showCategory(category);
+    } else {
+        // Ensure home page is visible by default
+        const homePage = document.getElementById('home-page');
+        if (homePage) {
+            homePage.style.display = 'block';
+        }
+    }
+    
+    // Add payment form listener
+    const paymentForm = document.querySelector('.payment-form');
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', processPayment);
+    }
+    
+    // Add checkout listener
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', updatePaymentAmount);
+    }
+    
+    console.log('Application initialized');
 });
 
 // Make functions globally available
