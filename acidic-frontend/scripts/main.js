@@ -62,8 +62,7 @@ if (localStorage.getItem("darkMode") === "true") {
 
 // === INNOVATIVE FEATURES ===
 
-// ── AI STYLIST ───────────────────────────────────────────────
-// Stores the user's quiz answers
+// ── AI STYLIST ───────────────────────────────────────────────────
 var stylistAnswers = { style: null, color: null, occasion: null };
 
 function showAIStylist() {
@@ -94,111 +93,88 @@ function nextQuizStep(step, choice) {
 
 function generateRecommendations(occasion) {
     stylistAnswers.occasion = occasion;
+    var style = stylistAnswers.style;
+    var color = stylistAnswers.color;
+    var occ   = stylistAnswers.occasion;
 
-    var style    = stylistAnswers.style;
-    var color    = stylistAnswers.color;
-    var occ      = stylistAnswers.occasion;
-
-    // Pull all products from productData
     var allProducts = (window.productData && window.productData.allproducts) ? window.productData.allproducts : [];
-
     if (allProducts.length === 0) {
         document.getElementById("ai-recommendations").innerHTML = "<p>No products found. Please try again.</p>";
         return;
     }
 
-    // --- Scoring logic ---
-    // Each answer votes for certain categories and price ranges
-    var categoryWeights = {};   // category -> score
-    var priceRange      = { min: 0, max: 9999 };
+    var categoryWeights = {};
+    var priceRange = { min: 0, max: 9999 };
 
-    // Style personality → category bias
     var styleMap = {
         minimalist: { tshirts: 3, sweaters: 2, pants: 2 },
         bold:       { hoodies: 3, tshirts: 2, twopieces: 2 },
         street:     { hoodies: 3, tshirts: 3, pants: 2, accessories: 1 },
         comfort:    { hoodies: 3, sweaters: 3, pants: 2 }
     };
-
-    // Colour preference → price/style nudge
     var colorMap = {
         monochrome: { priceMax: 500 },
         vibrant:    { priceMin: 300 },
         earthy:     { priceMax: 450 },
         mixed:      {}
     };
-
-    // Occasion → category bias
     var occasionMap = {
-        "Everyday Wear":   { tshirts: 3, pants: 2, sweaters: 1 },
-        "Night Out":       { hoodies: 3, twopieces: 3, tshirts: 1 },
-        "Special Events":  { twopieces: 3, sweaters: 2, hoodies: 1 },
-        "All of the Above":{ tshirts: 2, hoodies: 2, pants: 2, twopieces: 2, sweaters: 1, accessories: 1 }
+        "Everyday Wear":    { tshirts: 3, pants: 2, sweaters: 1 },
+        "Night Out":        { hoodies: 3, twopieces: 3, tshirts: 1 },
+        "Special Events":   { twopieces: 3, sweaters: 2, hoodies: 1 },
+        "All of the Above": { tshirts: 2, hoodies: 2, pants: 2, twopieces: 2, sweaters: 1, accessories: 1 }
     };
 
-    // Apply style weights
     var sw = styleMap[style] || {};
     Object.keys(sw).forEach(function(cat) { categoryWeights[cat] = (categoryWeights[cat] || 0) + sw[cat]; });
 
-    // Apply colour adjustments
     var cw = colorMap[color] || {};
     if (cw.priceMin) priceRange.min = cw.priceMin;
     if (cw.priceMax) priceRange.max = cw.priceMax;
 
-    // Apply occasion weights
     var ow = occasionMap[occ] || occasionMap["All of the Above"];
     Object.keys(ow).forEach(function(cat) { categoryWeights[cat] = (categoryWeights[cat] || 0) + ow[cat]; });
 
-    // Score every product
     var scored = allProducts.map(function(p) {
         var score = categoryWeights[p.category] || 0;
-        // Price range bonus
         if (p.price >= priceRange.min && p.price <= priceRange.max) score += 2;
-        // Small random tiebreaker so results feel fresh
         score += Math.random() * 0.5;
         return { product: p, score: score };
     });
-
-    // Sort by score descending, take top 6
     scored.sort(function(a, b) { return b.score - a.score; });
     var picks = scored.slice(0, 6).map(function(s) { return s.product; });
 
-    // --- Render ---
     var container = document.getElementById("ai-recommendations");
     document.getElementById("quiz-step-3").style.display = "none";
 
-    var styleLabel = { minimalist:"Minimalist", bold:"Bold & Edgy", street:"Streetwear", comfort:"Comfort First" }[style] || style;
-    var colorLabel = { monochrome:"Monochrome", vibrant:"Vibrant", earthy:"Earthy Tones", mixed:"Mixed Palette" }[color] || color;
+    var styleLabel   = { minimalist:"Minimalist", bold:"Bold & Edgy", street:"Streetwear", comfort:"Comfort First" }[style] || style;
+    var colorLabel   = { monochrome:"Monochrome", vibrant:"Vibrant", earthy:"Earthy Tones", mixed:"Mixed Palette" }[color] || color;
 
     container.innerHTML =
         "<h3 style='margin-bottom:6px'>Your Picks</h3>" +
-        "<p style='color:#888;font-size:13px;margin-bottom:20px'>" +
-            styleLabel + " · " + colorLabel + " · " + occ +
-        "</p>" +
+        "<p style='color:#888;font-size:13px;margin-bottom:20px'>" + styleLabel + " · " + colorLabel + " · " + occ + "</p>" +
         "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px'></div>";
 
     var grid = container.querySelector("div");
-
     picks.forEach(function(product) {
-        var img   = (product.images && product.images[0]) || product.image || product.img || "";
-        var card  = document.createElement("div");
+        var img  = (product.images && product.images[0]) || product.image || product.img || "";
+        var card = document.createElement("div");
         card.className = "product";
         card.style.cssText = "background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;transition:transform 0.2s;";
         card.innerHTML =
-            "<img src='" + img + "' alt='" + product.name + "' style='width:100%;height:220px;object-fit:cover;' onerror=\"this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+'\" > " +
+            "<img src='" + img + "' alt='" + product.name + "' style='width:100%;height:220px;object-fit:cover;'>" +
             "<div style='padding:14px'>" +
                 "<p style='font-weight:700;margin:0 0 4px;font-size:14px'>" + product.name + "</p>" +
                 "<p style='color:#f4b400;font-weight:700;margin:0 0 10px;font-size:13px'>R" + product.price + "</p>" +
                 "<p style='color:#888;font-size:11px;margin:0 0 12px;text-transform:capitalize'>" + product.category + "</p>" +
-                "<button class='add-to-cart' onclick='addToCart(" + JSON.stringify({id:product.id,name:product.name,price:product.price,image:img}).replace(/'/g,"&#39;") + ")' " +
-                "style='width:100%;padding:9px;background:#000;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;'>Add to Cart</button>" +
+                "<button class='add-to-cart' onclick='addToCart(" + JSON.stringify({id:product.id,name:product.name,price:product.price,image:img}).replace(/'/g,"&#39;") + ")'" +
+                " style='width:100%;padding:9px;background:#000;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;'>Add to Cart</button>" +
             "</div>";
         card.addEventListener("mouseenter", function() { card.style.transform = "translateY(-4px)"; });
         card.addEventListener("mouseleave", function() { card.style.transform = ""; });
         grid.appendChild(card);
     });
 
-    // Show reset button
     var reset = document.createElement("button");
     reset.textContent = "Retake Quiz";
     reset.style.cssText = "margin-top:24px;padding:10px 24px;background:#f4b400;color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px;";
@@ -207,10 +183,7 @@ function generateRecommendations(occasion) {
 }
 
 // Virtual Try-On
-function showVirtualTryOn() {
-    hideAllSections();
-    document.getElementById("virtual-tryon").style.display = "block";
-}
+// showVirtualTryOn — see consolidated try-on block below
 
 function startWebcam() {
     alert(
@@ -219,11 +192,7 @@ function startWebcam() {
     // In a real implementation, this would access the user's webcam
 }
 
-function tryOnProduct(type) {
-    alert(
-        `Trying on ${type}. In a full implementation, this would use AR to show the item on you.`
-    );
-}
+// tryOnProduct handled by selectTryOnProduct()
 
 // Sustainability
 function showSustainability() {
@@ -268,98 +237,306 @@ function uploadStyle() {
 // Loyalty Program
 function showLoyaltyProgram() {
     hideAllSections();
-    document.getElementById("loyalty-program").style.display = "block";
-    if (currentUser) {
-        displayUserRewards();
+    var section = document.getElementById('loyalty-program');
+    if (section) {
+        section.style.display = 'block';
+        if (typeof renderLoyaltyPage === 'function') renderLoyaltyPage();
     }
 }
 
 // Outfit Builder
+// ================================================================
+//  OUTFIT BUILDER — FIXED & ENHANCED
+// ================================================================
+
 let currentOutfit = { top: null, bottom: null, accessory: null };
 
 function showOutfitBuilder() {
     hideAllSections();
-    document.getElementById("outfit-builder").style.display = "block";
-    showOutfitCategory("tshirts");
-}
-
-function showOutfitCategory(category) {
-    const outfitProducts = document.getElementById("outfit-products");
-    outfitProducts.innerHTML = "";
-
-    if (products[category]) {
-        products[category].forEach((item) => {
-            const div = document.createElement("div");
-            div.classList.add("outfit-product");
-            div.innerHTML = `
-                <img src="${item.img}" alt="${item.name}" onerror="handleImageError(this)">
-                <div>
-                    <h4>${item.name}</h4>
-                    <p>R${item.price}</p>
-                </div>`;
-            div.onclick = () => addToOutfit(category, item);
-            outfitProducts.appendChild(div);
-        });
+    const section = document.getElementById('outfit-builder');
+    if (section) {
+        section.style.display = 'block';
+        initOutfitBuilder();
     }
 }
 
+function initOutfitBuilder() {
+    const section = document.getElementById('outfit-builder');
+    if (!section) return;
+
+    section.innerHTML = `
+        <div class="outfit-container">
+            <h2>Build Your Look</h2>
+            <p style="text-align:center;color:#888;margin-bottom:24px;">Pick a top, bottom and accessory to create your perfect outfit</p>
+
+            <div class="outfit-layout">
+
+                <!-- LEFT: Current outfit canvas -->
+                <div class="outfit-canvas-panel">
+                    <h3>Your Outfit</h3>
+
+                    <div class="outfit-slot" id="top-slot">
+                        <div class="slot-placeholder" id="top-placeholder">
+                            <span style="font-size:32px">👕</span>
+                            <p>No top selected</p>
+                        </div>
+                        <div class="slot-item" id="top-item" style="display:none;"></div>
+                    </div>
+
+                    <div class="outfit-slot" id="bottom-slot">
+                        <div class="slot-placeholder" id="bottom-placeholder">
+                            <span style="font-size:32px">👖</span>
+                            <p>No bottom selected</p>
+                        </div>
+                        <div class="slot-item" id="bottom-item" style="display:none;"></div>
+                    </div>
+
+                    <div class="outfit-slot" id="accessory-slot">
+                        <div class="slot-placeholder" id="accessory-placeholder">
+                            <span style="font-size:32px">🧢</span>
+                            <p>No accessory selected</p>
+                        </div>
+                        <div class="slot-item" id="accessory-item" style="display:none;"></div>
+                    </div>
+
+                    <div class="outfit-summary" id="outfit-summary" style="display:none;">
+                        <div class="summary-line">
+                            <span>Outfit Total</span>
+                            <span id="outfit-total" style="font-weight:700;color:#f4b400;">R0</span>
+                        </div>
+                    </div>
+
+                    <button class="add-outfit-btn" id="add-outfit-btn" onclick="addOutfitToCart()" disabled>
+                        🛒 Add Outfit to Cart
+                    </button>
+                    <button class="clear-outfit-btn" onclick="clearOutfit()">
+                        ✕ Clear Outfit
+                    </button>
+                </div>
+
+                <!-- RIGHT: Product picker -->
+                <div class="outfit-picker-panel">
+                    <div class="outfit-category-tabs">
+                        <button class="outfit-tab active" onclick="showOutfitCategory('tshirts', this)">T-Shirts</button>
+                        <button class="outfit-tab" onclick="showOutfitCategory('hoodies', this)">Hoodies</button>
+                        <button class="outfit-tab" onclick="showOutfitCategory('sweaters', this)">Sweaters</button>
+                        <button class="outfit-tab" onclick="showOutfitCategory('pants', this)">Bottoms</button>
+                        <button class="outfit-tab" onclick="showOutfitCategory('twopieces', this)">Two Pieces</button>
+                        <button class="outfit-tab" onclick="showOutfitCategory('accessories', this)">Accessories</button>
+                    </div>
+                    <div class="outfit-products-grid" id="outfit-products"></div>
+                </div>
+
+            </div>
+        </div>`;
+
+    addOutfitBuilderStyles();
+    currentOutfit = { top: null, bottom: null, accessory: null };
+    showOutfitCategory('tshirts', document.querySelector('.outfit-tab'));
+}
+
+// ── Category tab + product grid ───────────────────────────────────
+function showOutfitCategory(category, tabEl) {
+    // Update active tab
+    document.querySelectorAll('.outfit-tab').forEach(t => t.classList.remove('active'));
+    if (tabEl) tabEl.classList.add('active');
+
+    const grid = document.getElementById('outfit-products');
+    if (!grid) return;
+
+    const all = window.productData?.allproducts || [];
+    const items = all.filter(p => p.category === category);
+
+    if (!items.length) {
+        grid.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">No products in this category</p>';
+        return;
+    }
+
+    grid.innerHTML = items.map(item => {
+        const img = item.images?.[0] || item.image || item.img || '';
+        return `<div class="outfit-product-card" onclick="addToOutfit('${category}', ${JSON.stringify({
+            id: item.id, name: item.name, price: item.price,
+            image: img, category: item.category
+        }).replace(/"/g, '&quot;')})">
+            <div class="outfit-card-img">
+                <img src="${img}" alt="${item.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+'">
+                <div class="outfit-card-overlay">+ Add</div>
+            </div>
+            <div class="outfit-card-info">
+                <p class="outfit-card-name">${item.name}</p>
+                <p class="outfit-card-price">R${item.price}</p>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Add item to outfit slot ────────────────────────────────────────
 function addToOutfit(category, item) {
-    if (category === "tshirts" || category === "sweaters" || category === "hoodies") {
+    // Parse item if passed as string from onclick
+    if (typeof item === 'string') {
+        try { item = JSON.parse(item); } catch(e) { return; }
+    }
+
+    const isTops       = ['tshirts','hoodies','sweaters','twopieces'].includes(category);
+    const isBottoms    = ['pants'].includes(category);
+    const isAccessory  = ['accessories'].includes(category);
+
+    if (isTops) {
         currentOutfit.top = item;
-        document.getElementById("top-layer").innerHTML = `
-            <img src="${item.img}" alt="${item.name}" style="max-width: 200px;" onerror="handleImageError(this)">
-            <h4>${item.name}</h4><p>R${item.price}</p>`;
-        document.getElementById("bottom-layer").style.display = "block";
-    } else if (category === "pants") {
+        renderOutfitSlot('top', item);
+    } else if (isBottoms) {
         currentOutfit.bottom = item;
-        document.getElementById("bottom-layer").innerHTML = `
-            <img src="${item.img}" alt="${item.name}" style="max-width: 200px;" onerror="handleImageError(this)">
-            <h4>${item.name}</h4><p>R${item.price}</p>`;
-        document.getElementById("accessory-layer").style.display = "block";
-    } else if (category === "accessories") {
+        renderOutfitSlot('bottom', item);
+    } else if (isAccessory) {
         currentOutfit.accessory = item;
-        document.getElementById("accessory-layer").innerHTML = `
-            <img src="${item.img}" alt="${item.name}" style="max-width: 100px;" onerror="handleImageError(this)">
-            <h4>${item.name}</h4><p>R${item.price}</p>`;
+        renderOutfitSlot('accessory', item);
+    }
+
+    updateOutfitSummary();
+    showNotification(item.name + ' added to outfit', 'success');
+}
+
+function renderOutfitSlot(slot, item) {
+    const placeholder = document.getElementById(slot + '-placeholder');
+    const slotEl      = document.getElementById(slot + '-item');
+    if (!placeholder || !slotEl) return;
+
+    placeholder.style.display = 'none';
+    slotEl.style.display = 'flex';
+    slotEl.innerHTML = `
+        <img src="${item.image || item.img || ''}" alt="${item.name}"
+             style="width:70px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;"
+             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+'">
+        <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 3px;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</p>
+            <p style="margin:0;color:#f4b400;font-weight:700;font-size:13px">R${item.price}</p>
+        </div>
+        <button onclick="removeFromOutfit('${slot}')"
+                style="background:none;border:none;font-size:18px;cursor:pointer;color:#ccc;padding:0 4px;flex-shrink:0;"
+                title="Remove">✕</button>`;
+}
+
+function removeFromOutfit(slot) {
+    currentOutfit[slot] = null;
+    const placeholder = document.getElementById(slot + '-placeholder');
+    const slotEl      = document.getElementById(slot + '-item');
+    if (placeholder) placeholder.style.display = 'flex';
+    if (slotEl)      slotEl.style.display = 'none';
+    updateOutfitSummary();
+}
+
+function clearOutfit() {
+    ['top','bottom','accessory'].forEach(s => removeFromOutfit(s));
+    showNotification('Outfit cleared', 'info');
+}
+
+function updateOutfitSummary() {
+    const hasItems = currentOutfit.top || currentOutfit.bottom || currentOutfit.accessory;
+    const summary  = document.getElementById('outfit-summary');
+    const totalEl  = document.getElementById('outfit-total');
+    const addBtn   = document.getElementById('add-outfit-btn');
+
+    if (summary)  summary.style.display  = hasItems ? 'block' : 'none';
+    if (addBtn)   addBtn.disabled        = !hasItems;
+
+    if (totalEl) {
+        const total = (currentOutfit.top?.price       || 0) +
+                      (currentOutfit.bottom?.price    || 0) +
+                      (currentOutfit.accessory?.price || 0);
+        totalEl.textContent = 'R' + total;
     }
 }
 
+// ── Add whole outfit to cart ──────────────────────────────────────
 function addOutfitToCart() {
-    if (currentOutfit.top) {
-        const size = "Medium"; // Default size for outfit items
-        cart.push({
-            name: currentOutfit.top.name + " (Outfit)",
-            price: currentOutfit.top.price,
-            size,
-            qty: 1,
-        });
-    }
-    if (currentOutfit.bottom) {
-        const size = "Medium"; // Default size for outfit items
-        cart.push({
-            name: currentOutfit.bottom.name + " (Outfit)",
-            price: currentOutfit.bottom.price,
-            size,
-            qty: 1,
-        });
-    }
-    if (currentOutfit.accessory) {
-        cart.push({
-            name: currentOutfit.accessory.name + " (Outfit)",
-            price: currentOutfit.accessory.price,
-            size: "One Size",
-            qty: 1,
-        });
+    const hasItems = currentOutfit.top || currentOutfit.bottom || currentOutfit.accessory;
+    if (!hasItems) {
+        showNotification('Please add at least one item to your outfit', 'error');
+        return;
     }
 
-    if (currentOutfit.top || currentOutfit.bottom || currentOutfit.accessory) {
-        updateCart();
-        toggleCart(true);
-        alert("Outfit added to cart!");
-    } else {
-        alert("Please add at least one item to your outfit.");
-    }
+    ['top','bottom','accessory'].forEach(slot => {
+        const item = currentOutfit[slot];
+        if (!item) return;
+        addToCart({
+            id:       item.id,
+            name:     item.name + ' (Outfit)',
+            price:    item.price,
+            image:    item.image || item.img || '',
+            quantity: 1,
+            size:     slot === 'accessory' ? 'One Size' : 'M',
+            category: item.category || slot
+        });
+    });
+
+    toggleCart(true);
+    showNotification('Full outfit added to cart!', 'success');
 }
+
+// ── Styles ────────────────────────────────────────────────────────
+function addOutfitBuilderStyles() {
+    if (document.getElementById('outfit-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'outfit-styles';
+    style.textContent = `
+        .outfit-container{max-width:1100px;margin:0 auto;padding:30px;background:#fff;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.08);}
+        .outfit-container h2{text-align:center;margin-bottom:6px;}
+        .outfit-layout{display:grid;grid-template-columns:320px 1fr;gap:24px;margin-top:10px;}
+        .outfit-canvas-panel{background:#f8f9fa;border-radius:14px;padding:18px;border:1px solid #e0e0e0;display:flex;flex-direction:column;gap:10px;}
+        .outfit-canvas-panel h3{margin:0 0 8px;font-size:16px;}
+        .outfit-slot{background:#fff;border-radius:10px;border:1px solid #eee;padding:12px;min-height:90px;}
+        .slot-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ccc;gap:4px;min-height:66px;font-size:12px;}
+        .slot-item{display:flex;align-items:center;gap:12px;}
+        .outfit-summary{border-top:1px solid #eee;padding-top:10px;margin-top:4px;}
+        .summary-line{display:flex;justify-content:space-between;font-size:15px;}
+        .add-outfit-btn{width:100%;padding:13px;background:#000;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;transition:background 0.2s;margin-top:4px;}
+        .add-outfit-btn:hover{background:#333;}
+        .add-outfit-btn:disabled{opacity:0.4;cursor:not-allowed;background:#666;}
+        .clear-outfit-btn{width:100%;padding:9px;background:none;color:#888;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:13px;transition:all 0.2s;}
+        .clear-outfit-btn:hover{border-color:#f44336;color:#f44336;}
+        .outfit-picker-panel{display:flex;flex-direction:column;gap:14px;}
+        .outfit-category-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+        .outfit-tab{background:#f0f0f0;border:none;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;}
+        .outfit-tab:hover{background:#e0e0e0;}
+        .outfit-tab.active{background:#000;color:#fff;}
+        .outfit-products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;max-height:580px;overflow-y:auto;padding-right:4px;}
+        .outfit-product-card{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #eee;cursor:pointer;transition:all 0.2s;}
+        .outfit-product-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.1);border-color:#f4b400;}
+        .outfit-card-img{position:relative;height:160px;overflow:hidden;}
+        .outfit-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s;}
+        .outfit-product-card:hover .outfit-card-img img{transform:scale(1.06);}
+        .outfit-card-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;opacity:0;transition:opacity 0.2s;}
+        .outfit-product-card:hover .outfit-card-overlay{opacity:1;}
+        .outfit-card-info{padding:8px 10px;}
+        .outfit-card-name{margin:0 0 3px;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .outfit-card-price{margin:0;font-size:12px;color:#f4b400;font-weight:700;}
+        @media(max-width:768px){.outfit-layout{grid-template-columns:1fr;}.outfit-canvas-panel{order:2;}.outfit-picker-panel{order:1;}}
+    `;
+    document.head.appendChild(style);
+}
+
+// ── Fix openExperienceModal for outfit-builder ────────────────────
+const _prevOpenExperienceModal = typeof openExperienceModal === 'function' ? openExperienceModal : null;
+openExperienceModal = function(type) {
+    const modal = document.getElementById('experience-modal');
+    const body  = document.getElementById('experience-modal-body');
+    if (!modal || !body) return;
+
+    if (type === 'outfit-builder') {
+        body.innerHTML = '<section id="outfit-builder" style="padding:0;background:none;box-shadow:none;"></section>';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => initOutfitBuilder(), 50);
+    } else if (_prevOpenExperienceModal) {
+        _prevOpenExperienceModal(type);
+    } else {
+        body.innerHTML = getExperienceContent(type);
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+window.openExperienceModal = openExperienceModal;
+window.showOutfitBuilder   = showOutfitBuilder;
 
 // Utility function to hide all sections
 function hideAllSections() {
@@ -1037,186 +1214,144 @@ function viewProduct(productId, event) {
     window.location.href = `product.html?id=${productId}&key=${productKey}`;
 }
 
-// === FIXED VIRTUAL TRY-ON SYSTEM ===
+// ================================================================
+//  VIRTUAL TRY-ON — CONSOLIDATED CLEAN IMPLEMENTATION
+// ================================================================
 
-// Virtual Try-On Variables
-let currentTryOnImage = null;
+// ── State ─────────────────────────────────────────────────────────
+let currentTryOnImage    = null;
 let selectedTryOnProduct = null;
-let webcamStream = null;
-let canvasContext = null;
+let webcamStream         = null;
+let canvasContext        = null;
 
-// Initialize Virtual Try-On with FIXED display
+// ── Entry point ───────────────────────────────────────────────────
+function showVirtualTryOn() {
+    hideAllSections();
+    const section = document.getElementById('virtual-tryon');
+    if (section) {
+        section.style.display = 'block';
+        addVirtualTryOnStyles();
+        initVirtualTryOn();
+    }
+}
+
+// ── Build the UI ──────────────────────────────────────────────────
 function initVirtualTryOn() {
     const tryonSection = document.getElementById('virtual-tryon');
     if (!tryonSection) return;
-    
-    // Clear existing content
-    tryonSection.innerHTML = '';
-    
-    // Enhanced HTML for Virtual Try-On
+
     tryonSection.innerHTML = `
         <div class="tryon-container">
             <h2>Virtual Try-On Experience</h2>
             <p class="tryon-subtitle">See how our clothing looks on you before buying</p>
-            
             <div class="tryon-interface">
-                <!-- Left Panel: Image Source Selection -->
+
+                <!-- LEFT -->
                 <div class="tryon-source-panel">
                     <div class="source-selector">
                         <h3>Choose Your Source</h3>
                         <div class="source-options">
-                            <button class="source-option active" data-source="webcam" onclick="selectSource('webcam')">
-                                <i class="fas fa-camera"></i>
-                                <span>Live Camera</span>
-                            </button>
-                            <button class="source-option" data-source="upload" onclick="selectSource('upload')">
-                                <i class="fas fa-upload"></i>
-                                <span>Upload Photo</span>
-                            </button>
-                            <button class="source-option" data-source="sample" onclick="selectSource('sample')">
-                                <i class="fas fa-user"></i>
-                                <span>Use Sample Model</span>
-                            </button>
+                            <button class="source-option active" data-source="webcam" onclick="selectSource('webcam')">📷 Live Camera</button>
+                            <button class="source-option" data-source="upload"  onclick="selectSource('upload')">📁 Upload Photo</button>
+                            <button class="source-option" data-source="sample"  onclick="selectSource('sample')">🧍 Sample Model</button>
                         </div>
-                        
-                        <!-- Webcam Controls - VISIBLE by default -->
+
                         <div id="webcam-controls" class="source-controls active">
                             <div class="webcam-preview" id="webcam-preview">
                                 <div class="placeholder">Camera feed will appear here</div>
                             </div>
                             <div class="control-buttons">
-                                <button class="start-camera-btn" onclick="startWebcam()">
-                                    <i class="fas fa-play"></i> Start Camera
-                                </button>
-                                <button class="capture-btn" onclick="captureFromWebcam()" disabled>
-                                    <i class="fas fa-camera"></i> Capture Photo
-                                </button>
-                                <button class="stop-camera-btn" onclick="stopWebcam()" disabled>
-                                    <i class="fas fa-stop"></i> Stop Camera
-                                </button>
+                                <button class="start-camera-btn" onclick="startWebcam()">▶ Start</button>
+                                <button class="capture-btn"      onclick="captureFromWebcam()" disabled>📸 Capture</button>
+                                <button class="stop-camera-btn"  onclick="stopWebcam()"        disabled>⏹ Stop</button>
                             </div>
                         </div>
-                        
-                        <!-- Upload Controls - HIDDEN initially -->
-                        <div id="upload-controls" class="source-controls" style="display: none;">
+
+                        <div id="upload-controls" class="source-controls" style="display:none;">
                             <div class="upload-area" id="upload-area">
-                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p style="font-size:30px;margin:0">☁️</p>
                                 <p>Drag & drop your photo here</p>
                                 <p class="upload-hint">or click to browse</p>
-                                <input type="file" id="image-upload" accept="image/*" 
-                                       onchange="handleImageUpload(event)" hidden>
-                                <button class="browse-btn" onclick="document.getElementById('image-upload').click()">
-                                    Browse Files
-                                </button>
+                                <input type="file" id="image-upload" accept="image/*" onchange="handleImageUpload(event)" hidden>
+                                <button class="browse-btn" onclick="document.getElementById('image-upload').click()">Browse Files</button>
                             </div>
                             <div class="upload-requirements">
-                                <p><i class="fas fa-info-circle"></i> For best results:</p>
+                                <p><strong>💡 Best results:</strong></p>
                                 <ul>
-                                    <li>Stand facing the camera</li>
-                                    <li>Good lighting is important</li>
-                                    <li>Wear form-fitting clothing</li>
-                                    <li>Clear background works best</li>
+                                    <li>Face the camera directly</li>
+                                    <li>Good, even lighting</li>
+                                    <li>Form-fitting clothes</li>
+                                    <li>Clear background</li>
                                 </ul>
                             </div>
                         </div>
-                        
-                        <!-- Sample Controls - HIDDEN initially -->
-                        <div id="sample-controls" class="source-controls" style="display: none;">
+
+                        <div id="sample-controls" class="source-controls" style="display:none;">
                             <div class="sample-models">
                                 <div class="sample-model" onclick="useSampleModel(1)">
-                                    <img src="acidic 2.jpg" alt="Sample Model 1">
-                                    <span>Male Model</span>
+                                    <img src="acidic 2.jpg"  alt="Male Model"><span>Male</span>
                                 </div>
                                 <div class="sample-model" onclick="useSampleModel(2)">
-                                    <img src="acidic 28.jpg" alt="Sample Model 2">
-                                    <span>Female Model</span>
+                                    <img src="acidic 28.jpg" alt="Female Model"><span>Female</span>
                                 </div>
                                 <div class="sample-model" onclick="useSampleModel(3)">
-                                    <img src="acidic 32.jpg" alt="Sample Model 3">
-                                    <span>Street Style</span>
+                                    <img src="acidic 32.jpg" alt="Street"><span>Street</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="tryon-instructions">
-                        <h4><i class="fas fa-lightbulb"></i> How to get the best results:</h4>
+                        <h4>📋 Tips for best results:</h4>
                         <ol>
                             <li>Choose a well-lit area</li>
-                            <li>Stand about 2 meters from camera</li>
-                            <li>Face forward with arms slightly away from body</li>
-                            <li>Make sure your full body is in frame</li>
-                            <li>Click "Capture Photo" when ready</li>
+                            <li>Stand ~2m from camera</li>
+                            <li>Face forward, arms slightly out</li>
+                            <li>Full body in frame</li>
+                            <li>Click Capture when ready</li>
                         </ol>
                     </div>
                 </div>
-                
-                <!-- Center Panel: Try-On Visualization -->
+
+                <!-- CENTER -->
                 <div class="tryon-visualization-panel">
                     <div class="visualization-header">
                         <h3>Try-On Preview</h3>
                         <div class="visualization-controls">
-                            <button class="reset-btn" onclick="resetTryOn()">
-                                <i class="fas fa-redo"></i> Reset
-                            </button>
-                            <button class="download-btn" onclick="downloadTryOnImage()">
-                                <i class="fas fa-download"></i> Save
-                            </button>
+                            <button class="reset-btn"    onclick="resetTryOn()">↺ Reset</button>
+                            <button class="download-btn" onclick="downloadTryOnImage()">⬇ Save Look</button>
                         </div>
                     </div>
-                    
                     <div class="visualization-area">
                         <div class="base-image-container">
-                            <img id="base-image" src="" alt="Your photo" style="display: none;">
-                            <canvas id="tryon-canvas" width="500" height="700"></canvas>
+                            <canvas id="tryon-canvas" width="500" height="680"></canvas>
                             <div class="no-image-placeholder" id="no-image-placeholder">
-                                <i class="fas fa-user-circle"></i>
+                                <span style="font-size:48px">🧍</span>
                                 <p>Upload or capture a photo to start</p>
                             </div>
                         </div>
-                        
                         <div class="tryon-controls">
                             <div class="control-group">
-                                <label>Product Position:</label>
-                                <div class="slider-control">
-                                    <span>Left</span>
-                                    <input type="range" id="position-x" min="0" max="100" value="50" 
-                                           oninput="updateProductPosition()">
-                                    <span>Right</span>
-                                </div>
+                                <label>Position ↔</label>
+                                <input type="range" id="position-x"      min="0"  max="100" value="50"  oninput="updateProductPosition()">
                             </div>
                             <div class="control-group">
-                                <label>Product Size:</label>
-                                <div class="slider-control">
-                                    <span>Small</span>
-                                    <input type="range" id="product-scale" min="50" max="150" value="100" 
-                                           oninput="updateProductScale()">
-                                    <span>Large</span>
-                                </div>
+                                <label>Size ⬡</label>
+                                <input type="range" id="product-scale"   min="40" max="160" value="100" oninput="updateProductScale()">
                             </div>
                             <div class="control-group">
-                                <label>Product Opacity:</label>
-                                <div class="slider-control">
-                                    <span>Faded</span>
-                                    <input type="range" id="product-opacity" min="30" max="100" value="80" 
-                                           oninput="updateProductOpacity()">
-                                    <span>Solid</span>
-                                </div>
+                                <label>Opacity ◑</label>
+                                <input type="range" id="product-opacity" min="20" max="100" value="80"  oninput="updateProductOpacity()">
                             </div>
                         </div>
                     </div>
-                    
                     <div class="visualization-actions">
-                        <button class="add-to-cart-btn" onclick="addTryOnToCart()" disabled>
-                            <i class="fas fa-shopping-cart"></i> Add Selected Item to Cart
-                        </button>
-                        <button class="compare-btn" onclick="compareTryOn()">
-                            <i class="fas fa-exchange-alt"></i> Compare with Another Product
-                        </button>
+                        <button class="add-to-cart-btn" onclick="addTryOnToCart()" disabled>🛒 Add to Cart</button>
+                        <button class="compare-btn"     onclick="compareTryOn()">⇄ Compare</button>
                     </div>
                 </div>
-                
-                <!-- Right Panel: Product Selection -->
+
+                <!-- RIGHT -->
                 <div class="tryon-products-panel">
                     <div class="products-header">
                         <h3>Try These Products</h3>
@@ -1232,987 +1367,428 @@ function initVirtualTryOn() {
                             </select>
                         </div>
                     </div>
-                    
-                    <div class="tryon-products-grid" id="tryon-products-grid">
-                        <!-- Products will be loaded here -->
-                    </div>
-                    
+                    <div class="tryon-products-grid" id="tryon-products-grid"></div>
                     <div class="tryon-suggestions">
-                        <h4><i class="fas fa-magic"></i> AI Style Suggestions</h4>
-                        <div class="suggestions-container" id="ai-suggestions">
-                            <!-- AI suggestions will appear here -->
-                        </div>
+                        <h4>✨ Style Suggestions</h4>
+                        <div id="ai-suggestions"></div>
                     </div>
                 </div>
+
             </div>
-        </div>
-    `;
-    
-    // Initialize canvas
+        </div>`;
+
     const canvas = document.getElementById('tryon-canvas');
     if (canvas) {
         canvasContext = canvas.getContext('2d');
-        // Set canvas background
         canvasContext.fillStyle = '#f5f5f5';
         canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Add "Upload your photo" text on canvas
-        canvasContext.fillStyle = '#999';
-        canvasContext.font = '16px Arial';
+        canvasContext.fillStyle = '#bbb';
+        canvasContext.font = '15px sans-serif';
         canvasContext.textAlign = 'center';
-        canvasContext.fillText('Upload or capture a photo to start', canvas.width/2, canvas.height/2);
+        canvasContext.fillText('Upload or capture a photo to start', canvas.width / 2, canvas.height / 2);
     }
-    
-    // Initialize drag and drop for upload
+
     initDragAndDrop();
-    
-    // Load try-on products
     loadTryOnProducts();
-    
-    // Load AI suggestions
     generateAISuggestions();
 }
 
-// FIXED: Source selection function
+// ── Source selector ───────────────────────────────────────────────
 function selectSource(source) {
-    console.log('Selected source:', source);
-    
-    // Update active source button
-    document.querySelectorAll('.source-option').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const button = document.querySelector(`[data-source="${source}"]`);
-    if (button) {
-        button.classList.add('active');
-    }
-    
-    // Hide all controls first
-    document.querySelectorAll('.source-controls').forEach(control => {
-        control.style.display = 'none';
-    });
-    
-    // Show selected control
-    const selectedControl = document.getElementById(`${source}-controls`);
-    if (selectedControl) {
-        selectedControl.style.display = 'block';
-        selectedControl.classList.add('active');
-    }
-    
-    // Stop webcam if switching away from it
-    if (source !== 'webcam') {
-        stopWebcam();
-    }
+    document.querySelectorAll('.source-option').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`[data-source="${source}"]`);
+    if (btn) btn.classList.add('active');
+
+    document.querySelectorAll('.source-controls').forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+    const panel = document.getElementById(source + '-controls');
+    if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
+
+    if (source !== 'webcam') stopWebcam();
 }
 
-// FIXED: Webcam functions
+// ── Webcam ────────────────────────────────────────────────────────
 async function startWebcam() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Your browser does not support camera access. Please use Chrome, Firefox, or Edge.');
+        return;
+    }
     try {
-        // Check if browser supports mediaDevices
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('Your browser does not support camera access. Please use Chrome, Firefox, or Edge.');
-            return;
-        }
-        
-        const constraints = {
-            video: {
-                width: { ideal: 640 },
-                height: { ideal: 480 },
-                facingMode: 'user'
-            }
-        };
-        
-        webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+        webcamStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+        });
         const video = document.createElement('video');
-        video.srcObject = webcamStream;
-        video.autoplay = true;
+        video.srcObject   = webcamStream;
+        video.autoplay    = true;
         video.playsInline = true;
-        
+        video.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px;';
+
         const preview = document.getElementById('webcam-preview');
         preview.innerHTML = '';
         preview.appendChild(video);
-        
-        // Enable capture button
-        const captureBtn = document.querySelector('.capture-btn');
-        const stopBtn = document.querySelector('.stop-camera-btn');
-        const startBtn = document.querySelector('.start-camera-btn');
-        
-        if (captureBtn) captureBtn.disabled = false;
-        if (stopBtn) stopBtn.disabled = false;
-        if (startBtn) startBtn.disabled = true;
-        
 
+        const captureBtn = document.querySelector('.capture-btn');
+        const stopBtn    = document.querySelector('.stop-camera-btn');
+        const startBtn   = document.querySelector('.start-camera-btn');
+        if (captureBtn) captureBtn.disabled = false;
+        if (stopBtn)    stopBtn.disabled    = false;
+        if (startBtn)   startBtn.disabled   = true;
     } catch (error) {
-        console.error('Error accessing webcam:', error);
-        if (error.name === 'NotAllowedError') {
-            alert('Camera access denied. Please allow camera access in your browser settings.');
-        } else if (error.name === 'NotFoundError') {
-            alert('No camera found. Please connect a camera or use upload option.');
-        } else {
-            alert('Unable to access camera. Please check permissions.');
-        }
+        if (error.name === 'NotAllowedError')      alert('Camera access denied. Please allow camera access in your browser settings.');
+        else if (error.name === 'NotFoundError')   alert('No camera found. Please connect a camera or use the upload option.');
+        else                                       alert('Unable to access camera: ' + error.message);
     }
 }
 
 function stopWebcam() {
-    if (webcamStream) {
-        webcamStream.getTracks().forEach(track => track.stop());
-        webcamStream = null;
-    }
-    
+    if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); webcamStream = null; }
     const preview = document.getElementById('webcam-preview');
-    if (preview) {
-        preview.innerHTML = '<div class="placeholder">Camera feed will appear here</div>';
-    }
-    
+    if (preview) preview.innerHTML = '<div class="placeholder">Camera feed will appear here</div>';
     const captureBtn = document.querySelector('.capture-btn');
-    const stopBtn = document.querySelector('.stop-camera-btn');
-    const startBtn = document.querySelector('.start-camera-btn');
-    
+    const stopBtn    = document.querySelector('.stop-camera-btn');
+    const startBtn   = document.querySelector('.start-camera-btn');
     if (captureBtn) captureBtn.disabled = true;
-    if (stopBtn) stopBtn.disabled = true;
-    if (startBtn) startBtn.disabled = false;
+    if (stopBtn)    stopBtn.disabled    = true;
+    if (startBtn)   startBtn.disabled   = false;
 }
 
 function captureFromWebcam() {
-    const preview = document.getElementById('webcam-preview');
-    const video = preview.querySelector('video');
-    
+    const video = document.getElementById('webcam-preview')?.querySelector('video');
     if (!video) return;
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert to data URL
-    const imageData = canvas.toDataURL('image/jpeg');
-    setTryOnImage(imageData);
-    
-    // Show success message
-    showNotification('Photo captured successfully!', 'success');
-    
-    // Stop webcam after capture
+    const c = document.createElement('canvas');
+    c.width = video.videoWidth; c.height = video.videoHeight;
+    c.getContext('2d').drawImage(video, 0, 0);
+    setTryOnImage(c.toDataURL('image/jpeg'));
+    showNotification('Photo captured!', 'success');
     stopWebcam();
 }
 
-// FIXED: Image upload functions
+// ── Upload ────────────────────────────────────────────────────────
 function initDragAndDrop() {
-    const uploadArea = document.getElementById('upload-area');
-    if (!uploadArea) return;
-    
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-    
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-    
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        
+    const area = document.getElementById('upload-area');
+    if (!area) return;
+    area.addEventListener('dragover',  e => { e.preventDefault(); area.classList.add('dragover'); });
+    area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+    area.addEventListener('drop', e => {
+        e.preventDefault(); area.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleImageFile(file);
-        } else {
-            alert('Please drop an image file (JPEG, PNG, etc.)');
-        }
+        if (file && file.type.startsWith('image/')) handleImageFile(file);
+        else alert('Please drop an image file');
     });
-    
-    uploadArea.addEventListener('click', () => {
-        const fileInput = document.getElementById('image-upload');
-        if (fileInput) {
-            fileInput.click();
-        }
-    });
+    area.addEventListener('click', () => document.getElementById('image-upload')?.click());
 }
 
-function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-        handleImageFile(file);
-    }
-}
+function handleImageUpload(event) { const f = event.target.files[0]; if (f) handleImageFile(f); }
 
 function handleImageFile(file) {
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        alert('Image file is too large. Please select an image smaller than 5MB.');
-        return;
-    }
-    
+    if (file.size > 5 * 1024 * 1024) { alert('Image too large (max 5MB)'); return; }
     const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        setTryOnImage(e.target.result);
-        showNotification('Photo uploaded successfully!', 'success');
-    };
-    
-    reader.onerror = function() {
-        alert('Error reading image file. Please try another image.');
-    };
-    
+    reader.onload  = e => { setTryOnImage(e.target.result); showNotification('Photo uploaded!', 'success'); };
+    reader.onerror = () => alert('Error reading file');
     reader.readAsDataURL(file);
 }
 
-// FIXED: Set try-on image
+// ── Set base image on canvas ──────────────────────────────────────
 function setTryOnImage(imageSrc) {
-    const baseImage = document.getElementById('base-image');
-    const canvas = document.getElementById('tryon-canvas');
+    const canvas      = document.getElementById('tryon-canvas');
     const placeholder = document.getElementById('no-image-placeholder');
-    
-    if (!baseImage || !canvas || !placeholder) return;
-    
-    baseImage.src = imageSrc;
-    baseImage.style.display = 'block';
-    
-    // Hide placeholder
-    placeholder.style.display = 'none';
-    
-    // Create a new image object for loading
+    if (!canvas || !canvasContext) return;
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.src = imageSrc;
-    
     img.onload = function() {
-        // Clear canvas
+        const ca = canvas.width / canvas.height;
+        const ia = img.width / img.height;
+        let dw, dh, x, y;
+        if (ia > ca) { dw = canvas.width;  dh = canvas.width / ia;  x = 0; y = (canvas.height - dh) / 2; }
+        else         { dh = canvas.height; dw = canvas.height * ia; y = 0; x = (canvas.width  - dw) / 2; }
+
         canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Calculate scaling to fit canvas
-        const canvasAspect = canvas.width / canvas.height;
-        const imageAspect = img.width / img.height;
-        
-        let drawWidth, drawHeight, x, y;
-        
-        if (imageAspect > canvasAspect) {
-            // Image is wider than canvas
-            drawWidth = canvas.width;
-            drawHeight = canvas.width / imageAspect;
-            x = 0;
-            y = (canvas.height - drawHeight) / 2;
-        } else {
-            // Image is taller than canvas
-            drawHeight = canvas.height;
-            drawWidth = canvas.height * imageAspect;
-            x = (canvas.width - drawWidth) / 2;
-            y = 0;
-        }
-        
-        // Draw base image
-        canvasContext.drawImage(img, x, y, drawWidth, drawHeight);
-        
-        currentTryOnImage = {
-            src: imageSrc,
-            width: drawWidth,
-            height: drawHeight,
-            x: x,
-            y: y,
-            originalWidth: img.width,
-            originalHeight: img.height
-        };
-        
-        // Enable add to cart button if product selected
-        const addToCartBtn = document.querySelector('.add-to-cart-btn');
-        if (addToCartBtn && selectedTryOnProduct) {
-            addToCartBtn.disabled = false;
+        canvasContext.drawImage(img, x, y, dw, dh);
+        currentTryOnImage = { src: imageSrc, width: dw, height: dh, x, y };
+        if (placeholder) placeholder.style.display = 'none';
+        if (selectedTryOnProduct) {
+            drawTryOnOverlay();
+            const addBtn = document.querySelector('.add-to-cart-btn');
+            if (addBtn) addBtn.disabled = false;
         }
     };
-    
-    img.onerror = function() {
-        alert('Error loading image. Please try another image.');
-    };
+    img.onerror = () => alert('Error loading image');
 }
 
-// Rest of the functions remain the same as before...
+// ── Product grid ──────────────────────────────────────────────────
+function loadTryOnProducts(category) {
+    const grid = document.getElementById('tryon-products-grid');
+    if (!grid) return;
+    const all  = window.productData?.allproducts || [];
+    const list = (category && category !== 'all') ? all.filter(p => p.category === category) : all.slice(0, 12);
+    if (!list.length) { grid.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">No products found</p>'; return; }
 
-// FIXED: Show virtual try-on section
-function showVirtualTryOn() {
-    hideAllSections();
-    const tryonSection = document.getElementById('virtual-tryon');
-    if (tryonSection) {
-        tryonSection.style.display = 'block';
-        
-        // Initialize the try-on system
-        initVirtualTryOn();
+    grid.innerHTML = list.map(p => {
+        const img = p.images?.[0] || p.image || '';
+        return `<div class="tryon-product-item" onclick="selectTryOnProduct(${p.id}, event)">
+            <div class="tryon-product-image">
+                <img src="${img}" alt="${p.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+'">
+                <div class="tryon-overlay"><button class="try-it-btn">👕 Try It</button></div>
+            </div>
+            <div class="tryon-product-info">
+                <p style="font-weight:700;margin:0 0 2px;font-size:13px">${p.name}</p>
+                <p style="color:#f4b400;font-weight:700;margin:0;font-size:12px">R${p.price}</p>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function filterTryOnProducts() { loadTryOnProducts(document.getElementById('tryon-category-filter')?.value); }
+
+// ── Select product ────────────────────────────────────────────────
+function selectTryOnProduct(productId, event) {
+    const all = window.productData?.allproducts || [];
+    selectedTryOnProduct = all.find(p => p.id == productId);
+    if (!selectedTryOnProduct) return;
+
+    document.querySelectorAll('.tryon-product-item').forEach(el => el.style.outline = '');
+    if (event?.currentTarget) event.currentTarget.style.outline = '2px solid #f4b400';
+
+    if (currentTryOnImage) {
+        drawTryOnOverlay();
+        const addBtn = document.querySelector('.add-to-cart-btn');
+        if (addBtn) addBtn.disabled = false;
     }
+    showNotification('Selected: ' + selectedTryOnProduct.name, 'success');
 }
 
-// Update the navigation to call the fixed function
-document.addEventListener('DOMContentLoaded', function() {
-    // Update all virtual try-on links
-    document.querySelectorAll('[onclick*="VirtualTryOn"], [onclick*="virtualtryon"], [onclick*="tryon"]').forEach(link => {
-        const onclick = link.getAttribute('onclick');
-        if (onclick && onclick.includes('showVirtualTryOn') || onclick.includes('showTryOn')) {
-            link.setAttribute('onclick', 'showVirtualTryOn()');
-        }
-    });
-    
-    // Also update footer links
-    const footerLinks = document.querySelectorAll('footer a');
-    footerLinks.forEach(link => {
-        if (link.textContent.includes('Virtual Try-On') || link.textContent.includes('Try-On')) {
-            link.onclick = function(e) {
-                e.preventDefault();
-                showVirtualTryOn();
-            };
-        }
-    });
-});
+// ── Canvas overlay ────────────────────────────────────────────────
+function drawTryOnOverlay() {
+    if (!canvasContext || !currentTryOnImage || !selectedTryOnProduct) return;
+    const canvas  = document.getElementById('tryon-canvas');
+    const scale   = (parseInt(document.getElementById('product-scale')?.value)   || 100) / 100;
+    const opacity = (parseInt(document.getElementById('product-opacity')?.value) || 80)  / 100;
+    const posX    = (parseInt(document.getElementById('position-x')?.value)      || 50)  / 100;
 
-// FIXED CSS for Virtual Try-On
+    const base = new Image();
+    base.crossOrigin = 'anonymous';
+    base.src = currentTryOnImage.src;
+    base.onload = () => {
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.drawImage(base, currentTryOnImage.x, currentTryOnImage.y, currentTryOnImage.width, currentTryOnImage.height);
+
+        const src = selectedTryOnProduct.images?.[0] || selectedTryOnProduct.image || '';
+        if (!src) return;
+        const prod = new Image();
+        prod.crossOrigin = 'anonymous';
+        prod.src = src;
+        prod.onload = () => {
+            const ow = currentTryOnImage.width  * scale * 0.55;
+            const oh = currentTryOnImage.height * scale * 0.45;
+            const ox = (canvas.width * posX) - (ow / 2);
+            const oy = currentTryOnImage.y + (currentTryOnImage.height * 0.15);
+
+            canvasContext.globalAlpha = opacity;
+            canvasContext.drawImage(prod, ox, oy, ow, oh);
+            canvasContext.globalAlpha = 1;
+
+            canvasContext.fillStyle = 'rgba(0,0,0,0.55)';
+            canvasContext.fillRect(ox, oy + oh + 4, ow, 22);
+            canvasContext.fillStyle = '#fff';
+            canvasContext.font = 'bold 12px sans-serif';
+            canvasContext.textAlign = 'center';
+            canvasContext.fillText(selectedTryOnProduct.name, ox + ow / 2, oy + oh + 18);
+        };
+    };
+}
+
+function updateProductPosition() { drawTryOnOverlay(); }
+function updateProductScale()    { drawTryOnOverlay(); }
+function updateProductOpacity()  { drawTryOnOverlay(); }
+
+// ── Sample models ─────────────────────────────────────────────────
+function useSampleModel(num) {
+    const map = { 1: 'acidic 2.jpg', 2: 'acidic 28.jpg', 3: 'acidic 32.jpg' };
+    document.querySelectorAll('.sample-model img').forEach((img, i) => {
+        img.style.border = (i + 1 === num) ? '2px solid #f4b400' : '2px solid transparent';
+    });
+    setTryOnImage(map[num] || map[1]);
+    showNotification('Sample model loaded!', 'success');
+}
+
+// ── Reset ─────────────────────────────────────────────────────────
+function resetTryOn() {
+    currentTryOnImage = null; selectedTryOnProduct = null;
+    const canvas = document.getElementById('tryon-canvas');
+    if (canvas && canvasContext) {
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.fillStyle = '#f5f5f5';
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+        canvasContext.fillStyle = '#bbb';
+        canvasContext.font = '15px sans-serif';
+        canvasContext.textAlign = 'center';
+        canvasContext.fillText('Upload or capture a photo to start', canvas.width / 2, canvas.height / 2);
+    }
+    const ph = document.getElementById('no-image-placeholder');
+    if (ph) ph.style.display = 'flex';
+    const addBtn = document.querySelector('.add-to-cart-btn');
+    if (addBtn) addBtn.disabled = true;
+    [['position-x', 50], ['product-scale', 100], ['product-opacity', 80]].forEach(([id, val]) => {
+        const el = document.getElementById(id); if (el) el.value = val;
+    });
+    showNotification('Reset!', 'info');
+}
+
+// ── Download ──────────────────────────────────────────────────────
+function downloadTryOnImage() {
+    if (!currentTryOnImage) { showNotification('Upload a photo first', 'error'); return; }
+    const canvas = document.getElementById('tryon-canvas');
+    if (!canvas) return;
+    const a = document.createElement('a');
+    a.download = 'acidic-tryon-' + Date.now() + '.jpg';
+    a.href = canvas.toDataURL('image/jpeg', 0.9);
+    a.click();
+    showNotification('Look saved!', 'success');
+}
+
+// ── Compare ───────────────────────────────────────────────────────
+function compareTryOn() {
+    if (!currentTryOnImage) { showNotification('Upload a photo first', 'error'); return; }
+    showNotification('Select another product from the list to compare', 'info');
+    const grid = document.getElementById('tryon-products-grid');
+    if (grid) { grid.style.outline = '2px solid #f4b400'; setTimeout(() => grid.style.outline = '', 2000); }
+}
+
+// ── Add to cart ───────────────────────────────────────────────────
+function addTryOnToCart() {
+    if (!selectedTryOnProduct) { showNotification('Please select a product first', 'error'); return; }
+    addToCart({ id: selectedTryOnProduct.id, name: selectedTryOnProduct.name, price: selectedTryOnProduct.price, image: selectedTryOnProduct.images?.[0] || selectedTryOnProduct.image || '' });
+    showNotification(selectedTryOnProduct.name + ' added to cart!', 'success');
+}
+
+// ── AI suggestions ────────────────────────────────────────────────
+function generateAISuggestions() {
+    const container = document.getElementById('ai-suggestions');
+    if (!container) return;
+    const picks = (window.productData?.allproducts || []).slice().sort(() => Math.random() - 0.5).slice(0, 3);
+    container.innerHTML = picks.map(p => {
+        const img = p.images?.[0] || p.image || '';
+        return `<div onclick="selectTryOnProduct(${p.id}, event)"
+            style="display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:8px;
+                   cursor:pointer;margin-bottom:8px;border:1px solid #eee;transition:border-color 0.2s;"
+            onmouseover="this.style.borderColor='#f4b400'" onmouseout="this.style.borderColor='#eee'">
+            <img src="${img}" style="width:40px;height:40px;object-fit:cover;border-radius:5px;" onerror="this.style.display='none'">
+            <div>
+                <p style="margin:0;font-size:12px;font-weight:700">${p.name}</p>
+                <p style="margin:0;font-size:11px;color:#f4b400">R${p.price}</p>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── CSS ───────────────────────────────────────────────────────────
 function addVirtualTryOnStyles() {
-    const styles = `
-        /* Virtual Try-On Styles */
-        .tryon-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-            background: white;
-            border-radius: 20px;
-            color: #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .tryon-subtitle {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 18px;
-            color: #666;
-        }
-        
-        .tryon-interface {
-            display: grid;
-            grid-template-columns: 300px 1fr 350px;
-            gap: 20px;
-            margin-top: 30px;
-        }
-        
-        /* Source Panel */
-        .tryon-source-panel {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .source-selector h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .source-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .source-option {
-            background: white;
-            border: 2px solid #e0e0e0;
-            color: #333;
-            padding: 12px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .source-option:hover {
-            background: #f0f0f0;
-            transform: translateY(-2px);
-            border-color: #764ba2;
-        }
-        
-        .source-option.active {
-            background: #764ba2;
-            border-color: #764ba2;
-            color: white;
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.2);
-        }
-        
-        .source-option i {
-            font-size: 18px;
-        }
-        
-        .source-controls {
-            display: block;
-            margin-bottom: 20px;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-        
-        .source-controls:not(.active) {
-            display: none !important;
-            opacity: 0;
-        }
-        
-        .webcam-preview {
-            width: 100%;
-            height: 200px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .webcam-preview video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .control-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .control-buttons button {
-            flex: 1;
-            min-width: 100px;
-            background: #764ba2;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .control-buttons button:hover {
-            background: #5a3780;
-            transform: translateY(-2px);
-        }
-        
-        .control-buttons button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .upload-area {
-            border: 2px dashed #764ba2;
-            border-radius: 10px;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: white;
-        }
-        
-        .upload-area:hover, .upload-area.dragover {
-            border-color: #5a3780;
-            background: #f9f5ff;
-        }
-        
-        .upload-area i {
-            font-size: 48px;
-            margin-bottom: 10px;
-            color: #764ba2;
-        }
-        
-        .upload-hint {
-            font-size: 12px;
-            color: #666;
-            margin: 5px 0 15px 0;
-        }
-        
-        .browse-btn {
-            background: #764ba2;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .upload-requirements {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #333;
-            border-left: 4px solid #2196F3;
-        }
-        
-        .upload-requirements ul {
-            margin: 10px 0 0 0;
-            padding-left: 20px;
-        }
-        
-        .upload-requirements li {
-            margin-bottom: 5px;
-        }
-        
-        .sample-models {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        
-        .sample-model {
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .sample-model:hover {
-            transform: scale(1.05);
-        }
-        
-        .sample-model img {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            border: 2px solid transparent;
-        }
-        
-        .sample-model:hover img {
-            border-color: #764ba2;
-        }
-        
-        .sample-model span {
-            font-size: 12px;
-            color: #333;
-        }
-        
-        .tryon-instructions {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #2196F3;
-        }
-        
-        .tryon-instructions h4 {
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #333;
-        }
-        
-        .tryon-instructions ol {
-            margin: 10px 0 0 0;
-            padding-left: 20px;
-        }
-        
-        .tryon-instructions li {
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #333;
-        }
-        
-        /* Visualization Panel */
-        .tryon-visualization-panel {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e0e0e0;
-        }
-        
-        .visualization-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .visualization-header h3 {
-            margin: 0;
-            color: #333;
-        }
-        
-        .visualization-controls {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .visualization-controls button {
-            background: #f5f5f5;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-            color: #333;
-        }
-        
-        .visualization-controls button:hover {
-            background: #e0e0e0;
-        }
-        
-        .visualization-area {
-            margin-bottom: 20px;
-        }
-        
-        .base-image-container {
-            width: 100%;
-            height: 400px;
-            background: #f5f5f5;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        #tryon-canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            display: block;
-        }
-        
-        .no-image-placeholder {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            background: #f5f5f5;
-        }
-        
-        .no-image-placeholder i {
-            font-size: 80px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-        
-        .tryon-controls {
-            background: #f8f8f8;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .control-group {
-            margin-bottom: 15px;
-        }
-        
-        .control-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-        }
-        
-        .slider-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .slider-control span {
-            font-size: 12px;
-            color: #666;
-            min-width: 40px;
-        }
-        
-        .slider-control input[type="range"] {
-            flex: 1;
-            height: 6px;
-            -webkit-appearance: none;
-            background: #ddd;
-            border-radius: 3px;
-            outline: none;
-        }
-        
-        .slider-control input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #764ba2;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .visualization-actions {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .visualization-actions button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-        
-        .add-to-cart-btn {
-            background: #000;
-            color: white;
-        }
-        
-        .add-to-cart-btn:hover {
-            background: #333;
-        }
-        
-        .add-to-cart-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: #666;
-        }
-        
-        .compare-btn {
-            background: #764ba2;
-            color: white;
-        }
-        
-        .compare-btn:hover {
-            background: #5a3780;
-        }
-        
-        /* Products Panel */
-        .tryon-products-panel {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-        
-        .products-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .products-header h3 {
-            margin: 0;
-            color: #333;
-        }
-        
-        .category-filter select {
-            background: white;
-            border: 1px solid #ddd;
-            color: #333;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .tryon-products-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .tryon-product-item {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.3s;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .tryon-product-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            border-color: #764ba2;
-        }
-        
-        .tryon-product-image {
-            position: relative;
-            height: 120px;
-            overflow: hidden;
-        }
-        
-        .tryon-product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-        
-        .tryon-product-item:hover .tryon-product-image img {
-            transform: scale(1.1);
-        }
-        
-        .tryon-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .tryon-product-item:hover .tryon-overlay {
-            opacity: 1;
-        }
-        
-        .try-it-btn {
-            background: #f4b400;
-            color: black;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .tryon-product-info {
-            padding: 15px;
-        }
-        
-        .tryon-product-info h4 {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-            color: #333;
-        }
-        
-        .tryon-price {
-            color: #f4b400;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-        }
-        
-        .tryon-colors {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .tryon-color-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 1px solid #ddd;
-        }
-        
-        .quick-view-btn {
-            width: 100%;
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            color: #333;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-        
-        .quick-view-btn:hover {
-            background: #e0e0e0;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .tryon-interface {
-                grid-template-columns: 1fr;
-            }
-            
-            .tryon-source-panel, .tryon-visualization-panel, .tryon-products-panel {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .tryon-container {
-                padding: 15px;
-            }
-            
-            .tryon-interface {
-                gap: 15px;
-            }
-            
-            .visualization-actions {
-                flex-direction: column;
-            }
-            
-            .control-buttons {
-                flex-direction: column;
-            }
-            
-            .sample-models {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .tryon-products-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .tryon-interface {
-                grid-template-columns: 1fr;
-            }
-            
-            .sample-models {
-                grid-template-columns: 1fr;
-            }
-            
-            .tryon-products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .visualization-controls {
-                flex-direction: column;
-            }
-        }
+    if (document.getElementById('tryon-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'tryon-styles';
+    style.textContent = `
+        .tryon-container{max-width:1400px;margin:0 auto;padding:30px;background:#fff;border-radius:20px;color:#333;box-shadow:0 10px 30px rgba(0,0,0,0.08);}
+        .tryon-container h2{text-align:center;margin-bottom:6px;}
+        .tryon-subtitle{text-align:center;color:#666;margin-bottom:24px;font-size:16px;}
+        .tryon-interface{display:grid;grid-template-columns:270px 1fr 290px;gap:20px;margin-top:16px;}
+        .tryon-source-panel,.tryon-products-panel{background:#f8f9fa;border-radius:14px;padding:16px;border:1px solid #e0e0e0;}
+        .source-selector h3{margin:0 0 12px;font-size:15px;}
+        .source-options{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+        .source-option{background:#fff;border:2px solid #e0e0e0;color:#333;padding:9px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;font-size:13px;font-weight:500;}
+        .source-option:hover{border-color:#f4b400;background:#fffdf0;}
+        .source-option.active{background:#000;border-color:#000;color:#fff;}
+        .webcam-preview{width:100%;height:170px;background:#e0e0e0;border-radius:10px;margin-bottom:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:13px;color:#888;text-align:center;}
+        .webcam-preview video{width:100%;height:100%;object-fit:cover;}
+        .control-buttons{display:flex;gap:6px;flex-wrap:wrap;}
+        .control-buttons button{flex:1;min-width:70px;background:#000;color:#fff;border:none;padding:8px 4px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:background 0.2s;}
+        .control-buttons button:hover{background:#333;}
+        .control-buttons button:disabled{opacity:0.4;cursor:not-allowed;}
+        .upload-area{border:2px dashed #ccc;border-radius:10px;padding:20px 14px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fff;margin-bottom:10px;}
+        .upload-area:hover,.upload-area.dragover{border-color:#f4b400;background:#fffdf0;}
+        .upload-hint{font-size:11px;color:#888;margin:3px 0 10px;}
+        .browse-btn{background:#000;color:#fff;border:none;padding:7px 16px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;}
+        .upload-requirements{background:#f0f4ff;padding:10px;border-radius:8px;font-size:12px;border-left:3px solid #f4b400;}
+        .upload-requirements ul{margin:5px 0 0;padding-left:16px;}
+        .upload-requirements li{margin-bottom:3px;}
+        .sample-models{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+        .sample-model{cursor:pointer;text-align:center;transition:transform 0.2s;}
+        .sample-model:hover{transform:scale(1.04);}
+        .sample-model img{width:100%;height:70px;object-fit:cover;border-radius:7px;border:2px solid transparent;transition:border-color 0.2s;}
+        .sample-model span{font-size:10px;color:#555;display:block;margin-top:3px;}
+        .tryon-instructions{margin-top:14px;background:#fff;border-radius:10px;padding:12px;border:1px solid #eee;font-size:12px;}
+        .tryon-instructions h4{margin:0 0 7px;font-size:13px;}
+        .tryon-instructions ol{margin:0;padding-left:16px;}
+        .tryon-instructions li{margin-bottom:4px;color:#555;}
+        .tryon-visualization-panel{display:flex;flex-direction:column;gap:14px;}
+        .visualization-header{display:flex;justify-content:space-between;align-items:center;}
+        .visualization-header h3{margin:0;}
+        .visualization-controls{display:flex;gap:8px;}
+        .reset-btn,.download-btn{background:#f4b400;color:#000;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;transition:background 0.2s;}
+        .reset-btn:hover,.download-btn:hover{background:#e6a800;}
+        .base-image-container{background:#f5f5f5;border-radius:12px;overflow:hidden;position:relative;min-height:280px;}
+        #tryon-canvas{display:block;width:100%;border-radius:12px;}
+        .no-image-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#aaa;font-size:13px;gap:6px;pointer-events:none;}
+        .tryon-controls{display:flex;flex-direction:column;gap:9px;padding:10px;background:#f8f9fa;border-radius:10px;border:1px solid #eee;}
+        .control-group{display:flex;align-items:center;gap:10px;}
+        .control-group label{font-size:12px;font-weight:600;color:#555;min-width:76px;}
+        .control-group input[type=range]{flex:1;accent-color:#f4b400;}
+        .visualization-actions{display:flex;gap:10px;}
+        .add-to-cart-btn,.compare-btn{flex:1;padding:11px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:all 0.2s;}
+        .add-to-cart-btn{background:#000;color:#fff;}
+        .add-to-cart-btn:hover{background:#333;}
+        .add-to-cart-btn:disabled{opacity:0.4;cursor:not-allowed;background:#666;}
+        .compare-btn{background:#f4b400;color:#000;}
+        .compare-btn:hover{background:#e6a800;}
+        .products-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+        .products-header h3{margin:0;font-size:15px;}
+        .category-filter select{background:#fff;border:1px solid #ddd;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;}
+        .tryon-products-grid{display:grid;grid-template-columns:1fr;gap:8px;max-height:400px;overflow-y:auto;margin-bottom:14px;}
+        .tryon-product-item{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e0e0e0;cursor:pointer;transition:all 0.2s;}
+        .tryon-product-item:hover{transform:translateY(-3px);box-shadow:0 8px 16px rgba(0,0,0,0.1);border-color:#f4b400;}
+        .tryon-product-image{position:relative;height:100px;overflow:hidden;}
+        .tryon-product-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s;}
+        .tryon-product-item:hover .tryon-product-image img{transform:scale(1.08);}
+        .tryon-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+        .tryon-product-item:hover .tryon-overlay{opacity:1;}
+        .try-it-btn{background:#f4b400;color:#000;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px;}
+        .tryon-product-info{padding:8px 10px;}
+        .tryon-suggestions h4{margin:0 0 8px;font-size:13px;}
+        @media(max-width:900px){.tryon-interface{grid-template-columns:1fr;}}
     `;
-    
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = styles;
-    document.head.appendChild(styleSheet);
+    document.head.appendChild(style);
 }
 
-// Add styles when page loads
-if (typeof addVirtualTryOnStyles !== 'undefined') {
-    addVirtualTryOnStyles();
-}
+// ── Fix openExperienceModal for visual-tryon ──────────────────────
+const _baseOpenExperienceModal = typeof openExperienceModal === 'function' ? openExperienceModal : null;
+openExperienceModal = function(type) {
+    const modal = document.getElementById('experience-modal');
+    const body  = document.getElementById('experience-modal-body');
+    if (!modal || !body) return;
+    if (type === 'visual-tryon') {
+        body.innerHTML = '<div id="virtual-tryon" style="padding:0;"></div>';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => { addVirtualTryOnStyles(); initVirtualTryOn(); }, 50);
+    } else if (type === 'rewards') {
+        body.innerHTML = '<section id="loyalty-program" style="display:block;padding:0;"><div class="loyalty-container"></div></section>';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => { if (typeof renderLoyaltyPage === 'function') renderLoyaltyPage(); }, 50);
+    } else if (_baseOpenExperienceModal) {
+        _baseOpenExperienceModal(type);
+    } else {
+        body.innerHTML = getExperienceContent(type);
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.openExperienceModal   = openExperienceModal;
+window.showVirtualTryOn      = showVirtualTryOn;
+window.addVirtualTryOnStyles = addVirtualTryOnStyles;
+
+document.addEventListener('DOMContentLoaded', () => addVirtualTryOnStyles());
 
 function loadHomeNewArrivals() {
   const container = document.getElementById("home-new-arrivals");

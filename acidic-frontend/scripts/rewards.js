@@ -1,492 +1,342 @@
-// ===== REWARDS SYSTEM =====
-class RewardsSystem {
-    constructor() {
-        this.userPoints = 0;
-        this.userTier = 'Bronze';
-        this.orderHistory = [];
-        this.loadUserData();
-    }
+// ================================================================
+//  ACIDIC REWARDS — complete rewrite
+//  • All data stored per signed-in user (email-keyed)
+//  • Renders its own HTML so it works in the section AND modal
+//  • createUserWithRewards / displayUserRewards defined here
+//  • Points only awarded to signed-in users
+// ================================================================
 
-    // Load user data from localStorage
-    loadUserData() {
-        // Load points
-        const savedPoints = localStorage.getItem('acidicUserPoints');
-        this.userPoints = savedPoints ? parseInt(savedPoints) : 0;
-        
-        // Load tier
-        const savedTier = localStorage.getItem('acidicUserTier');
-        this.userTier = savedTier || 'Bronze';
-        
-        // Load order history
-        const savedOrders = localStorage.getItem('acidicOrderHistory');
-        this.orderHistory = savedOrders ? JSON.parse(savedOrders) : [];
-        
-        this.updateTier();
-        this.updateDisplay();
-        this.updateOrderHistoryDisplay();
-    }
+// ── Storage helpers ───────────────────────────────────────────────
 
-    // Save user data to localStorage
-    saveUserData() {
-        localStorage.setItem('acidicUserPoints', this.userPoints.toString());
-        localStorage.setItem('acidicUserTier', this.userTier);
-        localStorage.setItem('acidicOrderHistory', JSON.stringify(this.orderHistory));
-    }
+function _getCurrentUser() {
+    try { return JSON.parse(localStorage.getItem('currentUser')); } catch(e) { return null; }
+}
 
-    // Add points from purchase
-    addPointsFromPurchase(totalAmount) {
-        // 1 point per R10 spent
-        const pointsEarned = Math.floor(totalAmount / 10);
-        this.userPoints += pointsEarned;
-        this.updateTier();
-        this.saveUserData();
-        this.updateDisplay();
-        
-        return pointsEarned;
-    }
+function _rewardKey() {
+    var u = _getCurrentUser();
+    if (!u || !u.email) return null;
+    return 'ar_' + u.email.replace(/[^a-zA-Z0-9]/g, '_');
+}
 
-    // Update tier based on points
-    updateTier() {
-        if (this.userPoints >= 500) {
-            this.userTier = 'Gold';
-        } else if (this.userPoints >= 200) {
-            this.userTier = 'Silver';
-        } else {
-            this.userTier = 'Bronze';
-        }
-    }
+function _loadRewardData() {
+    var k = _rewardKey();
+    if (!k) return null;
+    try { return JSON.parse(localStorage.getItem(k)) || { points: 0, tier: 'Bronze', orders: [] }; }
+    catch(e) { return { points: 0, tier: 'Bronze', orders: [] }; }
+}
 
-    // Get tier benefits
-    getTierBenefits() {
-        const benefits = {
-            'Bronze': [
-                '10% off your next purchase',
-                'Exclusive email updates'
-            ],
-            'Silver': [
-                '10% off all purchases',
-                'Free delivery on all orders',
-                'Early access to sales'
-            ],
-            'Gold': [
-                '10% off all purchases + free delivery',
-                'Exclusive access to new collections',
-                'Free express shipping',
-                'Birthday gift',
-                'Priority customer support'
-            ]
-        };
-        
-        return benefits[this.userTier] || benefits['Bronze'];
-    }
+function _saveRewardData(data) {
+    var k = _rewardKey();
+    if (!k) return;
+    localStorage.setItem(k, JSON.stringify(data));
 
-    // Get next tier requirements
-    getNextTierInfo() {
-        const tierRequirements = {
-            'Bronze': { next: 'Silver', pointsNeeded: 200, currentPoints: this.userPoints },
-            'Silver': { next: 'Gold', pointsNeeded: 500, currentPoints: this.userPoints },
-            'Gold': { next: null, pointsNeeded: 0, currentPoints: this.userPoints }
-        };
-        
-        return tierRequirements[this.userTier];
-    }
+    var user = _getCurrentUser();
+    if (user) {
+        user.points = data.points;
+        user.tier   = data.tier;
+        localStorage.setItem('currentUser', JSON.stringify(user));
 
-    // Calculate progress percentage
-    getProgressPercentage() {
-        const tierInfo = this.getNextTierInfo();
-        if (!tierInfo.next) return 100; // Gold tier maxed
-        
-        const pointsInCurrentTier = this.userPoints;
-        let lowerBound, upperBound;
-        
-        switch(this.userTier) {
-            case 'Bronze':
-                lowerBound = 0;
-                upperBound = 200;
-                break;
-            case 'Silver':
-                lowerBound = 200;
-                upperBound = 500;
-                break;
-            default:
-                return 100;
-        }
-        
-        const pointsInRange = pointsInCurrentTier - lowerBound;
-        const totalRange = upperBound - lowerBound;
-        
-        return Math.min(Math.round((pointsInRange / totalRange) * 100), 100);
-    }
-
-    // Add order to history
-    addOrderToHistory(order) {
-        const orderData = {
-            id: order.id || 'ORD-' + Date.now().toString().slice(-8),
-            date: new Date().toLocaleDateString('en-ZA', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }),
-            items: order.items || [],
-            total: order.total || 0,
-            status: 'Processing',
-            pointsEarned: Math.floor((order.total || 0) / 10)
-        };
-        
-        this.orderHistory.unshift(orderData);
-        if (this.orderHistory.length > 10) {
-            this.orderHistory = this.orderHistory.slice(0, 10); // Keep only last 10 orders
-        }
-        
-        this.saveUserData();
-        this.updateOrderHistoryDisplay();
-    }
-
-    // Update display elements
-    updateDisplay() {
-        // Update points display
-        const userPointsElement = document.getElementById('user-points');
-        if (userPointsElement) {
-            userPointsElement.textContent = `${this.userPoints} Points`;
-        }
-
-        // Update tier display
-        const tierInfoElement = document.getElementById('tier-info');
-        if (tierInfoElement) {
-            tierInfoElement.textContent = `Current Tier: ${this.userTier}`;
-        }
-
-        // Update progress bar
-        const progressElement = document.getElementById('points-progress');
-        if (progressElement) {
-            const progress = this.getProgressPercentage();
-            progressElement.style.width = `${progress}%`;
-        }
-
-        // Update current benefits
-        const benefitsElement = document.getElementById('current-benefits');
-        if (benefitsElement) {
-            const benefits = this.getTierBenefits();
-            benefitsElement.innerHTML = `<strong>Current Benefits:</strong><br>` + 
-                benefits.map(benefit => `• ${benefit}`).join('<br>');
-        }
-
-        // Update tier highlights
-        this.updateTierHighlights();
-        
-        // Update confirmation modal if open
-        this.updateConfirmationModal();
-    }
-
-    // Update tier highlights
-    updateTierHighlights() {
-        const tiers = ['bronze-tier', 'silver-tier', 'gold-tier'];
-        
-        tiers.forEach(tierId => {
-            const tierElement = document.getElementById(tierId);
-            if (tierElement) {
-                // Remove all highlights first
-                tierElement.style.opacity = '0.7';
-                tierElement.style.border = 'none';
-                tierElement.style.transform = 'scale(1)';
-                
-                // Highlight current tier
-                if (tierId === `${this.userTier.toLowerCase()}-tier`) {
-                    tierElement.style.opacity = '1';
-                    tierElement.style.border = '2px solid #f4b400';
-                    tierElement.style.transform = 'scale(1.02)';
-                    tierElement.style.boxShadow = '0 4px 15px rgba(244, 180, 0, 0.3)';
-                }
-            }
-        });
-    }
-
-    // Update order history display
-    updateOrderHistoryDisplay() {
-        const orderHistoryList = document.getElementById('order-history-list');
-        if (!orderHistoryList) return;
-        
-        if (this.orderHistory.length === 0) {
-            orderHistoryList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No orders yet</p>';
-            return;
-        }
-        
-        orderHistoryList.innerHTML = this.orderHistory.map(order => `
-            <div class="order-history-item" style="padding: 15px; border-bottom: 1px solid #eee; background: #f9f9f9; margin-bottom: 10px; border-radius: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div>
-                        <strong style="display: block; margin-bottom: 5px;">${order.id}</strong>
-                        <small style="color: #666;">${order.date}</small>
-                    </div>
-                    <span style="background: ${order.status === 'Processing' ? '#ff9800' : '#4CAF50'}; 
-                           color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                        ${order.status}
-                    </span>
-                </div>
-                <div style="margin-top: 10px; display: flex; justify-content: space-between;">
-                    <span>R${order.total}</span>
-                    <span style="color: #f4b400; font-weight: bold;">+${order.pointsEarned} pts</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    // Update confirmation modal with rewards info
-    updateConfirmationModal() {
-        const pointsEarnedElement = document.getElementById('points-earned');
-        const totalPointsElement = document.getElementById('total-points');
-        const tierProgressElement = document.getElementById('tier-progress');
-        
-        if (pointsEarnedElement) {
-            // This will be updated when processing payment
-            // Just ensure element exists
-        }
-        
-        if (totalPointsElement) {
-            totalPointsElement.textContent = this.userPoints;
-        }
-        
-        if (tierProgressElement) {
-            const nextTier = this.getNextTierInfo();
-            if (nextTier.next) {
-                const pointsNeeded = nextTier.pointsNeeded - this.userPoints;
-                tierProgressElement.textContent = 
-                    `${pointsNeeded} points needed for ${nextTier.next} tier`;
-            } else {
-                tierProgressElement.textContent = 'You have reached the highest tier! 🎉';
-            }
-        }
-    }
-
-    // Show loyalty program
-    showLoyaltyProgram() {
-        this.updateDisplay();
-        
-        // Show the loyalty program section
-        hideAllSections();
-        const loyaltySection = document.getElementById('loyalty-program');
-        if (loyaltySection) {
-            loyaltySection.style.display = 'block';
-        }
-    }
-
-    // Get user points for external use
-    getUserPoints() {
-        return this.userPoints;
-    }
-
-    // Update user rewards (called from payment processing)
-    updateUserRewards(pointsEarned) {
-        this.userPoints += pointsEarned;
-        this.updateTier();
-        this.saveUserData();
-        this.updateDisplay();
-    }
-
-    // Redeem points for discount
-    redeemPointsForDiscount(pointsToRedeem) {
-        if (pointsToRedeem > this.userPoints) {
-            return { success: false, message: 'Insufficient points' };
-        }
-        
-        // Calculate discount (10 points = R1)
-        const discountAmount = Math.floor(pointsToRedeem / 10);
-        this.userPoints -= pointsToRedeem;
-        this.saveUserData();
-        this.updateDisplay();
-        
-        return { 
-            success: true, 
-            message: `R${discountAmount} discount applied!`,
-            discount: discountAmount 
-        };
+        var users = JSON.parse(localStorage.getItem('acidicUsers') || '[]');
+        var idx   = users.findIndex(function(u) { return u.email === user.email; });
+        if (idx > -1) { users[idx].points = data.points; users[idx].tier = data.tier; }
+        localStorage.setItem('acidicUsers', JSON.stringify(users));
     }
 }
 
-// ===== GLOBAL REWARDS INSTANCE =====
-const rewardsSystem = new RewardsSystem();
+// ── Tier logic ────────────────────────────────────────────────────
 
-// ===== REWARDS UI FUNCTIONS =====
-function showLoyaltyProgram() {
-    rewardsSystem.showLoyaltyProgram();
+function _calcTier(pts) {
+    if (pts >= 500) return 'Gold';
+    if (pts >= 200) return 'Silver';
+    return 'Bronze';
 }
+
+function _tierProgress(pts) {
+    if (pts >= 500) return { next: null, needed: 0, pct: 100 };
+    if (pts >= 200) return { next: 'Gold',   needed: 500 - pts, pct: Math.round(((pts - 200) / 300) * 100) };
+    return              { next: 'Silver', needed: 200 - pts, pct: Math.round((pts / 200) * 100) };
+}
+
+// ── Required by auth.js ────────────────────────────────────────────
+
+function createUserWithRewards(userObj) {
+    return Object.assign({}, userObj, {
+        points:   userObj.points   || 0,
+        tier:     userObj.tier     || 'Bronze',
+        joinedAt: userObj.joinedAt || new Date().toISOString()
+    });
+}
+
+function displayUserRewards() {
+    renderLoyaltyPage();
+}
+
+// ── Required by main.js ────────────────────────────────────────────
 
 function updateUserRewards(pointsEarned) {
-    rewardsSystem.updateUserRewards(pointsEarned);
+    var user = _getCurrentUser();
+    if (!user) return;
+
+    var data    = _loadRewardData() || { points: 0, tier: 'Bronze', orders: [] };
+    data.points += pointsEarned;
+    data.tier    = _calcTier(data.points);
+    _saveRewardData(data);
+    renderLoyaltyPage();
+
+    if (typeof showNotification === 'function') {
+        showNotification('You earned ' + pointsEarned + ' reward points!', 'success');
+    }
 }
 
 function getUserPoints() {
-    return rewardsSystem.getUserPoints();
+    var data = _loadRewardData();
+    return data ? data.points : 0;
 }
 
 function saveOrderToHistory(totalAmount, transactionId) {
-    const order = {
-        id: transactionId,
-        total: totalAmount,
-        items: [...cart]
+    var user    = _getCurrentUser();
+    var orderId = transactionId || ('ORD-' + Date.now().toString().slice(-8));
+    var cartArr = (typeof cart !== 'undefined') ? cart.slice() : [];
+    var pts     = Math.floor(totalAmount / 10);
+
+    var order = {
+        id:           orderId,
+        date:         new Date().toISOString(),
+        items:        cartArr,
+        total:        totalAmount,
+        status:       'Processing',
+        pointsEarned: pts
     };
-    rewardsSystem.addOrderToHistory(order);
-    
-    // Also add points from this purchase
-    const pointsEarned = rewardsSystem.addPointsFromPurchase(totalAmount);
-    return pointsEarned;
+
+    var global = JSON.parse(localStorage.getItem('userOrders') || '[]');
+    global.unshift(order);
+    localStorage.setItem('userOrders', JSON.stringify(global));
+
+    if (user) {
+        var data    = _loadRewardData() || { points: 0, tier: 'Bronze', orders: [] };
+        data.orders = data.orders || [];
+        data.orders.unshift(order);
+        if (data.orders.length > 20) data.orders = data.orders.slice(0, 20);
+        _saveRewardData(data);
+    }
+
+    if (typeof updateOrderHistoryDisplay === 'function') updateOrderHistoryDisplay();
+    renderLoyaltyPage();
+    return pts;
 }
 
-function updateTierProgress() {
-    rewardsSystem.updateDisplay();
-}
+function updateTierProgress() { renderLoyaltyPage(); }
 
-function showRedeemPointsModal() {
-    // Create modal for points redemption
-    const modalHTML = `
-        <div id="redeem-modal" class="modal" style="display: block;">
-            <div class="modal-content" style="max-width: 400px;">
-                <span class="close-modal" onclick="closeRedeemModal()">×</span>
-                <h3>Redeem Your Points</h3>
-                <p>You have <strong>${rewardsSystem.userPoints} points</strong> available.</p>
-                <p>Exchange rate: <strong>10 points = R1 discount</strong></p>
-                
-                <div style="margin: 20px 0;">
-                    <label for="redeem-points">Points to redeem:</label>
-                    <input type="number" id="redeem-points" min="10" max="${rewardsSystem.userPoints}" 
-                           step="10" value="100" style="width: 100%; padding: 10px; margin-top: 5px;">
-                    <small style="color: #666;">Minimum: 10 points</small>
-                </div>
-                
-                <div id="redeem-result" style="margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 5px; display: none;"></div>
-                
-                <button onclick="redeemPoints()" style="width: 100%; padding: 12px; background: #f4b400; color: #000; 
-                        border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
-                    Redeem Points
-                </button>
-                
-                <button onclick="closeRedeemModal()" style="width: 100%; padding: 12px; background: #666; color: white; 
-                        border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;">
-                    Cancel
-                </button>
-            </div>
-        </div>
-    `;
-    
-    // Remove existing modal if any
-    const existingModal = document.getElementById('redeem-modal');
-    if (existingModal) existingModal.remove();
-    
-    // Add new modal
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHTML;
-    document.body.appendChild(modalContainer.firstElementChild);
-}
+// ── Core render ────────────────────────────────────────────────────
 
-function closeRedeemModal() {
-    const modal = document.getElementById('redeem-modal');
-    if (modal) modal.remove();
-}
+function renderLoyaltyPage() {
+    var section = document.getElementById('loyalty-program');
+    if (!section) return;
 
-function redeemPoints() {
-    const pointsInput = document.getElementById('redeem-points');
-    const pointsToRedeem = parseInt(pointsInput.value);
-    const resultElement = document.getElementById('redeem-result');
-    
-    if (!pointsToRedeem || pointsToRedeem < 10) {
-        resultElement.innerHTML = '<span style="color: #ff4444;">Minimum 10 points required</span>';
-        resultElement.style.display = 'block';
+    var wrap = section.querySelector('.loyalty-container');
+    if (!wrap) {
+        section.innerHTML = '<div class="loyalty-container"></div>';
+        wrap = section.querySelector('.loyalty-container');
+    }
+
+    var user = _getCurrentUser();
+
+    if (!user) {
+        wrap.innerHTML =
+            '<h2 style="text-align:center;margin:0 0 20px;">ACIDIC Rewards</h2>' +
+            '<div style="text-align:center;padding:36px 20px;background:#f8f9fa;border-radius:14px;margin-bottom:24px;">' +
+                '<div style="font-size:52px;margin-bottom:12px;">&#128274;</div>' +
+                '<h3 style="margin:0 0 8px;">Sign In to Earn Rewards</h3>' +
+                '<p style="color:#888;margin:0 0 22px;">Create an account or sign in to start earning points with every purchase.</p>' +
+                '<button onclick="showSignUp()" style="background:#000;color:#fff;border:none;padding:11px 26px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;margin-right:10px;">Sign Up</button>' +
+                '<button onclick="showLogin()" style="background:#f4b400;color:#000;border:none;padding:11px 26px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;">Sign In</button>' +
+            '</div>' +
+            _tierCardsHTML(null);
         return;
     }
-    
-    const result = rewardsSystem.redeemPointsForDiscount(pointsToRedeem);
-    
-    resultElement.innerHTML = result.success ? 
-        `<span style="color: #4CAF50;">✓ ${result.message}</span>` :
-        `<span style="color: #ff4444;">✗ ${result.message}</span>`;
-    
-    resultElement.style.display = 'block';
-    
-    if (result.success) {
-        // Update cart total with discount
-        updateCartWithDiscount(result.discount);
-        setTimeout(() => {
-            closeRedeemModal();
-            // Show success message
-            showToastMessage(`R${result.discount} discount applied! ${pointsToRedeem} points redeemed.`);
-        }, 1500);
+
+    var data  = _loadRewardData() || { points: 0, tier: 'Bronze', orders: [] };
+    var tier  = _calcTier(data.points);
+    var prog  = _tierProgress(data.points);
+    var tc    = { Bronze: '#cd7f32', Silver: '#a8a9ad', Gold: '#f4b400' };
+    var col   = tc[tier] || '#f4b400';
+
+    wrap.innerHTML =
+        '<h2 style="text-align:center;margin:0 0 20px;">ACIDIC Rewards</h2>' +
+
+        '<div style="background:linear-gradient(135deg,#000 0%,#1a1a1a 100%);color:#fff;border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;">' +
+            '<div style="position:absolute;top:-30px;right:-30px;width:140px;height:140px;background:' + col + ';border-radius:50%;opacity:0.12;pointer-events:none;"></div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">' +
+                '<div>' +
+                    '<p style="margin:0 0 4px;opacity:0.6;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Welcome back</p>' +
+                    '<h3 style="margin:0 0 8px;font-size:22px;">' + (user.name || 'Member') + '</h3>' +
+                    '<span style="background:' + col + ';color:#000;padding:3px 14px;border-radius:20px;font-size:12px;font-weight:700;">' + tier + ' Member</span>' +
+                '</div>' +
+                '<div style="text-align:right;">' +
+                    '<p style="margin:0 0 2px;opacity:0.6;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Points</p>' +
+                    '<p style="margin:0;font-size:40px;font-weight:900;color:' + col + ';line-height:1;">' + data.points + '</p>' +
+                '</div>' +
+            '</div>' +
+            '<div style="margin-top:20px;">' +
+                (prog.next
+                    ? '<div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.7;margin-bottom:6px;"><span>' + tier + '</span><span>' + prog.needed + ' pts to ' + prog.next + '</span><span>' + prog.next + '</span></div>' +
+                      '<div style="background:rgba(255,255,255,0.15);border-radius:10px;height:7px;overflow:hidden;"><div style="background:' + col + ';height:100%;width:' + prog.pct + '%;border-radius:10px;"></div></div>'
+                    : '<p style="text-align:center;opacity:0.9;font-size:14px;margin:0;">&#127942; You\'ve reached the highest tier!</p>'
+                ) +
+            '</div>' +
+        '</div>' +
+
+        _tierCardsHTML(tier) +
+
+        '<div style="background:#fffdf0;border:1px solid #f4b400;border-radius:12px;padding:16px;margin-bottom:20px;">' +
+            '<h4 style="margin:0 0 10px;font-size:14px;">Your Current Benefits</h4>' +
+            _benefitsHTML(tier) +
+        '</div>' +
+
+        '<div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:16px;">' +
+            '<h4 style="margin:0 0 14px;font-size:14px;">Order History</h4>' +
+            '<div style="max-height:260px;overflow-y:auto;" id="order-history-list">' +
+                _orderHistoryHTML(data.orders) +
+            '</div>' +
+        '</div>';
+}
+
+function _tierCardsHTML(activeTier) {
+    var tiers = [
+        { name:'Bronze', pts:0,   icon:'&#129353;', col:'#cd7f32', perks:['10% off next purchase','Early sale access'] },
+        { name:'Silver', pts:200, icon:'&#129352;', col:'#a8a9ad', perks:['10% off all purchases','Free delivery','Early sale access'] },
+        { name:'Gold',   pts:500, icon:'&#129351;', col:'#f4b400', perks:['10% off all purchases','Free express delivery','Exclusive drops','Birthday gift'] }
+    ];
+    var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">';
+    tiers.forEach(function(t) {
+        var active = activeTier === t.name;
+        html +=
+            '<div style="border-radius:12px;padding:14px;border:2px solid ' + (active ? t.col : '#eee') + ';background:' + (active ? t.col + '18' : '#fafafa') + ';' + (active ? 'transform:scale(1.02);box-shadow:0 4px 12px rgba(0,0,0,0.08);' : '') + '">' +
+                '<div style="font-size:22px;margin-bottom:6px;">' + t.icon + '</div>' +
+                '<p style="font-weight:800;margin:0 0 2px;font-size:14px;color:' + t.col + ';">' + t.name + '</p>' +
+                '<p style="margin:0 0 8px;font-size:11px;color:#999;">' + (t.pts === 0 ? 'Starting tier' : t.pts + '+ pts') + '</p>' +
+                '<ul style="margin:0;padding-left:14px;font-size:11px;color:#555;line-height:1.9;">' +
+                    t.perks.map(function(p) { return '<li>' + p + '</li>'; }).join('') +
+                '</ul>' +
+            '</div>';
+    });
+    return html + '</div>';
+}
+
+function _benefitsHTML(tier) {
+    var b = {
+        Bronze: ['10% off your next purchase','Early sale access'],
+        Silver: ['10% off all purchases','Free delivery on all orders','Early sale access'],
+        Gold:   ['10% off all purchases','Free express delivery','Exclusive drops','Birthday gift','Priority support']
+    };
+    return (b[tier] || b.Bronze).map(function(item) {
+        return '<p style="margin:0 0 6px;font-size:13px;">&#10003; ' + item + '</p>';
+    }).join('');
+}
+
+function _orderHistoryHTML(orders) {
+    if (!orders || !orders.length) {
+        return '<p style="text-align:center;color:#bbb;padding:20px 0;font-size:13px;">No orders yet</p>';
+    }
+    return orders.map(function(o) {
+        var date = '';
+        try { date = new Date(o.date).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' }); } catch(e) { date = o.date || ''; }
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;">' +
+            '<div><p style="margin:0 0 2px;font-weight:700;font-size:13px;">' + o.id + '</p><p style="margin:0;font-size:11px;color:#aaa;">' + date + '</p></div>' +
+            '<div style="text-align:right;"><p style="margin:0 0 3px;font-weight:700;font-size:13px;">R' + o.total + '</p><span style="background:#f4b400;color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">+' + (o.pointsEarned || Math.floor(o.total / 10)) + ' pts</span></div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── showLoyaltyProgram ─────────────────────────────────────────────
+
+function showLoyaltyProgram() {
+    if (typeof hideAllSections === 'function') hideAllSections();
+    var section = document.getElementById('loyalty-program');
+    if (section) {
+        section.style.display = 'block';
+        renderLoyaltyPage();
     }
 }
 
-function updateCartWithDiscount(discountAmount) {
-    // This function should update the cart total in the UI
-    // You'll need to implement this based on your cart system
-    console.log(`Discount of R${discountAmount} applied to cart`);
-    // Example: Update cart total display
-    const cartTotalElement = document.getElementById('cart-total');
-    if (cartTotalElement) {
-        const currentTotal = parseFloat(cartTotalElement.textContent.replace('R', ''));
-        const newTotal = Math.max(0, currentTotal - discountAmount);
-        cartTotalElement.textContent = `R${newTotal}`;
+// ── Redeem modal ───────────────────────────────────────────────────
+
+function showRedeemPointsModal() {
+    var user = _getCurrentUser();
+    if (!user) {
+        if (typeof showNotification === 'function') showNotification('Please sign in to redeem points', 'error');
+        return;
     }
+    var data = _loadRewardData() || { points: 0 };
+    var ex   = document.getElementById('redeem-modal');
+    if (ex) ex.remove();
+
+    var modal = document.createElement('div');
+    modal.id  = 'redeem-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    modal.innerHTML =
+        '<div style="background:#fff;border-radius:16px;padding:28px;width:90%;max-width:360px;position:relative;">' +
+            '<button onclick="document.getElementById(\'redeem-modal\').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#bbb;">&#10005;</button>' +
+            '<h3 style="margin:0 0 6px;">Redeem Points</h3>' +
+            '<p style="color:#888;font-size:13px;margin:0 0 18px;">You have <strong>' + data.points + ' points</strong> &middot; 10 pts = R1 discount</p>' +
+            '<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Points to redeem (min 10)</label>' +
+            '<input type="number" id="redeem-input" min="10" max="' + data.points + '" step="10" value="' + Math.min(100, data.points) + '" style="width:100%;padding:10px;border:2px solid #eee;border-radius:8px;font-size:15px;box-sizing:border-box;margin-bottom:6px;">' +
+            '<p style="color:#f4b400;font-size:13px;margin:0 0 16px;" id="redeem-preview">= R' + Math.min(10, Math.floor(data.points / 10)) + ' discount</p>' +
+            '<div id="redeem-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>' +
+            '<button onclick="applyRedemption()" style="width:100%;padding:13px;background:#000;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;">Apply Discount</button>' +
+        '</div>';
+
+    modal.querySelector('#redeem-input').addEventListener('input', function() {
+        var d = Math.floor((parseInt(this.value) || 0) / 10);
+        document.getElementById('redeem-preview').textContent = '= R' + d + ' discount';
+    });
+
+    document.body.appendChild(modal);
 }
 
-function showToastMessage(message) {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4CAF50;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
-        z-index: 10000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        animation: slideIn 0.3s ease;
-    `;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+function applyRedemption() {
+    var pts  = parseInt(document.getElementById('redeem-input') && document.getElementById('redeem-input').value) || 0;
+    var msg  = document.getElementById('redeem-msg');
+    var data = _loadRewardData() || { points: 0, tier: 'Bronze', orders: [] };
+
+    if (pts < 10)          { _showRedeemMsg(msg, false, 'Minimum 10 points to redeem'); return; }
+    if (pts > data.points) { _showRedeemMsg(msg, false, 'Not enough points');           return; }
+
+    var discount = Math.floor(pts / 10);
+    data.points -= pts;
+    data.tier    = _calcTier(data.points);
+    _saveRewardData(data);
+    renderLoyaltyPage();
+    _showRedeemMsg(msg, true, 'R' + discount + ' discount applied!');
+
+    var totalEl = document.getElementById('cart-total');
+    if (totalEl) {
+        var cur = parseFloat(totalEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+        totalEl.textContent = 'R' + Math.max(0, cur - discount).toFixed(2);
+    }
+
+    setTimeout(function() {
+        var m = document.getElementById('redeem-modal');
+        if (m) m.remove();
+    }, 1600);
 }
 
-// ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize rewards system
-    console.log('Rewards system initialized');
-    
-    // Add redeem button to loyalty program if it doesn't exist
-    setTimeout(() => {
-        const loyaltyContainer = document.querySelector('.loyalty-container');
-        if (loyaltyContainer && !document.getElementById('redeem-points-btn')) {
-            const redeemButton = document.createElement('button');
-            redeemButton.id = 'redeem-points-btn';
-            redeemButton.textContent = 'Redeem Points for Discount';
-            redeemButton.style.cssText = `
-                background: #f4b400;
-                color: #000;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px;
-                margin-top: 20px;
-                width: 100%;
-            `;
-            redeemButton.onclick = showRedeemPointsModal;
-            
-            const pointsDisplay = document.querySelector('.points-display');
-            if (pointsDisplay) {
-                pointsDisplay.appendChild(redeemButton);
-            }
-        }
-    }, 1000);
-});
+function _showRedeemMsg(el, ok, text) {
+    if (!el) return;
+    el.style.display    = 'block';
+    el.style.background = ok ? '#e8f5e9' : '#ffebee';
+    el.style.color      = ok ? '#2e7d32'  : '#c62828';
+    el.textContent      = text;
+}
 
-// ===== GLOBAL EXPORTS =====
-window.showLoyaltyProgram = showLoyaltyProgram;
-window.updateUserRewards = updateUserRewards;
-window.getUserPoints = getUserPoints;
-window.saveOrderToHistory = saveOrderToHistory;
-window.updateTierProgress = updateTierProgress;
+// ── Global exports ─────────────────────────────────────────────────
+window.createUserWithRewards  = createUserWithRewards;
+window.displayUserRewards     = displayUserRewards;
+window.updateUserRewards      = updateUserRewards;
+window.getUserPoints          = getUserPoints;
+window.saveOrderToHistory     = saveOrderToHistory;
+window.showLoyaltyProgram     = showLoyaltyProgram;
+window.updateTierProgress     = updateTierProgress;
+window.renderLoyaltyPage      = renderLoyaltyPage;
+window.showRedeemPointsModal  = showRedeemPointsModal;
+window.applyRedemption        = applyRedemption;
