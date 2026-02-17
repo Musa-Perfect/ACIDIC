@@ -62,7 +62,10 @@ if (localStorage.getItem("darkMode") === "true") {
 
 // === INNOVATIVE FEATURES ===
 
-// AI Stylist
+// ── AI STYLIST ───────────────────────────────────────────────
+// Stores the user's quiz answers
+var stylistAnswers = { style: null, color: null, occasion: null };
+
 function showAIStylist() {
     hideAllSections();
     document.getElementById("ai-stylist-section").style.display = "block";
@@ -70,6 +73,7 @@ function showAIStylist() {
 }
 
 function resetQuiz() {
+    stylistAnswers = { style: null, color: null, occasion: null };
     document.getElementById("quiz-step-1").style.display = "block";
     document.getElementById("quiz-step-2").style.display = "none";
     document.getElementById("quiz-step-3").style.display = "none";
@@ -78,40 +82,128 @@ function resetQuiz() {
 
 function nextQuizStep(step, choice) {
     if (step === 1) {
+        stylistAnswers.style = choice;
         document.getElementById("quiz-step-1").style.display = "none";
         document.getElementById("quiz-step-2").style.display = "block";
     } else if (step === 2) {
+        stylistAnswers.color = choice;
         document.getElementById("quiz-step-2").style.display = "none";
         document.getElementById("quiz-step-3").style.display = "block";
     }
 }
 
-function generateRecommendations() {
-    const recommendations = document.getElementById("ai-recommendations");
-    recommendations.innerHTML = "<h3>Recommended For You</h3>";
+function generateRecommendations(occasion) {
+    stylistAnswers.occasion = occasion;
 
-    // Generate some recommendations based on "user preferences"
-    const recommendedItems = [
-        products.tshirts[0],
-        products.hoodies[0],
-        products.pants[0],
-        products.accessories[0],
-    ];
+    var style    = stylistAnswers.style;
+    var color    = stylistAnswers.color;
+    var occ      = stylistAnswers.occasion;
 
-    recommendedItems.forEach((item) => {
-        const div = document.createElement("div");
-        div.classList.add("product");
-        div.innerHTML = `
-            <img src="${item.img}" alt="${item.name}" onerror="handleImageError(this)">
-            <div class="product-info">
-                <h3>${item.name}</h3>
-                <p>R${item.price}</p>
-                <button class="add-to-cart" onclick="openModal(${JSON.stringify(item).replace(/"/g, "&quot;")})">View Details</button>
-            </div>`;
-        recommendations.appendChild(div);
+    // Pull all products from productData
+    var allProducts = (window.productData && window.productData.allproducts) ? window.productData.allproducts : [];
+
+    if (allProducts.length === 0) {
+        document.getElementById("ai-recommendations").innerHTML = "<p>No products found. Please try again.</p>";
+        return;
+    }
+
+    // --- Scoring logic ---
+    // Each answer votes for certain categories and price ranges
+    var categoryWeights = {};   // category -> score
+    var priceRange      = { min: 0, max: 9999 };
+
+    // Style personality → category bias
+    var styleMap = {
+        minimalist: { tshirts: 3, sweaters: 2, pants: 2 },
+        bold:       { hoodies: 3, tshirts: 2, twopieces: 2 },
+        street:     { hoodies: 3, tshirts: 3, pants: 2, accessories: 1 },
+        comfort:    { hoodies: 3, sweaters: 3, pants: 2 }
+    };
+
+    // Colour preference → price/style nudge
+    var colorMap = {
+        monochrome: { priceMax: 500 },
+        vibrant:    { priceMin: 300 },
+        earthy:     { priceMax: 450 },
+        mixed:      {}
+    };
+
+    // Occasion → category bias
+    var occasionMap = {
+        "Everyday Wear":   { tshirts: 3, pants: 2, sweaters: 1 },
+        "Night Out":       { hoodies: 3, twopieces: 3, tshirts: 1 },
+        "Special Events":  { twopieces: 3, sweaters: 2, hoodies: 1 },
+        "All of the Above":{ tshirts: 2, hoodies: 2, pants: 2, twopieces: 2, sweaters: 1, accessories: 1 }
+    };
+
+    // Apply style weights
+    var sw = styleMap[style] || {};
+    Object.keys(sw).forEach(function(cat) { categoryWeights[cat] = (categoryWeights[cat] || 0) + sw[cat]; });
+
+    // Apply colour adjustments
+    var cw = colorMap[color] || {};
+    if (cw.priceMin) priceRange.min = cw.priceMin;
+    if (cw.priceMax) priceRange.max = cw.priceMax;
+
+    // Apply occasion weights
+    var ow = occasionMap[occ] || occasionMap["All of the Above"];
+    Object.keys(ow).forEach(function(cat) { categoryWeights[cat] = (categoryWeights[cat] || 0) + ow[cat]; });
+
+    // Score every product
+    var scored = allProducts.map(function(p) {
+        var score = categoryWeights[p.category] || 0;
+        // Price range bonus
+        if (p.price >= priceRange.min && p.price <= priceRange.max) score += 2;
+        // Small random tiebreaker so results feel fresh
+        score += Math.random() * 0.5;
+        return { product: p, score: score };
     });
 
+    // Sort by score descending, take top 6
+    scored.sort(function(a, b) { return b.score - a.score; });
+    var picks = scored.slice(0, 6).map(function(s) { return s.product; });
+
+    // --- Render ---
+    var container = document.getElementById("ai-recommendations");
     document.getElementById("quiz-step-3").style.display = "none";
+
+    var styleLabel = { minimalist:"Minimalist", bold:"Bold & Edgy", street:"Streetwear", comfort:"Comfort First" }[style] || style;
+    var colorLabel = { monochrome:"Monochrome", vibrant:"Vibrant", earthy:"Earthy Tones", mixed:"Mixed Palette" }[color] || color;
+
+    container.innerHTML =
+        "<h3 style='margin-bottom:6px'>Your Picks</h3>" +
+        "<p style='color:#888;font-size:13px;margin-bottom:20px'>" +
+            styleLabel + " · " + colorLabel + " · " + occ +
+        "</p>" +
+        "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px'></div>";
+
+    var grid = container.querySelector("div");
+
+    picks.forEach(function(product) {
+        var img   = (product.images && product.images[0]) || product.image || product.img || "";
+        var card  = document.createElement("div");
+        card.className = "product";
+        card.style.cssText = "background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;transition:transform 0.2s;";
+        card.innerHTML =
+            "<img src='" + img + "' alt='" + product.name + "' style='width:100%;height:220px;object-fit:cover;' onerror=\"this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+'\" > " +
+            "<div style='padding:14px'>" +
+                "<p style='font-weight:700;margin:0 0 4px;font-size:14px'>" + product.name + "</p>" +
+                "<p style='color:#f4b400;font-weight:700;margin:0 0 10px;font-size:13px'>R" + product.price + "</p>" +
+                "<p style='color:#888;font-size:11px;margin:0 0 12px;text-transform:capitalize'>" + product.category + "</p>" +
+                "<button class='add-to-cart' onclick='addToCart(" + JSON.stringify({id:product.id,name:product.name,price:product.price,image:img}).replace(/'/g,"&#39;") + ")' " +
+                "style='width:100%;padding:9px;background:#000;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;'>Add to Cart</button>" +
+            "</div>";
+        card.addEventListener("mouseenter", function() { card.style.transform = "translateY(-4px)"; });
+        card.addEventListener("mouseleave", function() { card.style.transform = ""; });
+        grid.appendChild(card);
+    });
+
+    // Show reset button
+    var reset = document.createElement("button");
+    reset.textContent = "Retake Quiz";
+    reset.style.cssText = "margin-top:24px;padding:10px 24px;background:#f4b400;color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px;";
+    reset.onclick = resetQuiz;
+    container.appendChild(reset);
 }
 
 // Virtual Try-On

@@ -825,12 +825,10 @@
           </div>
           <div class="quiz-step" id="quiz-step-3" style="display: none">
             <p>What occasions do you dress for?</p>
-            <button onclick="generateRecommendations()">Everyday Wear</button>
-            <button onclick="generateRecommendations()">Night Out</button>
-            <button onclick="generateRecommendations()">Special Events</button>
-            <button onclick="generateRecommendations()">
-              All of the Above
-            </button>
+            <button onclick="generateRecommendations('Everyday Wear')">Everyday Wear</button>
+            <button onclick="generateRecommendations('Night Out')">Night Out</button>
+            <button onclick="generateRecommendations('Special Events')">Special Events</button>
+            <button onclick="generateRecommendations('All of the Above')">All of the Above</button>
           </div>
         </div>
         <div class="ai-recommendations" id="ai-recommendations"></div>
@@ -1183,19 +1181,6 @@
 
     <section id="product-section" class="products"></section>
 
-    <!-- CART SIDEBAR -->
-    <div id="cart-overlay" class="cart-overlay hidden">
-      <div class="cart-header">
-        <h2>Your Cart</h2>
-        <span class="close-cart" onclick="toggleCart(false)">×</span>
-      </div>
-      <div class="cart-items" id="cart-items"></div>
-      <div class="cart-footer">
-        <p>Total: <span id="cart-total">R0</span></p>
-        <button class="checkout-btn" onclick="checkout()">Checkout</button>
-      </div>
-    </div>
-
     <!-- PRODUCT DETAILS MODAL -->
 <div id="product-modal" class="modal">
   <div class="modal-content">
@@ -1359,35 +1344,6 @@
             </button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- CART SIDEBAR -->
-    <div id="cart-sidebar" class="cart-sidebar">
-      <div class="cart-header">
-        <h2>Your Cart</h2>
-        <span class="close-cart" onclick="toggleCart(false)">×</span>
-      </div>
-      <div class="cart-items" id="cart-items"></div>
-      <div class="cart-footer">
-        <p>Total: <span id="cart-total">R0</span></p>
-        <button
-          class="clear-cart-btn"
-          onclick="clearCartWithConfirmation()"
-          style="
-            background: #666;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            width: 100%;
-          "
-        >
-          Clear Cart
-        </button>
-        <button class="checkout-btn" onclick="checkout()">Checkout</button>
       </div>
     </div>
 
@@ -1856,7 +1812,7 @@
   </div>
 </div>
 
-<!-- Cart Sidebar (needed for toggleCart() to work) -->
+<!-- Cart Sidebar -->
 <div id="cart-sidebar" class="cart-sidebar">
   <div class="cart-header">
     <h3>Your Cart</h3>
@@ -1887,6 +1843,7 @@
         }
       }
     </script>
+  
 
     <script src="scripts/products.js"></script>
     <script src="scripts/cart.js"></script>
