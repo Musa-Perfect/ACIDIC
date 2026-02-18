@@ -1,10 +1,7 @@
 // === MAIN APPLICATION LOGIC ===
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    showCategory("tshirts");
-    updateAuthLink();
-});
+// [Removed duplicate DOMContentLoaded - handled in comprehensive init below]
 
 // === HERO SLIDESHOW ===
 const slides = document.querySelectorAll(".hero-slide");
@@ -1965,18 +1962,7 @@ function triggerSearch() {
     return new URLSearchParams(window.location.search).get(name);
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const category = getQueryParam("category");
-    const product = getQueryParam("product");
-
-    if (product && typeof openProductModal === "function") {
-      openProductModal(product);
-    } else if (category && typeof showCategory === "function") {
-      showCategory(category);
-    } else {
-      showCategory("allproducts");
-    }
-  });
+  // [Removed duplicate DOMContentLoaded - URL params handled in main init]
 
   function toggleExperience(card) {
   const grid = document.querySelector(".experience-grid");
@@ -2222,10 +2208,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update auth link
     updateAuthLink();
     
-    // Show default category
-    showCategory("tshirts");
-    
-    // Check URL parameters
+    // Check URL parameters first
     const category = getQueryParam("category");
     const product = getQueryParam("product");
 
@@ -2234,6 +2217,8 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (category && typeof showCategory === "function") {
         showCategory(category);
     } else {
+        // Show default category only if no URL params
+        showCategory("tshirts");
         // Ensure home page is visible by default
         const homePage = document.getElementById('home-page');
         if (homePage) {

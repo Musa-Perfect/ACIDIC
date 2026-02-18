@@ -488,78 +488,7 @@ function addColorSwatchStyles() {
 }
 
 // === UPDATE PRODUCT DISPLAY TO SHOW COLORS ===
-function showCategory(category) {
-    hideAllSections();
-    const section = document.getElementById("product-section");
-    const mainContent = document.getElementById("main-content");
-    section.style.display = "grid";
-    mainContent.style.display = "block";
-    section.classList.remove("active");
-    section.innerHTML = "";
-
-    if (productData[category]) {
-        setTimeout(() => {
-            productData[category].forEach((product) => {
-                const div = document.createElement("div");
-                div.classList.add("product");
-                div.dataset.productId = product.id;
-                
-                // Get available colors
-                const colors = product.variants?.find(v => v.name === 'Color')?.options || [];
-                
-                div.innerHTML = `
-                    <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
-                    <div class="product-info">
-                        <h3>${product.name}</h3>
-                        <p class="price">R${product.price}</p>
-                        ${product.comparePrice ? `<p class="compare-price">R${product.comparePrice}</p>` : ''}
-                        
-                        <!-- COLOR SWATCHES DISPLAY -->
-                        ${colors.length > 0 ? `
-                            <div class="product-colors">
-                                <span style="font-size: 12px; color: #666; margin-right: 5px;">Colors:</span>
-                                ${colors.map(color => {
-                                    const colorMap = {
-                                        'Black': '#000000',
-                                        'White': '#ffffff',
-                                        'Red': '#ff0000',
-                                        'Blue': '#0000ff',
-                                        'Lime': '#00ff00',
-                                        'Cyan': '#00ffff',
-                                        'Cream': '#fffdd0',
-                                        'Green': '#008000',
-                                        'Brown': '#964b00',
-                                        'Pink': '#ffc0cb'
-                                    };
-                                    const hex = colorMap[color] || '#ccc';
-                                    const needsBorder = color === 'White' || color === 'Cream';
-                                    return `
-                                        <div class="mini-color-swatch" 
-                                             title="${color}"
-                                             style="background: ${hex}; ${needsBorder ? 'border: 1px solid #ccc' : ''}"></div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        ` : ''}
-                        
-                        <p class="stock-status ${getStockStatusClass(product.totalStock, product.lowStockThreshold)}">
-                            ${getStockStatus(product.totalStock, product.lowStockThreshold)}
-                        </p>
-                        <div class="product-actions">
-                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
-                                <i class="fas fa-cart-plus"></i> Quick Add
-                            </button>
-                        </div>
-                    </div>`;
-                section.appendChild(div);
-            });
-            requestAnimationFrame(() => section.classList.add("active"));
-        }, 150);
-    }
-}
+// [showCategory #1 removed to fix duplicates]
 
 // === FORCE UPDATE EXISTING PRODUCTS WITH ALL COLORS ===
 function forceColorUpdateOnAllProducts() {
@@ -608,46 +537,7 @@ function forceColorUpdateOnAllProducts() {
 }
 
 // === INITIALIZATION ===
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing ACIDIC Clothing store...');
-    
-    // Add color swatch styles
-    addColorSwatchStyles();
-    addModalStyles();
-    addCartFeedbackStyles();
-    
-    // Force update products with all colors
-    forceColorUpdateOnAllProducts();
-    
-    // Save products to localStorage
-    saveProductsToLocalStorage();
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Make sure productData is globally available
-    window.productData = productData;
-    
-    // Show all products by default
-    if (document.getElementById("product-section")) {
-        showCategory('allproducts');
-    }
-    
-    // Add global event listener for product clicks
-    document.addEventListener('click', function(e) {
-        // Handle product card clicks (except buttons)
-        if (e.target.closest('.product') && !e.target.closest('button')) {
-            const productElement = e.target.closest('.product');
-            const productId = productElement.dataset.productId;
-            
-            if (productId) {
-                viewProduct(parseInt(productId), e);
-            }
-        }
-    });
-    
-    console.log('Product system initialized successfully');
-});
+// [DOMContentLoaded #1 removed to fix duplicates]
 
 // === IMAGE ERROR HANDLING ===
 function handleImageError(img) {
@@ -657,62 +547,7 @@ function handleImageError(img) {
 }
 
 // === PRODUCT DISPLAY FUNCTIONS ===
-function showCategory(category) {
-    // Hide all sections first
-    const sections = document.querySelectorAll('.product-section, #product-section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-        section.classList.remove('active');
-    });
-    
-    const section = document.getElementById("product-section");
-    const mainContent = document.getElementById("main-content");
-    if (!section) return;
-    
-    section.style.display = "grid";
-    if (mainContent) mainContent.style.display = "block";
-    section.classList.remove("active");
-    section.innerHTML = "";
-
-    if (productData[category]) {
-        setTimeout(() => {
-            productData[category].forEach((product) => {
-                const div = document.createElement("div");
-                div.classList.add("product");
-                div.dataset.productId = product.id;
-                div.innerHTML = `
-                    <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
-                    <div class="product-info">
-                        <h3>${product.name}</h3>
-                        <p class="price">R${product.price}</p>
-                        ${product.comparePrice ? `<p class="compare-price">R${product.comparePrice}</p>` : ''}
-                        <p class="stock-status">${getStockStatus(product.totalStock, product.lowStockThreshold)}</p>
-                        <div class="product-actions">
-                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
-                                <i class="fas fa-cart-plus"></i> Quick Add
-                            </button>
-                        </div>
-                    </div>`;
-                
-                // Make the whole product card clickable except buttons
-                div.addEventListener('click', function(e) {
-                    if (!e.target.closest('.product-actions') && !e.target.closest('button')) {
-                        viewProduct(product.id, e);
-                    }
-                });
-                
-                section.appendChild(div);
-            });
-            
-            if (section.classList) {
-                requestAnimationFrame(() => section.classList.add("active"));
-            }
-        }, 150);
-    }
-}
+// [showCategory #2 removed to fix duplicates]
 
 function getStockStatus(stock, threshold) {
     if (stock === 0) return 'Out of Stock';
@@ -852,115 +687,7 @@ function showToast(message) {
 }
 
 // === INITIALIZATION ===
-document.addEventListener('DOMContentLoaded', function() {
-    // Save products to localStorage
-    saveProductsToLocalStorage();
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Show all products by default
-    showCategory('allproducts');
-    
-    // Add CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-        
-        .product {
-            transition: transform 0.3s ease;
-        }
-        
-        .product:hover {
-            transform: translateY(-5px);
-        }
-        
-        .price {
-            font-weight: bold;
-            color: #000;
-            font-size: 18px;
-            margin: 5px 0;
-        }
-        
-        .compare-price {
-            text-decoration: line-through;
-            color: #999;
-            font-size: 14px;
-            margin: 0;
-        }
-        
-        .stock-status {
-            font-size: 12px;
-            margin: 5px 0;
-        }
-        
-        .stock-status:before {
-            content: '• ';
-        }
-        
-        .view-details, .quick-add {
-            padding: 8px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-        
-        .view-details {
-            background: #000;
-            color: white;
-        }
-        
-        .view-details:hover {
-            background: #333;
-        }
-        
-        .quick-add {
-            background: #f4b400;
-            color: #000;
-        }
-        
-        .quick-add:hover {
-            background: #ffcc33;
-        }
-        
-        .product-info {
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .product-info h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            font-weight: 500;
-        }
-    `;
-    document.head.appendChild(style);
-});
+// [DOMContentLoaded #2 removed to fix duplicates]
 
 // === PAGINATION SYSTEM ===
 let currentPage = {};
@@ -1056,115 +783,7 @@ function changePage(category, page) {
 }
 
 // === UPDATED SHOWCATEGORY FUNCTION WITH PAGINATION ===
-function showCategory(category) {
-    hideAllSections();
-    const section = document.getElementById("product-section");
-    const mainContent = document.getElementById("main-content");
-    section.style.display = "block";
-    mainContent.style.display = "block";
-    section.classList.remove("active");
-    section.innerHTML = "";
-
-    if (productData[category]) {
-        setTimeout(() => {
-            // Get products for current page
-            const products = getProductsForPage(category, currentPage[category]);
-            
-            // Create products container
-            const productsContainer = document.createElement('div');
-            productsContainer.className = 'products-container';
-            productsContainer.style.display = 'grid';
-            productsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
-            productsContainer.style.gap = '20px';
-            productsContainer.style.padding = '20px';
-            
-            products.forEach((product) => {
-                const div = document.createElement("div");
-                div.classList.add("product");
-                div.dataset.productId = product.id;
-                
-                // Get available colors
-                const colors = product.variants?.find(v => v.name === 'Color')?.options || [];
-                
-                div.innerHTML = `
-                    <img src="${product.images[0]}" alt="${product.name}" onerror="handleImageError(this)">
-                    <div class="product-info">
-                        <h3>${product.name}</h3>
-                        <p class="price">R${product.price}</p>
-                        ${product.comparePrice ? `<p class="compare-price">R${product.comparePrice}</p>` : ''}
-                        
-                        <!-- COLOR SWATCHES DISPLAY -->
-                        ${colors.length > 0 ? `
-                            <div class="product-colors">
-                                <span style="font-size: 12px; color: #666; margin-right: 5px;">Colors:</span>
-                                ${colors.slice(0, 5).map(color => {
-                                    const colorMap = {
-                                        'Black': '#000000',
-                                        'White': '#ffffff',
-                                        'Red': '#ff0000',
-                                        'Blue': '#0000ff',
-                                        'Lime': '#00ff00',
-                                        'Cyan': '#00ffff',
-                                        'Cream': '#fffdd0',
-                                        'Green': '#008000',
-                                        'Brown': '#964b00',
-                                        'Pink': '#ffc0cb'
-                                    };
-                                    const hex = colorMap[color] || '#ccc';
-                                    const needsBorder = color === 'White' || color === 'Cream';
-                                    return `
-                                        <div class="mini-color-swatch" 
-                                             title="${color}"
-                                             style="background: ${hex}; ${needsBorder ? 'border: 1px solid #ccc' : ''}"></div>
-                                    `;
-                                }).join('')}
-                                ${colors.length > 5 ? `<span style="font-size: 11px; color: #999;">+${colors.length - 5} more</span>` : ''}
-                            </div>
-                        ` : ''}
-                        
-                        <p class="stock-status ${getStockStatusClass(product.totalStock, product.lowStockThreshold)}">
-                            ${getStockStatus(product.totalStock, product.lowStockThreshold)}
-                        </p>
-                        <div class="product-actions">
-                            <button class="view-details" onclick="viewProduct(${product.id}, event)">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="quick-add" onclick="quickAddToCart(${product.id}, event)">
-                                <i class="fas fa-cart-plus"></i> Quick Add
-                            </button>
-                        </div>
-                    </div>`;
-                productsContainer.appendChild(div);
-            });
-            
-            section.appendChild(productsContainer);
-            
-            // Add pagination controls
-            const paginationContainer = document.createElement('div');
-            paginationContainer.className = 'pagination-container';
-            paginationContainer.innerHTML = createPaginationControls(category);
-            section.appendChild(paginationContainer);
-            
-            // Add page info
-            const totalProducts = productData[category].length;
-            const startProduct = ((currentPage[category] - 1) * productsPerPage) + 1;
-            const endProduct = Math.min(currentPage[category] * productsPerPage, totalProducts);
-            
-            const pageInfo = document.createElement('div');
-            pageInfo.className = 'page-info';
-            pageInfo.innerHTML = `
-                <div style="text-align: center; margin: 20px 0; color: #666; font-size: 14px;">
-                    Showing ${startProduct}-${endProduct} of ${totalProducts} products
-                    <span style="margin: 0 10px;">•</span>
-                    Page ${currentPage[category]} of ${getTotalPages(category)}
-                </div>
-            `;
-            section.appendChild(pageInfo);
-            
-            requestAnimationFrame(() => section.classList.add("active"));
-        }, 150);
-    }
-}
+// [showCategory #3 removed to fix duplicates]
 
 // === ADD PAGINATION STYLES ===
 function addPaginationStyles() {
@@ -1380,53 +999,7 @@ function showCategoryWithPagination(category) {
 }
 
 // === UPDATED INITIALIZATION ===
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing ACIDIC Clothing store with pagination...');
-    
-    // Initialize pagination
-    initPagination();
-    
-    // Add styles
-    addPaginationStyles();
-    addColorSwatchStyles();
-    addModalStyles();
-    addCartFeedbackStyles();
-    
-    // Force update products with all colors
-    forceColorUpdateOnAllProducts();
-    
-    // Save products to localStorage
-    saveProductsToLocalStorage();
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Make sure productData is globally available
-    window.productData = productData;
-    
-    // Update navigation handlers
-    updateNavHandlers();
-    
-    // Show all products by default
-    if (document.getElementById("product-section")) {
-        showCategory('allproducts');
-    }
-    
-    // Add global event listener for product clicks
-    document.addEventListener('click', function(e) {
-        // Handle product card clicks (except buttons)
-        if (e.target.closest('.product') && !e.target.closest('button')) {
-            const productElement = e.target.closest('.product');
-            const productId = productElement.dataset.productId;
-            
-            if (productId) {
-                viewProduct(parseInt(productId), e);
-            }
-        }
-    });
-    
-    console.log('Product system with pagination initialized successfully');
-});
+// [DOMContentLoaded #3 removed to fix duplicates]
 
 // === UPDATE THE HTML NAVIGATION ===
 // You need to update your HTML navigation to use showCategoryWithPagination
@@ -1920,10 +1493,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update navigation handlers
     updateNavHandlers();
     
-    // Show all products by default
-    if (document.getElementById("product-section")) {
-        showCategory('allproducts');
-    }
+    // Don't auto-show products here - main.js handles initial category display
+    // (Removed: showCategory('allproducts') to fix duplicate rendering)
     
     // Add global event listener for product clicks
     document.addEventListener('click', function(e) {
@@ -2567,35 +2138,7 @@ function addCartFeedbackStyles() {
 }
 
 // === INITIALIZE WITH FIXES ===
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing product system...');
-    
-    // Add styles
-    addModalStyles();
-    addCartFeedbackStyles();
-    
-    // Save products to localStorage
-    saveProductsToLocalStorage();
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Show all products by default
-    showCategory('allproducts');
-    
-    // Add global event listener for product clicks
-    document.addEventListener('click', function(e) {
-        // Handle product card clicks (except buttons)
-        if (e.target.closest('.product') && !e.target.closest('button')) {
-            const productElement = e.target.closest('.product');
-            const productId = productElement.dataset.productId;
-            
-            if (productId) {
-                viewProductDetails(parseInt(productId));
-            }
-        }
-    });
-});
+// [DOMContentLoaded #4 removed to fix duplicates]
 
 // === DEBUG FUNCTION ===
 function debugCart() {
@@ -2907,42 +2450,7 @@ function addCartFeedbackStyles() {
 }
 
 // === INITIALIZATION ===
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing ACIDIC Clothing store...');
-    
-    // Add modal styles
-    addModalStyles();
-    addCartFeedbackStyles();
-    
-    // Save products to localStorage
-    saveProductsToLocalStorage();
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Make sure productData is globally available
-    window.productData = productData;
-    
-    // Show all products by default
-    if (document.getElementById("product-section")) {
-        showCategory('allproducts');
-    }
-    
-    // Add global event listener for product clicks
-    document.addEventListener('click', function(e) {
-        // Handle product card clicks (except buttons)
-        if (e.target.closest('.product') && !e.target.closest('button')) {
-            const productElement = e.target.closest('.product');
-            const productId = productElement.dataset.productId;
-            
-            if (productId) {
-                viewProduct(parseInt(productId), e);
-            }
-        }
-    });
-    
-    console.log('Product system initialized successfully');
-});
+// [DOMContentLoaded #5 removed to fix duplicates]
 
 // === DEBUG FUNCTION ===
 function debugCart() {
@@ -3489,19 +2997,7 @@ function addModalStyles() {
 }
 
 // === INITIALIZE ===
-document.addEventListener('DOMContentLoaded', function() {
-    // Add modal styles
-    addModalStyles();
-    
-    // Save products to localStorage
-    saveProductsToLocalStorage();
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Show all products by default
-    showCategory('allproducts');
-});
+// [DOMContentLoaded #6 removed to fix duplicates]
 
 // Add CSS for enhanced cart and variant display
 function addEnhancedCartStyles() {
@@ -3619,34 +3115,7 @@ function addEnhancedCartStyles() {
 }
 
 // Initialize enhanced system
-document.addEventListener('DOMContentLoaded', function() {
-    // Add enhanced styles
-    addEnhancedCartStyles();
-    
-    // Load existing cart with enhanced data
-    const acidicCart = JSON.parse(localStorage.getItem('acidicCart'));
-    const oldCart = JSON.parse(localStorage.getItem('cart'));
-    
-    if (acidicCart) {
-        cart = acidicCart;
-    } else if (oldCart) {
-        cart = oldCart;
-        // Migrate old cart items to include variant data
-        cart = cart.map(item => ({
-            ...item,
-            color: item.color || 'Black',
-            size: item.size || 'Medium',
-            variantId: `${item.id || ''}-${item.color || 'default'}-${item.size || 'M'}`,
-            colorName: item.color || 'Black',
-            sizeCode: item.size || 'M'
-        }));
-        localStorage.setItem('acidicCart', JSON.stringify(cart));
-        localStorage.removeItem('cart');
-    }
-    
-    updateCartCount();
-    loadCartItems();
-});
+// [DOMContentLoaded #7 removed to fix duplicates]
 
 // Debug function to check cart status
 function debugCartStatus() {
