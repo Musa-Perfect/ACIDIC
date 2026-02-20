@@ -5930,3 +5930,236 @@ body.dark-mode .login-section {
     margin-top: 10px;
   }
 }
+
+/* ===== EXPERIENCE SECTION WITH SLIDESHOW BACKGROUND ===== */
+.experience-section {
+  position: relative;
+  width: 100%;
+  padding: 60px 20px;
+  overflow: hidden;
+}
+
+/* Slideshow Background Container */
+.experience-slideshow-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Individual Background Slides */
+.exp-bg-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+  z-index: 1;
+}
+
+.exp-bg-slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+/* Dark Overlay for Better Text Readability */
+.experience-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Experience Content */
+.experience-section .section-title,
+.experience-grid {
+  position: relative;
+  z-index: 10;
+}
+
+.experience-section .section-title {
+  color: white;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Experience Cards - Enhanced for Dark Background */
+.experience-card-wrapper {
+  position: relative;
+  z-index: 15;
+}
+
+.experience-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.experience-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.card-front .front-content {
+  background: transparent;
+  color: white;
+}
+
+.card-front .front-content h3,
+.card-front .front-content p {
+  color: white;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.card-front .front-content .tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.card-back .back-content {
+  background: rgba(244, 180, 0, 0.95);
+  color: #000;
+}
+
+.card-back .back-content h4,
+.card-back .back-content .back-details li {
+  color: #000;
+}
+
+.action-hint {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Slideshow Navigation Buttons */
+.exp-slideshow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s;
+  backdrop-filter: blur(5px);
+}
+
+.exp-slideshow-nav:hover {
+  background: rgba(244, 180, 0, 0.8);
+  border-color: white;
+}
+
+.exp-slideshow-prev {
+  left: 20px;
+}
+
+.exp-slideshow-next {
+  right: 20px;
+}
+
+/* Slideshow Dots */
+.exp-slideshow-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+.exp-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.exp-dot.active {
+  background: #f4b400;
+  transform: scale(1.2);
+  border-color: white;
+}
+
+.exp-dot:hover {
+  background: white;
+}
+
+/* Animation for cards appearing */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.experience-card-wrapper {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.experience-card-wrapper:nth-child(1) { animation-delay: 0.1s; }
+.experience-card-wrapper:nth-child(2) { animation-delay: 0.2s; }
+.experience-card-wrapper:nth-child(3) { animation-delay: 0.3s; }
+.experience-card-wrapper:nth-child(4) { animation-delay: 0.4s; }
+.experience-card-wrapper:nth-child(5) { animation-delay: 0.5s; }
+.experience-card-wrapper:nth-child(6) { animation-delay: 0.6s; }
+.experience-card-wrapper:nth-child(7) { animation-delay: 0.7s; }
+.experience-card-wrapper:nth-child(8) { animation-delay: 0.8s; }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .exp-slideshow-nav {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  
+  .exp-slideshow-prev {
+    left: 10px;
+  }
+  
+  .exp-slideshow-next {
+    right: 10px;
+  }
+  
+  .exp-dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+

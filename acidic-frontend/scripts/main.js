@@ -2185,6 +2185,86 @@ function updateMenuCartCount() {
   cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
 }
 
+// ===== EXPERIENCE SECTION SLIDESHOW =====
+let currentExpSlide = 0;
+const expSlides = document.querySelectorAll('.exp-bg-slide');
+const expDots = document.querySelectorAll('.exp-dot');
+let expSlideInterval;
+
+// Initialize slideshow
+function initExpSlideshow() {
+    if (!expSlides.length) return;
+    
+    // Clear any existing interval
+    if (expSlideInterval) clearInterval(expSlideInterval);
+    
+    // Start automatic slideshow
+    expSlideInterval = setInterval(() => {
+        nextExpSlide();
+    }, 2000); // Change every 2 seconds
+    
+    // Pause on hover
+    const expSection = document.querySelector('.experience-section');
+    if (expSection) {
+        expSection.addEventListener('mouseenter', () => {
+            clearInterval(expSlideInterval);
+        });
+        
+        expSection.addEventListener('mouseleave', () => {
+            clearInterval(expSlideInterval);
+            expSlideInterval = setInterval(() => {
+                nextExpSlide();
+            }, 5000);
+        });
+    }
+}
+
+// Show specific slide
+function goToExpSlide(index) {
+    if (!expSlides.length) return;
+    
+    // Hide all slides
+    expSlides.forEach(slide => {
+        slide.classList.remove('active');
+    });
+    
+    // Update dots
+    expDots.forEach(dot => {
+        dot.classList.remove('active');
+    });
+    
+    // Show selected slide
+    expSlides[index].classList.add('active');
+    expDots[index].classList.add('active');
+    
+    currentExpSlide = index;
+}
+
+// Next slide
+function nextExpSlide() {
+    const nextIndex = (currentExpSlide + 1) % expSlides.length;
+    goToExpSlide(nextIndex);
+}
+
+// Previous slide
+function prevExpSlide() {
+    const prevIndex = (currentExpSlide - 1 + expSlides.length) % expSlides.length;
+    goToExpSlide(prevIndex);
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're on the page with experience section
+    if (document.querySelector('.experience-section')) {
+        initExpSlideshow();
+    }
+});
+
+// Make functions global
+window.goToExpSlide = goToExpSlide;
+window.nextExpSlide = nextExpSlide;
+window.prevExpSlide = prevExpSlide;
+
 // === INITIALIZE MENU ===
 // === SINGLE DOMContentLoaded LISTENER ===
 document.addEventListener('DOMContentLoaded', function() {
@@ -2541,3 +2621,4 @@ window.addEventListener('load', function() {
 });
 
 console.log('✅ COMPREHENSIVE FIX INSTALLED\n');
+

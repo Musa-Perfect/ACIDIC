@@ -211,10 +211,31 @@
 </section>
 
 <section class="experience-section">
+  <!-- Slideshow Background -->
+  <div class="experience-slideshow-bg" id="experienceSlideshow">
+    <div class="exp-bg-slide active" style="background-image: url('acidic.jpg')"></div>
+    <div class="exp-bg-slide" style="background-image: url('acidic 32.jpg')"></div>
+    <div class="exp-bg-slide" style="background-image: url('acidic 29.jpg')"></div>
+    <div class="exp-bg-slide" style="background-image: url('acidic 2.jpg')"></div>
+    <div class="exp-bg-slide" style="background-image: url('acidic 3.jpg')"></div>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <button class="exp-slideshow-nav exp-slideshow-prev" onclick="prevExpSlide()">❮</button>
+  <button class="exp-slideshow-nav exp-slideshow-next" onclick="nextExpSlide()">❯</button>
+  
+  <!-- Slideshow Dots -->
+  <div class="exp-slideshow-dots">
+    <div class="exp-dot active" onclick="goToExpSlide(0)"></div>
+    <div class="exp-dot" onclick="goToExpSlide(1)"></div>
+    <div class="exp-dot" onclick="goToExpSlide(2)"></div>
+    <div class="exp-dot" onclick="goToExpSlide(3)"></div>
+    <div class="exp-dot" onclick="goToExpSlide(4)"></div>
+  </div>
+
   <h2 class="section-title">The ACIDIC Experience</h2>
 
   <div class="experience-grid">
-
     <!-- AI STYLIST -->
     <div class="experience-card-wrapper" onclick="openExperienceModal('ai-stylist')">
       <div class="experience-card">
@@ -261,15 +282,15 @@
       </div>
     </div>
 
-    <!-- VISUAL TRY-ON -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('visual-tryon')">
+    <!-- VIRTUAL TRY-ON -->
+    <div class="experience-card-wrapper" onclick="openExperienceModal('virtual-tryon')">
       <div class="experience-card">
         <div class="card-content">
           <div class="card-front">
             <div class="front-content">
               <div class="experience-header">
                 <div class="experience-icon">👕</div>
-                <h3>Visual Try-On</h3>
+                <h3>Virtual Try-On</h3>
               </div>
               <p class="experience-description">
                 See how ACIDIC pieces look on you before purchasing with AR technology.
@@ -351,53 +372,6 @@
               </div>
               <div class="action-hint">
                 <span class="hint-text">Click to see full impact</span>
-                <span class="hint-arrow">→</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- COMMUNITY -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('community')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">👥</div>
-                <h3>Community</h3>
-              </div>
-              <p class="experience-description">
-                Connect with creators, artists, and trendsetters in the ACIDIC community.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Social</span>
-                <span class="tag">Creative</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <h4>Community Features</h4>
-              <ul class="back-details">
-                <li>Share your style with #ACIDICStyle</li>
-                <li>Connect with fashion creators</li>
-                <li>Exclusive community events</li>
-                <li>Style inspiration gallery</li>
-              </ul>
-              <div class="action-hint">
-                <span class="hint-text">Click to join community</span>
                 <span class="hint-arrow">→</span>
               </div>
             </div>
@@ -503,6 +477,53 @@
       </div>
     </div>
 
+    <!-- COMMUNITY -->
+    <div class="experience-card-wrapper" onclick="openExperienceModal('community')">
+      <div class="experience-card">
+        <div class="card-content">
+          <div class="card-front">
+            <div class="front-content">
+              <div class="experience-header">
+                <div class="experience-icon">👥</div>
+                <h3>Community</h3>
+              </div>
+              <p class="experience-description">
+                Connect with creators, artists, and trendsetters in the ACIDIC community.
+              </p>
+              <div class="feature-tags">
+                <span class="tag">Social</span>
+                <span class="tag">Creative</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card-back">
+            <div class="back-content">
+              <div class="back-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <h4>Community Features</h4>
+              <ul class="back-details">
+                <li>Share your style with #ACIDICStyle</li>
+                <li>Connect with fashion creators</li>
+                <li>Exclusive community events</li>
+                <li>Style inspiration gallery</li>
+              </ul>
+              <div class="action-hint">
+                <span class="hint-text">Click to join community</span>
+                <span class="hint-arrow">→</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SIZE FINDER -->
     <div class="experience-card-wrapper" onclick="openExperienceModal('size-finder')">
       <div class="experience-card">
@@ -548,7 +569,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </section>
 
