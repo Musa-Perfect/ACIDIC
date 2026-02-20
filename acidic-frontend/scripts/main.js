@@ -2245,4 +2245,299 @@ document.addEventListener('DOMContentLoaded', function() {
 window.processPayment = processPayment;
 window.cancelPayment = cancelPayment;
 window.closePayment = closePayment;
-window.closeConfirmation = closeConfirmation;
+window.closeConfirmation = closeConfirmation;// ================================================================
+//  COMPREHENSIVE FIX FOR ALL FEATURES
+//  Add this to the END of main.js OR run in console to debug
+// ================================================================
+
+console.log('🔧 ACIDIC COMPREHENSIVE FIX LOADING...\n');
+
+// ── PART 1: Ensure productData is properly loaded ────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    
+    // Check productData
+    if (!window.productData) {
+      console.error('❌ productData not loaded!');
+      console.log('Make sure products.js loads BEFORE main.js');
+      return;
+    }
+    
+    console.log('✓ productData exists');
+    console.log('  Categories:', Object.keys(window.productData).join(', '));
+    
+    // Check allproducts
+    if (!window.productData.allproducts || window.productData.allproducts.length === 0) {
+      console.error('❌ allproducts array is empty!');
+      
+      // FIX: Rebuild allproducts from categories
+      console.log('🔧 Rebuilding allproducts array...');
+      const allProducts = [];
+      ['tshirts', 'sweaters', 'hoodies', 'pants', 'twopieces', 'accessories'].forEach(cat => {
+        if (window.productData[cat] && Array.isArray(window.productData[cat])) {
+          allProducts.push(...window.productData[cat]);
+        }
+      });
+      
+      window.productData.allproducts = allProducts;
+      console.log('✓ Rebuilt allproducts:', allProducts.length, 'products');
+    } else {
+      console.log('✓ allproducts:', window.productData.allproducts.length, 'products');
+    }
+    
+  }, 500); // Wait for products.js to fully execute
+});
+
+// ── PART 2: Fix viewProduct function ──────────────────────────────
+const originalViewProduct = window.viewProduct;
+window.viewProduct = function(productId, event) {
+  if (event) event.stopPropagation();
+  
+  console.log('👁️ viewProduct called - ID:', productId);
+  
+  // Check if productData exists
+  if (!window.productData || !window.productData.allproducts) {
+    console.error('❌ Product data not available');
+    if (typeof showNotification === 'function') {
+      showNotification('Product data not loaded. Please refresh the page.', 'error');
+    } else {
+      alert('Product data not loaded. Please refresh the page.');
+    }
+    return;
+  }
+  
+  const numId = parseInt(productId);
+  console.log('Searching for product ID:', productId, '(parsed:', numId + ')');
+  
+  // Find product
+  let product = window.productData.allproducts.find(p => p.id == productId || p.id == numId);
+  
+  if (!product) {
+    console.error('❌ Product not found');
+    console.log('Available IDs:', window.productData.allproducts.slice(0, 10).map(p => p.id));
+    
+    if (typeof showNotification === 'function') {
+      showNotification('Product not found', 'error');
+    } else {
+      alert('Product not found');
+    }
+    return;
+  }
+  
+  console.log('✓ Product found:', product.name);
+  
+  // Prepare product data
+  const productData = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    comparePrice: product.comparePrice,
+    description: product.description || 'No description available',
+    material: product.material || '',
+    images: product.images || [product.img || product.image] || [],
+    category: product.category,
+    variants: product.variants || [],
+    inventory: product.inventory || [],
+    totalStock: product.totalStock || 0,
+    sku: product.sku || ''
+  };
+  
+  // Store in localStorage
+  const productKey = `acidic_product_${productId}`;
+  localStorage.setItem(productKey, JSON.stringify(productData));
+  localStorage.setItem('lastViewedProductId', productId.toString());
+  
+  console.log('✓ Product data saved to localStorage');
+  console.log('✓ Redirecting to product.html...');
+  
+  // Redirect
+  window.location.href = `product.html?id=${productId}&key=${productKey}`;
+};
+
+// ── PART 3: Fix AI Stylist ───────────────────────────────────────
+window.showAIStylist = function() {
+  console.log('🤖 Opening AI Stylist...');
+  
+  try {
+    if (typeof hideAllSections === 'function') hideAllSections();
+    
+    const section = document.getElementById('ai-stylist-section');
+    if (!section) {
+      console.error('❌ AI Stylist section not found in HTML');
+      alert('AI Stylist section is missing from your HTML');
+      return;
+    }
+    
+    section.style.display = 'block';
+    
+    if (typeof resetQuiz === 'function') {
+      resetQuiz();
+    }
+    
+    console.log('✓ AI Stylist opened');
+  } catch (error) {
+    console.error('❌ AI Stylist error:', error);
+    alert('AI Stylist failed to load: ' + error.message);
+  }
+};
+
+// ── PART 4: Fix Virtual Try-On ────────────────────────────────────
+window.showVirtualTryOn = function() {
+  console.log('👕 Opening Virtual Try-On...');
+  
+  try {
+    if (typeof hideAllSections === 'function') hideAllSections();
+    
+    const section = document.getElementById('virtual-tryon');
+    if (!section) {
+      console.error('❌ Virtual Try-On section not found');
+      alert('Virtual Try-On section is missing from your HTML');
+      return;
+    }
+    
+    section.style.display = 'block';
+    
+    // Add styles if function exists
+    if (typeof addVirtualTryOnStyles === 'function') {
+      addVirtualTryOnStyles();
+    }
+    
+    // Initialize if function exists
+    if (typeof initVirtualTryOn === 'function') {
+      initVirtualTryOn();
+      console.log('✓ Virtual Try-On initialized');
+    } else {
+      console.warn('⚠ initVirtualTryOn function not found');
+      section.innerHTML = '<div style="padding:40px;text-align:center;"><h2>Virtual Try-On</h2><p>Initializing...</p></div>';
+    }
+    
+  } catch (error) {
+    console.error('❌ Virtual Try-On error:', error);
+    alert('Virtual Try-On failed to load: ' + error.message);
+  }
+};
+
+// ── PART 5: Fix Outfit Builder ───────────────────────────────────
+window.showOutfitBuilder = function() {
+  console.log('👔 Opening Outfit Builder...');
+  
+  try {
+    if (typeof hideAllSections === 'function') hideAllSections();
+    
+    const section = document.getElementById('outfit-builder');
+    if (!section) {
+      console.error('❌ Outfit Builder section not found');
+      alert('Outfit Builder section is missing from your HTML');
+      return;
+    }
+    
+    section.style.display = 'block';
+    
+    // Add styles if function exists
+    if (typeof addOutfitBuilderStyles === 'function') {
+      addOutfitBuilderStyles();
+    }
+    
+    // Initialize if function exists
+    if (typeof initOutfitBuilder === 'function') {
+      initOutfitBuilder();
+      console.log('✓ Outfit Builder initialized');
+    } else {
+      console.warn('⚠ initOutfitBuilder function not found');
+      section.innerHTML = '<div style="padding:40px;text-align:center;"><h2>Outfit Builder</h2><p>Initializing...</p></div>';
+    }
+    
+  } catch (error) {
+    console.error('❌ Outfit Builder error:', error);
+    alert('Outfit Builder failed to load: ' + error.message);
+  }
+};
+
+// ── PART 6: Global product card click handler ────────────────────
+document.addEventListener('click', function(e) {
+  // Check if click is on product card
+  const productCard = e.target.closest('.product');
+  
+  if (productCard) {
+    // Ignore if clicking on button
+    if (e.target.closest('button') || e.target.tagName === 'BUTTON') {
+      return;
+    }
+    
+    const productId = productCard.dataset.productId;
+    if (productId && typeof viewProduct === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+      viewProduct(productId, e);
+    }
+  }
+});
+
+// ── PART 7: Diagnostic function ──────────────────────────────────
+window.runDiagnostics = function() {
+  console.log('\n' + '='.repeat(60));
+  console.log('🔍 ACIDIC WEBSITE DIAGNOSTICS');
+  console.log('='.repeat(60) + '\n');
+  
+  // 1. Check productData
+  console.log('1️⃣ PRODUCT DATA:');
+  if (window.productData) {
+    console.log('  ✓ productData exists');
+    console.log('  Categories:', Object.keys(window.productData).join(', '));
+    
+    if (window.productData.allproducts) {
+      console.log('  ✓ allproducts:', window.productData.allproducts.length, 'products');
+      console.log('  Sample IDs:', window.productData.allproducts.slice(0, 5).map(p => p.id + ' - ' + p.name));
+    } else {
+      console.log('  ❌ allproducts array missing!');
+    }
+  } else {
+    console.log('  ❌ productData not loaded!');
+  }
+  
+  // 2. Check functions
+  console.log('\n2️⃣ FUNCTIONS:');
+  const functions = ['viewProduct', 'showAIStylist', 'showVirtualTryOn', 'showOutfitBuilder', 
+                     'initVirtualTryOn', 'initOutfitBuilder', 'hideAllSections'];
+  functions.forEach(fn => {
+    console.log('  ' + (typeof window[fn] === 'function' ? '✓' : '❌') + ' ' + fn);
+  });
+  
+  // 3. Check HTML sections
+  console.log('\n3️⃣ HTML SECTIONS:');
+  const sections = {
+    'AI Stylist': 'ai-stylist-section',
+    'Virtual Try-On': 'virtual-tryon',
+    'Outfit Builder': 'outfit-builder',
+    'Rewards': 'loyalty-program',
+    'Products': 'product-section'
+  };
+  Object.entries(sections).forEach(([name, id]) => {
+    const exists = document.getElementById(id);
+    console.log('  ' + (exists ? '✓' : '❌') + ' ' + name + ' (' + id + ')');
+  });
+  
+  // 4. Check product cards
+  console.log('\n4️⃣ PRODUCT CARDS:');
+  const cards = document.querySelectorAll('.product');
+  console.log('  Total cards on page:', cards.length);
+  if (cards.length > 0) {
+    const withId = Array.from(cards).filter(c => c.dataset.productId).length;
+    console.log('  Cards with product ID:', withId);
+    console.log('  First card ID:', cards[0].dataset.productId || '❌ MISSING');
+  }
+  
+  console.log('\n' + '='.repeat(60));
+  console.log('📋 DIAGNOSTICS COMPLETE');
+  console.log('='.repeat(60) + '\n');
+};
+
+// ── Auto-run diagnostics on load ─────────────────────────────────
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    console.log('\n🎯 COMPREHENSIVE FIX LOADED\n');
+    console.log('Run window.runDiagnostics() to check everything\n');
+  }, 1000);
+});
+
+console.log('✅ COMPREHENSIVE FIX INSTALLED\n');

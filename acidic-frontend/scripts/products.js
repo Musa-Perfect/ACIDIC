@@ -1487,6 +1487,223 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update cart count
     updateCartCount();
     
+    // === SINGLE SOURCE OF TRUTH FOR VIEW PRODUCT ===
+// This ensures only ONE viewProduct function exists
+
+window.viewProduct = function(productId, event) {
+    // Prevent any event issues
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    console.log('🔍 Opening product:', productId);
+    
+    // Find product from the source
+    let product = null;
+    
+    // Search in allproducts first (fastest)
+    if (window.productData && window.productData.allproducts) {
+        product = window.productData.allproducts.find(p => p.id == productId);
+    }
+    
+    // If not found, search in categories
+    if (!product && window.productData) {
+        const categories = ['tshirts', 'sweaters', 'hoodies', 'pants', 'twopieces', 'accessories'];
+        for (const category of categories) {
+            if (window.productData[category]) {
+                product = window.productData[category].find(p => p.id == productId);
+                if (product) break;
+            }
+        }
+    }
+    
+    // Final fallback - check localStorage
+    if (!product) {
+        try {
+            const stored = JSON.parse(localStorage.getItem('acidicProducts') || '[]');
+            product = stored.find(p => p.id == productId);
+        } catch (e) {
+            console.warn('Could not load from localStorage');
+        }
+    }
+    
+    if (!product) {
+        console.error('❌ Product not found:', productId);
+        if (typeof showNotification === 'function') {
+            showNotification('Product not found', 'error');
+        } else {
+            alert('Product not found');
+        }
+        return;
+    }
+    
+    console.log('✅ Found product:', product.name);
+    
+    // Prepare product data for the detail page
+    try {
+        // Complete product data with all variants
+        const productDetail = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            description: product.description || `Premium ${product.category} from ACIDIC Clothing`,
+            material: product.material || '100% Cotton',
+            images: product.images && product.images.length ? product.images : ['acidic 1.jpg'],
+            category: product.category,
+            // Ensure variants exist
+            variants: product.variants || [
+                { 
+                    name: 'Color', 
+                    options: ['Black', 'White', 'Red', 'Blue', 'Lime', 'Cyan', 'Cream', 'Green', 'Brown', 'Pink'] 
+                },
+                { 
+                    name: 'Size', 
+                    options: product.category === 'accessories' ? ['One Size'] : ['XS', 'S', 'M', 'L', 'XL', 'XXL'] 
+                }
+            ],
+            // Ensure inventory exists
+            inventory: product.inventory || generateInventoryForProduct(product),
+            totalStock: product.totalStock || 10,
+            sku: product.sku || `ACID-${(product.category || 'GEN').toUpperCase()}-${productId.toString().slice(-4)}`,
+            lowStockThreshold: 5,
+            status: 'active'
+        };
+        
+        // Store with timestamp to avoid caching issues
+        const storageKey = `product_${productId}_${Date.now()}`;
+        const productData = {
+            ...productDetail,
+            _stored: new Date().toISOString(),
+            _version: '1.0'
+        };
+        
+        // Store in multiple places for redundancy
+        localStorage.setItem('currentProduct', JSON.stringify(productData));
+        localStorage.setItem(`product_${productId}`, JSON.stringify(productData));
+        sessionStorage.setItem(`viewing_product_${productId}`, JSON.stringify(productData));
+        
+        // Clean up old product data (keep last 10)
+        try {
+            const keys = Object.keys(localStorage);
+            const productKeys = keys.filter(k => k.startsWith('product_') && !k.includes('_20'));
+            if (productKeys.length > 10) {
+                productKeys.sort().slice(0, -10).forEach(key => localStorage.removeItem(key));
+            }
+        } catch (e) {
+            // Ignore cleanup errors
+        }
+        
+        console.log('💾 Product stored, redirecting to product.html');
+        
+        // Navigate to product page
+        const productUrl = `product.html?id=${productId}&t=${Date.now()}`;
+        
+        // Use different navigation based on environment
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Development - simple redirect
+            window.location.href = productUrl;
+        } else {
+            // Production - use replace to avoid history issues
+            window.location.replace(productUrl);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error preparing product:', error);
+        // Fallback navigation
+        window.location.href = `product.html?id=${productId}`;
+    }
+};
+
+// Helper function to generate inventory if missing
+function generateInventoryForProduct(product) {
+    const colors = ['Black', 'White', 'Red', 'Blue', 'Lime', 'Cyan', 'Cream', 'Green', 'Brown', 'Pink'];
+    const sizes = product.category === 'accessories' ? ['One Size'] : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    const inventory = [];
+    
+    colors.forEach(color => {
+        sizes.forEach(size => {
+            inventory.push({
+                sku: `ACID-${(product.category || 'GEN').slice(0,3).toUpperCase()}-${color.slice(0,3).toUpperCase()}-${size}`,
+                color: color,
+                size: size,
+                stock: Math.floor(Math.random() * 15) + 5,
+                lowStock: 5
+            });
+        });
+    });
+    
+    return inventory;
+}
+
+// Override any existing viewProduct functions
+window.originalViewProduct = window.viewProduct;
+window.viewProduct = window.viewProduct; // This ensures our version is used
+
+// Fix all product card click handlers on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Small delay to ensure DOM is ready
+    setTimeout(function() {
+        console.log('🔧 Setting up product click handlers...');
+        
+        // Remove all existing click handlers by cloning
+        document.querySelectorAll('.product').forEach(card => {
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+        });
+        
+        // Add fresh click handlers
+        document.querySelectorAll('.product').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Ignore clicks on buttons
+                if (e.target.closest('button') || 
+                    e.target.closest('.quick-add') || 
+                    e.target.closest('.view-details') ||
+                    e.target.closest('.add-to-cart')) {
+                    return;
+                }
+                
+                const productId = this.dataset.productId;
+                if (productId) {
+                    window.viewProduct(productId, e);
+                }
+            });
+        });
+        
+        // Fix view details buttons
+        document.querySelectorAll('.view-details').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const card = this.closest('.product');
+                if (card && card.dataset.productId) {
+                    window.viewProduct(card.dataset.productId, e);
+                }
+            });
+        });
+        
+        console.log('✅ Product click handlers fixed permanently');
+    }, 100);
+});
+
+// Also add a global click handler as backup
+document.addEventListener('click', function(e) {
+    // If a product card was clicked but not handled
+    const productCard = e.target.closest('.product');
+    if (productCard && !e.target.closest('button')) {
+        const productId = productCard.dataset.productId;
+        if (productId && !e.defaultPrevented) {
+            window.viewProduct(productId, e);
+        }
+    }
+});
+
+// Export for module use if needed
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { viewProduct: window.viewProduct };
+}
+
     // Make sure productData is globally available
     window.productData = productData;
     
@@ -1517,6 +1734,15 @@ function viewProduct(productId, event) {
     if (event) event.stopPropagation();
     
     console.log('Opening product page for ID:', productId);
+    
+    // Check if productData exists
+    if (!window.productData || !window.productData.allproducts) {
+        console.error('Product data not loaded!');
+        if (typeof showNotification === 'function') {
+            showNotification('Product catalog not loaded. Please refresh.', 'error');
+        }
+        return;
+    }
     
     // First check if product exists in productData
     let product = window.productData.allproducts.find(p => p.id == productId);
