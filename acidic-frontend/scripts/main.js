@@ -2252,6 +2252,123 @@ function prevExpSlide() {
     goToExpSlide(prevIndex);
 }
 
+function proceedToPayFast() {
+  const subtotal = calculateCartSubtotal();
+  const total = subtotal + 150;
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  
+  // Set PayFast form values
+  document.getElementById('payfast_amount').value = total;
+  document.getElementById('mkhoza160@gmail.com').value = user?.email || '';
+  
+  // Submit to PayFast
+  document.querySelector('form[action*="payfast"]').submit();
+}
+
+function initPayPalButton() {
+  paypal.Buttons({
+    createOrder: function(data, actions) {
+      const subtotal = calculateCartSubtotal();
+      const total = subtotal + 150;
+      
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            currency_code: 'ZAR',
+            value: total.toFixed(2)
+          },
+          description: 'ACIDIC Clothing Order'
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        // Payment successful
+        handleSuccessfulPayment({
+          success: true,
+          transactionId: details.id,
+          amount: details.purchase_units[0].amount.value
+        });
+      });
+    },
+    onError: function(err) {
+      console.error('PayPal Error:', err);
+      showNotification('Payment failed. Please try again.', 'error');
+    }
+  }).render('#paypal-button-container');
+}
+
+// Call this when payment modal opens
+document.addEventListener('DOMContentLoaded', function() {
+  initPayPalButton();
+});
+
+const stripe = Stripe('pk_test_51T3w8URyvtBjnGFMPR0zSauTAWuGvCJTQmmiIfKluNCAkzNbaXygHObh4EGzOwhg0G2BYqeVgTqs12PjgVjCQwiF008ysQzXvv');
+
+async function payWithStripe() {
+  const subtotal = calculateCartSubtotal();
+  const total = (subtotal + 150) * 100; // Convert to cents
+  
+  // Create payment intent on your server
+  const response = await fetch('/create-payment-intent', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: total })
+  });
+  
+  const { clientSecret } = await response.json();
+  
+  // Confirm payment
+  const result = await stripe.confirmCardPayment(clientSecret, {
+    payment_method: {
+      card: cardElement,
+      billing_details: {
+        name: document.getElementById('cardholder_name').value
+      }
+    }
+  });
+  
+  if (result.error) {
+    showNotification(result.error.message, 'error');
+  } else {
+    handleSuccessfulPayment({
+      success: true,
+      transactionId: result.paymentIntent.id,
+      amount: total / 100
+    });
+  }
+}
+
+// Add PayPal button functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const paypalButton = document.querySelector('button[name="paypal"]');
+  
+  if (paypalButton) {
+    paypalButton.addEventListener('click', function() {
+      alert('PayPal integration not yet configured.\n\n' +
+            'To enable real payments:\n' +
+            '1. Create PayPal Business account\n' +
+            '2. Get API credentials\n' +
+            '3. Add PayPal SDK script\n' +
+            '4. Configure button handler\n\n' +
+            'See PAYMENT_INTEGRATION.md for details');
+    });
+  }
+  
+  const applePayButton = document.querySelector('button[name="apple-pay"]');
+  
+  if (applePayButton) {
+    applePayButton.addEventListener('click', function() {
+      alert('Apple Pay integration requires:\n' +
+            '1. Apple Developer account\n' +
+            '2. Payment provider (Stripe recommended)\n' +
+            '3. SSL certificate (HTTPS)\n' +
+            '4. Domain verification\n\n' +
+            'See PAYMENT_INTEGRATION.md for details');
+    });
+  }
+});
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the page with experience section
@@ -2622,3 +2739,220 @@ window.addEventListener('load', function() {
 
 console.log('✅ COMPREHENSIVE FIX INSTALLED\n');
 
+// ================================================================
+//  PAYMENT BUTTONS FIX
+//  Add this to main.js or run in console
+//  Makes PayPal/Apple Pay buttons functional with setup instructions
+// ================================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔧 Setting up payment buttons...');
+  
+  // Wait for modal to be available
+  setTimeout(function() {
+    
+    // ── PayPal Button ───────────────────────────────────────────────
+    const paypalButton = document.querySelector('button[name="paypal"]');
+    
+    if (paypalButton) {
+      // Remove any existing onclick
+      paypalButton.onclick = null;
+      
+      // Add new click handler
+      paypalButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('PayPal button clicked');
+        
+        // Show setup instruction modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          padding: 20px;
+        `;
+        
+        modal.innerHTML = `
+          <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+            <h2 style="margin: 0 0 16px; color: #0070ba;">
+              <svg width="32" height="32" style="vertical-align: middle; margin-right: 8px;" viewBox="0 0 124 33">
+                <path fill="#0070ba" d="M46.211,6.749h-6.839c-0.468,0-0.866,0.34-0.939,0.802l-2.766,17.537c-0.055,0.346,0.213,0.658,0.564,0.658h3.265c0.468,0,0.866-0.34,0.939-0.803l0.746-4.73c0.072-0.463,0.471-0.803,0.938-0.803h2.165c4.505,0,7.105-2.18,7.784-6.5c0.306-1.89,0.013-3.375-0.872-4.415C50.224,7.353,48.5,6.749,46.211,6.749z"/>
+              </svg>
+              PayPal Setup Required
+            </h2>
+            
+            <div style="background: #fff8e1; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+              <strong>⚠️ PayPal is not yet configured</strong>
+            </div>
+            
+            <p style="margin: 0 0 16px; color: #666; font-size: 14px;">
+              To accept PayPal payments, you need to:
+            </p>
+            
+            <ol style="margin: 0 0 20px; padding-left: 24px; color: #333; font-size: 14px; line-height: 1.8;">
+              <li><strong>Create a PayPal Business account</strong> at <a href="https://www.paypal.com/za/business" target="_blank" style="color: #0070ba;">paypal.com/za/business</a></li>
+              <li><strong>Get your Client ID</strong> from the Developer Dashboard</li>
+              <li><strong>Add PayPal SDK script</strong> to your HTML</li>
+              <li><strong>Configure the button</strong> with your credentials</li>
+            </ol>
+            
+            <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #333;">Quick Setup:</p>
+              <p style="margin: 0; font-size: 12px; color: #666; line-height: 1.6;">
+                See <strong>PAYMENT_INTEGRATION_GUIDE.md</strong> for complete step-by-step instructions,
+                including code examples and test credentials.
+              </p>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+              <button onclick="this.closest('div[style*=fixed]').remove()" style="flex: 1; padding: 12px; background: #0070ba; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                Got It
+              </button>
+              <button onclick="window.open('https://www.paypal.com/za/business', '_blank')" style="flex: 1; padding: 12px; background: white; color: #0070ba; border: 2px solid #0070ba; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                Sign Up for PayPal
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close on background click
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+      });
+      
+      console.log('✓ PayPal button configured');
+    } else {
+      console.warn('⚠ PayPal button not found');
+    }
+    
+    // ── Apple Pay Button ────────────────────────────────────────────
+    const applePayButton = document.querySelector('button[name="apple-pay"]');
+    
+    if (applePayButton) {
+      // Remove any existing onclick
+      applePayButton.onclick = null;
+      
+      // Add new click handler
+      applePayButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Apple Pay button clicked');
+        
+        // Show setup instruction modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          padding: 20px;
+        `;
+        
+        modal.innerHTML = `
+          <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+            <h2 style="margin: 0 0 16px; color: #000;">
+              <svg width="32" height="32" style="vertical-align: middle; margin-right: 8px;" viewBox="0 0 512 210.2">
+                <path d="M93.6 27.1C87.6 10.3 72.8 0 56.1 0H20.5C17.8 0 15.5 1.8 15 4.5L0 102.4c-.3 2.1 1.3 4 3.4 4h24.3l6.1-38.7-.2.9c.5-2.7 2.8-4.5 5.5-4.5h11.5c22.6 0 40.3-9.2 45.5-35.8.2-.9.3-1.7.5-2.5-.1 0-.1 0 0 0 1.8-11.7-.1-19.7-6-26.7z" fill="#253B80"/>
+              </svg>
+              Apple Pay Setup Required
+            </h2>
+            
+            <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+              <strong>⚠️ Apple Pay is not yet configured</strong>
+            </div>
+            
+            <p style="margin: 0 0 16px; color: #666; font-size: 14px;">
+              To accept Apple Pay, you need to:
+            </p>
+            
+            <ol style="margin: 0 0 20px; padding-left: 24px; color: #333; font-size: 14px; line-height: 1.8;">
+              <li><strong>Set up HTTPS</strong> (SSL certificate required)</li>
+              <li><strong>Sign up for Stripe</strong> (recommended provider)</li>
+              <li><strong>Register your domain</strong> with Apple</li>
+              <li><strong>Integrate Payment Request API</strong></li>
+            </ol>
+            
+            <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #333;">Recommended Approach:</p>
+              <p style="margin: 0; font-size: 12px; color: #666; line-height: 1.6;">
+                Use <strong>Stripe</strong> for Apple Pay integration. It handles all the complexity
+                and works across devices. See <strong>PAYMENT_INTEGRATION_GUIDE.md</strong> for details.
+              </p>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+              <button onclick="this.closest('div[style*=fixed]').remove()" style="flex: 1; padding: 12px; background: #000; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                Got It
+              </button>
+              <button onclick="window.open('https://stripe.com', '_blank')" style="flex: 1; padding: 12px; background: white; color: #000; border: 2px solid #000; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                Get Started with Stripe
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close on background click
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+      });
+      
+      console.log('✓ Apple Pay button configured');
+    } else {
+      console.warn('⚠ Apple Pay button not found');
+    }
+    
+  }, 1000); // Wait for modal HTML to load
+  
+});
+
+// ── Add notice to payment modal ──────────────────────────────────
+function addPaymentNotice() {
+  const paymentModal = document.getElementById('payment-modal');
+  if (!paymentModal) return;
+  
+  const paymentOptions = paymentModal.querySelector('.payment--options');
+  if (!paymentOptions || paymentOptions.querySelector('.payment-notice')) return;
+  
+  const notice = document.createElement('div');
+  notice.className = 'payment-notice';
+  notice.style.cssText = `
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+    color: #1565c0;
+    line-height: 1.6;
+  `;
+  notice.innerHTML = `
+    <strong>ℹ️ Note:</strong> PayPal and Apple Pay buttons show setup instructions. 
+    Card payment uses simulation for testing. See <strong>PAYMENT_INTEGRATION_GUIDE.md</strong> to configure real payments.
+  `;
+  
+  paymentOptions.parentNode.insertBefore(notice, paymentOptions);
+}
+
+setTimeout(addPaymentNotice, 1500);
+
+console.log('✅ Payment buttons fix installed');
