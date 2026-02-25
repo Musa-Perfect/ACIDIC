@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - ACIDIC Clothing</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #1f2937;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    .order-summary {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 2px solid #e5e7eb;
+    }
+    .payfast-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #00adef 0%, #0088cc 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 173, 239, 0.4);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .payfast-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 173, 239, 0.5);
+    }
+    .payfast-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .security-notice {
+      text-align: center;
+      margin-top: 20px;
+      padding: 16px;
+      background: #f0f9ff;
+      border-radius: 8px;
+      border: 1px solid #bae6fd;
+      font-size: 14px;
+      color: #0c4a6e;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #6b7280;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link:hover {
+      color: #1f2937;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Complete Your Order</h1>
+    <p class="subtitle">You're being redirected to PayFast to complete your secure payment</p>
+
+    <div class="order-summary" id="order-summary">
+      <div id="cart-items"></div>
+      <div class="order-total">
+        <span>Total:</span>
+        <span id="order-total">R0.00</span>
+      </div>
+    </div>
+
+    <!-- PAYFAST FORM - STANDALONE, NO INTERFERENCE -->
+    <form id="payfast-form" action="https://sandbox.payfast.co.za/eng/process" method="POST">
+      
+      <!-- Merchant Details -->
+      <input type="hidden" name="merchant_id" value="10046120">
+      <input type="hidden" name="merchant_key" value="m3himwm18fojr">
+      
+      <!-- Return URLs -->
+      <input type="hidden" name="return_url" id="return_url" value="">
+      <input type="hidden" name="cancel_url" id="cancel_url" value="">
+      <input type="hidden" name="notify_url" value="">
+      
+      <!-- Transaction Info -->
+      <input type="hidden" name="amount" id="payfast_amount" value="">
+      <input type="hidden" name="item_name" value="ACIDIC Clothing Order">
+      <input type="hidden" name="item_description" id="payfast_description" value="">
+      
+      <!-- Customer Info -->
+      <input type="hidden" name="email_address" id="payfast_email" value="">
+      <input type="hidden" name="name_first" id="payfast_name_first" value="">
+      <input type="hidden" name="name_last" id="payfast_name_last" value="">
+      <input type="hidden" name="cell_number" id="payfast_cell" value="">
+      
+      <!-- Custom Fields -->
+      <input type="hidden" name="custom_str1" id="payfast_order_id" value="">
+      <!-- custom_str2 removed - cart data stored in sessionStorage instead -->
+      
+      <!-- Submit Button -->
+      <button type="submit" class="payfast-btn" id="submit-btn">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+        </svg>
+        Pay Securely with PayFast
+      </button>
+    </form>
+
+    <div class="security-notice">
+      🔒 <strong>Secure Payment</strong><br>
+      Your payment is processed securely by PayFast
+    </div>
+
+    <a href="index.html" class="back-link">← Back to Store</a>
+  </div>
+
+  <script>
+    console.log('🔒 Standalone PayFast Checkout Page');
+
+    // Get cart and customer data from localStorage/sessionStorage
+    const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData') || '{}');
+
+    // Check if cart is empty
+    if (cart.length === 0) {
+      alert('Your cart is empty. Redirecting to store...');
+      window.location.href = 'index.html';
+    }
+
+    // Calculate total
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const delivery = 150;
+    const total = subtotal + delivery;
+
+    // Display order summary
+    const cartItemsDiv = document.getElementById('cart-items');
+    cart.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'order-item';
+      itemDiv.innerHTML = `
+        <span>${item.name} × ${item.quantity}</span>
+        <span>R${(item.price * item.quantity).toFixed(2)}</span>
+      `;
+      cartItemsDiv.appendChild(itemDiv);
+    });
+
+    // Add delivery
+    const deliveryDiv = document.createElement('div');
+    deliveryDiv.className = 'order-item';
+    deliveryDiv.innerHTML = `
+      <span>Delivery</span>
+      <span>R${delivery.toFixed(2)}</span>
+    `;
+    cartItemsDiv.appendChild(deliveryDiv);
+
+    document.getElementById('order-total').textContent = 'R' + total.toFixed(2);
+
+    // Generate order ID
+    const orderId = 'ACD' + Date.now();
+
+    // Fill form fields
+    document.getElementById('payfast_amount').value = total.toFixed(2);
+    document.getElementById('payfast_description').value = `Order ${orderId} - ${cart.length} item(s)`;
+    document.getElementById('payfast_email').value = checkoutData.email || user.email || '';
+    document.getElementById('payfast_order_id').value = orderId;
+    // Cart stored in sessionStorage, not sent to PayFast (exceeds 255 char limit)
+
+    // Split name
+    const fullName = checkoutData.name || user.name || 'Customer';
+    const names = fullName.split(' ');
+    document.getElementById('payfast_name_first').value = names[0] || 'Customer';
+    document.getElementById('payfast_name_last').value = names.slice(1).join(' ') || 'ACIDIC';
+
+    // Phone
+    const phone = (checkoutData.phone || user.phone || '').replace(/[^0-9]/g, '');
+    if (phone) document.getElementById('payfast_cell').value = phone;
+
+    // Set return URLs based on current domain
+    const baseUrl = window.location.origin + window.location.pathname.replace('payfast-checkout.html', '');
+    document.getElementById('return_url').value = baseUrl + 'success.html';
+    document.getElementById('cancel_url').value = baseUrl + 'cancel.html';
+
+    // Store order for success page
+    sessionStorage.setItem('pendingOrder', JSON.stringify({
+      orderId: orderId,
+      items: cart,
+      subtotal: subtotal,
+      delivery: delivery,
+      total: total,
+      timestamp: new Date().toISOString()
+    }));
+
+    console.log('✅ PayFast form initialized');
+    console.log('   Amount: R' + total.toFixed(2));
+    console.log('   Order ID:', orderId);
+    console.log('   Email:', document.getElementById('payfast_email').value);
+
+    // Handle form submission
+    document.getElementById('payfast-form').addEventListener('submit', function(e) {
+      const email = document.getElementById('payfast_email').value;
+      
+      if (!email || !email.includes('@')) {
+        e.preventDefault();
+        alert('Please complete checkout first - email is required');
+        window.location.href = 'index.html';
+        return false;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = `
+        <div class="spinner"></div>
+        Redirecting to PayFast...
+      `;
+
+      console.log('🚀 Submitting to PayFast...');
+      console.log('   URL:', this.action);
+      console.log('   Amount: R' + total);
+
+      // Form will submit naturally
+      return true;
+    });
+  </script>
+</body>
+</html>

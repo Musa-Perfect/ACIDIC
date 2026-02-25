@@ -1666,13 +1666,13 @@
     <form id="payfast-form" action="https://sandbox.payfast.co.za/eng/process" method="POST">
       
       <!-- Merchant Details -->
-      <input type="hidden" name="merchant_id" value="19119364">
-      <input type="hidden" name="merchant_key" value="ucfce5gbzdffz">
+      <input type="hidden" name="merchant_id" value="10046120">
+      <input type="hidden" name="merchant_key" value="m3himwm18fojr">
       
       <!-- Return URLs - CHANGE THESE TO YOUR DOMAIN -->
-      <input type="hidden" name="return_url" value="http://localhost/payment-success.html">
-      <input type="hidden" name="cancel_url" value="http://localhost/payment-cancel.html">
-      <input type="hidden" name="notify_url" value="http://localhost/notify.php">
+      <input type="hidden" name="return_url" value="success.html">
+      <input type="hidden" name="cancel_url" value="cancel.html">
+      <input type="hidden" name="notify_url" value="https://yoursite.com/notify">
       
       <!-- Transaction Info -->
       <input type="hidden" name="amount" id="payfast_amount" value="">
@@ -1687,7 +1687,7 @@
       
       <!-- Custom Fields -->
       <input type="hidden" name="custom_str1" id="payfast_order_id" value="">
-      <input type="hidden" name="custom_str2" id="payfast_cart_items" value="">
+      <!-- custom_str2 removed - cart exceeds 255 char limit -->
       
       <!-- Submit Button -->
       <button type="submit" style="
@@ -1724,22 +1724,8 @@
   </div>
 </div>
 
-          <form action="https://www.payfast.co.za/eng/process" method="POST">
-  <!-- Merchant Details -->
-  <input type="hidden" name="merchant_id" value="19119364">
-  <input type="hidden" name="merchant_key" value="ucfce5gbzdffz">
-  <input type="hidden" name="return_url" value="https://yoursite.com/success.html">
-  <input type="hidden" name="cancel_url" value="https://yoursite.com/cancel.html">
-  <input type="hidden" name="notify_url" value="https://yoursite.com/notify.php">
-  
-  <!-- Transaction Details -->
-  <input type="hidden" name="amount" id="payfast_amount">
-  <input type="hidden" name="item_name" value="ACIDIC Clothing Order">
-  <input type="hidden" name="email_address" id="mkhoza160@gmail.com">
-  
-  <!-- Submit Button -->
-  <button type="submit">Pay with PayFast</button>
-</form>
+          <!-- Duplicate form removed -->
+
 
         </form>
       </div>
