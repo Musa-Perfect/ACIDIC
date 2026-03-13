@@ -1,23 +1,11 @@
 {
-  "name": "acidic-web",
+  "name": "acidic-website",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "test": "jest --runInBand"
+    "start": "node server.js"
   },
-  "devDependencies": {
-    "jest": "29.7.0",
-    "jest-environment-jsdom": "29.7.0",
-    "@babel/preset-env": "7.25.8",
-    "babel-jest": "29.7.0"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "testMatch": ["**/__tests__/**/*.test.js"],
-    "transform": {
-      "^.+\\.jsx?$": "babel-jest"
-    },
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+  "dependencies": {
+    "express": "^4.18.2"
   }
 }
