@@ -2956,3 +2956,95 @@ function addPaymentNotice() {
 setTimeout(addPaymentNotice, 1500);
 
 console.log('✅ Payment buttons fix installed');
+
+// ================================================================
+// PERMANENT PRODUCT FIX - Add this to your main.js or as a separate file
+// ================================================================
+
+(function() {
+    console.log('🔧 Applying permanent product fixes...');
+    
+    // Ensure all products are saved with their correct IDs
+    function ensureProductsSaved() {
+        if (window.productData && window.productData.allproducts) {
+            window.productData.allproducts.forEach(product => {
+                const key = `acidic_product_${product.id}`;
+                if (!localStorage.getItem(key)) {
+                    localStorage.setItem(key, JSON.stringify(product));
+                }
+            });
+            localStorage.setItem('acidicProducts', JSON.stringify(window.productData.allproducts));
+        }
+    }
+    
+    // Override viewProduct function
+    window.viewProduct = function(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        console.log(`Opening product: ${id}`);
+        
+        // Try to get from localStorage
+        let product = null;
+        const key = `acidic_product_${id}`;
+        const stored = localStorage.getItem(key);
+        
+        if (stored) {
+            product = JSON.parse(stored);
+        } else if (window.productData && window.productData.allproducts) {
+            product = window.productData.allproducts.find(p => p.id == id);
+            if (product) {
+                localStorage.setItem(key, JSON.stringify(product));
+            }
+        }
+        
+        if (product) {
+            localStorage.setItem('currentProduct', JSON.stringify(product));
+            window.location.href = `product.html?id=${id}`;
+        } else {
+            console.error(`Product ${id} not found`);
+            alert('Product not found');
+        }
+    };
+    
+    // Fix product card clicks
+    function fixProductClicks() {
+        document.querySelectorAll('.product, .product-card, [class*="product-"]').forEach(card => {
+            // Remove any existing listeners by cloning
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+            
+            newCard.addEventListener('click', function(e) {
+                if (!e.target.closest('button') && !e.target.closest('.add-to-cart')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Try to find product ID
+                    const nameEl = this.querySelector('h3, .product-name, [class*="name"]');
+                    if (nameEl) {
+                        const productName = nameEl.textContent.trim();
+                        if (window.productData && window.productData.allproducts) {
+                            const product = window.productData.allproducts.find(p => 
+                                p.name.toLowerCase() === productName.toLowerCase() ||
+                                productName.toLowerCase().includes(p.name.toLowerCase())
+                            );
+                            if (product) {
+                                window.viewProduct(product.id, e);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    }
+    
+    // Run on page load
+    ensureProductsSaved();
+    
+    // Run again after a short delay for dynamically loaded content
+    setTimeout(fixProductClicks, 500);
+    setTimeout(fixProductClicks, 1000);
+    
+})();

@@ -187,89 +187,87 @@ function createProductObject(name, price, img, category, id = null) {
 
 // Populate the products with your existing data
 const tshirtData = [
-    { name: "Infinite", price: 250, img: "acidic 3.jpg" },
-    { name: "Infinite II", price: 350, img: "acidic 33.jpg" },
-    { name: "Acidic Effect", price: 350, img: "acidic 4.jpg" },
-    { name: "Lightning", price: 300, img: "acidic 19.jpg" },
-    { name: "Naruto", price: 400, img: "acidic 14.jpg" },
-    { name: "Hand Signature", price: 300, img: "acidic 16.jpg" },
-    { name: "Hand Signature II", price: 300, img: "acidic 15.jpg" },
-    { name: "Feather rainbow", price: 300, img: "acidic 26.jpg" },
-    { name: "Angelic", price: 300, img: "acidic 1.jpg" },
-    { name: "Rainbow", price: 350, img: "acidic 6.jpg" },
-    { name: "Butterfly effect", price: 300, img: "acidic 9.jpg" }
+    { id: 1771611565738, name: "Lightning", price: 300, img: "acidic 19.jpg" },
+    { id: 1771611565307, name: "Infinite", price: 250, img: "acidic 3.jpg" },
+    { id: 1771611565844, name: "Infinite II", price: 350, img: "acidic 33.jpg" },
+    { id: 1771611565384, name: "Acidic Effect", price: 350, img: "acidic 4.jpg" },
+    { id: 1771611565624, name: "Naruto", price: 400, img: "acidic 14.jpg" },
+    { id: 1771611565016, name: "Hand Signature", price: 300, img: "acidic 16.jpg" },
+    { id: 1771611565212, name: "Hand Signature II", price: 300, img: "acidic 15.jpg" },
+    { id: 1771611565073, name: "Feather rainbow", price: 300, img: "acidic 26.jpg" },
+    { id: 1771611565784, name: "Angelic", price: 300, img: "acidic 1.jpg" },
+    { id: 1771611565384, name: "Rainbow", price: 350, img: "acidic 6.jpg" },
+    { id: 1771611565835, name: "Butterfly effect", price: 300, img: "acidic 9.jpg" }
 ];
 
 const sweaterData = [
-    { name: "Infinite", price: 350, img: "acidic 2.jpg" },
-    { name: "Infinite II", price: 400, img: "acidic 7.jpg" },
-    { name: "Acidic Effect", price: 450, img: "acidic m.jpg" },
-    { name: "Angelic", price: 400, img: "acidic 1.jpg" },
-    { name: "Rainbow", price: 400, img: "acidic 34.jpg" },
-    { name: "Butterfly effect", price: 400, img: "acidic.jpg" }
+    { id: 1771611565029, name: "Infinite Sweater", price: 350, img: "acidic 2.jpg" },
+    { id: 1771611565411, name: "Infinite II Sweater", price: 400, img: "acidic 7.jpg" },
+    { id: 1771611565895, name: "Acidic Effect Sweater", price: 450, img: "acidic m.jpg" },
+    { id: 1771611565111, name: "Angelic Sweater", price: 400, img: "acidic 1.jpg" },
+    { id: 1771611565707, name: "Rainbow Sweater", price: 400, img: "acidic 34.jpg" },
+    { id: 1771611564974, name: "Butterfly effect Sweater", price: 400, img: "acidic.jpg" }
 ];
 
 const hoodieData = [
-    { name: "Infinite II", price: 500, img: "acidic 8.jpg" },
-    { name: "Feather rainbow", price: 450, img: "acidic 5.jpg" },
-    { name: "Hand Signature", price: 450, img: "acidic 24.jpg" },
-    { name: "Hand Signature II", price: 450, img: "acidic 23.jpg" },
-    { name: "Naruto", price: 550, img: "acidic 22.jpg" },
-    { name: "Angelic", price: 450, img: "acidic 25.jpg" },
-    { name: "Rainbow", price: 450, img: "acidic 27.jpg" },
-    { name: "Lightning", price: 450, img: "acidic 21.jpg" },
-    { name: "Infinite", price: 400, img: "acidic 32.jpg" }
+    { id: 1771611565384, name: "Infinite II Hoodie", price: 500, img: "acidic 8.jpg" },
+    { id: 1771611565247, name: "Feather rainbow Hoodie", price: 450, img: "acidic 5.jpg" },
+    { id: 1771611565516, name: "Hand Signature Hoodie", price: 450, img: "acidic 24.jpg" },
+    { id: 1771611565812, name: "Hand Signature II Hoodie", price: 450, img: "acidic 23.jpg" },
+    { id: 1771611565514, name: "Naruto Hoodie", price: 550, img: "acidic 22.jpg" },
+    { id: 1771611565699, name: "Angelic Hoodie", price: 450, img: "acidic 25.jpg" },
+    { id: 1771611565356, name: "Rainbow Hoodie", price: 450, img: "acidic 27.jpg" },
+    { id: 1771611565636, name: "Lightning Hoodie", price: 450, img: "acidic 21.jpg" },
+    { id: 1771611565495, name: "Infinite Hoodie", price: 400, img: "acidic 32.jpg" }
 ];
 
 const pantsData = [
-    { name: "Slim Fit Cargo", price: 499, img: "acidic 12.jpg" },
-    { name: "Street Joggers", price: 459, img: "acidic 13.jpg" }
+    { id: 1771611564933, name: "Slim Fit Cargo", price: 499, img: "acidic 12.jpg" },
+    { id: 1771611565837, name: "Street Joggers", price: 459, img: "acidic 13.jpg" }
 ];
 
 const twopiecesData = [
-    { name: "Ladies Set", price: 500, img: "acidic 28.jpg" },
-    { name: "Infinite Set", price: 500, img: "acidic 29.jpg" }
+    { id: 1771611565378, name: "Ladies Set", price: 500, img: "acidic 28.jpg" },
+    { id: 1771611565858, name: "Infinite Set", price: 500, img: "acidic 29.jpg" }
 ];
 
 const accessoriesData = [
-    { name: "Infinite Cap", price: 300, img: "acidic 31.jpg" },
-    { name: "Rainbow Cap", price: 250, img: "acidic 30.jpg" }
+    { id: 1771611565843, name: "Infinite Cap", price: 300, img: "acidic 31.jpg" },
+    { id: 1771611565841, name: "Rainbow Cap", price: 250, img: "acidic 30.jpg" }
 ];
 
-// Create products for each category
+// Create products for each category with FIXED IDs
 tshirtData.forEach(item => {
-    const product = createProductObject(item.name, item.price, item.img, 'tshirts');
+    const product = createProductObject(item.name, item.price, item.img, 'tshirts', item.id);
     productData.tshirts.push(product);
     productData.allproducts.push(product);
 });
 
 sweaterData.forEach(item => {
-    const product = createProductObject(item.name, item.price, item.img, 'sweaters');
+    const product = createProductObject(item.name, item.price, item.img, 'sweaters', item.id);
     productData.sweaters.push(product);
     productData.allproducts.push(product);
 });
 
 hoodieData.forEach(item => {
-    const product = createProductObject(item.name, item.price, item.img, 'hoodies');
+    const product = createProductObject(item.name, item.price, item.img, 'hoodies', item.id);
     productData.hoodies.push(product);
     productData.allproducts.push(product);
 });
 
 pantsData.forEach(item => {
-    const product = createProductObject(item.name, item.price, item.img, 'pants');
+    const product = createProductObject(item.name, item.price, item.img, 'pants', item.id);
     productData.pants.push(product);
     productData.allproducts.push(product);
 });
 
 twopiecesData.forEach(item => {
-    const product = createProductObject(item.name, item.price, item.img, 'twopieces');
+    const product = createProductObject(item.name, item.price, item.img, 'twopieces', item.id);
     productData.twopieces.push(product);
     productData.allproducts.push(product);
 });
 
 accessoriesData.forEach(item => {
-    // Accessories have different inventory (no sizes)
-    const productId = generateProductId();
     const inventory = colorOptions.map(color => ({
         sku: `ACID-ACC-${color.name.slice(0, 3).toUpperCase()}-OS`,
         color: color.name,
@@ -279,7 +277,7 @@ accessoriesData.forEach(item => {
     }));
     
     const product = {
-        id: productId,
+        id: item.id,
         name: item.name,
         category: 'accessories',
         price: item.price,
@@ -294,7 +292,7 @@ accessoriesData.forEach(item => {
         totalStock: inventory.reduce((sum, item) => sum + item.stock, 0),
         lowStockThreshold: 5,
         status: 'active',
-        sku: `ACID-ACC-${productId.toString().slice(-4)}`,
+        sku: `ACID-ACC-${item.id}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
@@ -304,14 +302,21 @@ accessoriesData.forEach(item => {
 
 // Save products to localStorage for admin system
 function saveProductsToLocalStorage() {
-    if (localStorage.getItem('acidicProducts')) {
-        console.log('Products already exist in localStorage');
-        return;
-    }
-    
     localStorage.setItem('acidicProducts', JSON.stringify(productData.allproducts));
+    
+    // Save each product individually with its ID
+    productData.allproducts.forEach(product => {
+        localStorage.setItem(`acidic_product_${product.id}`, JSON.stringify(product));
+    });
+    
     console.log('Products saved to localStorage:', productData.allproducts.length);
 }
+
+// Make products available globally
+window.productData = productData;
+
+// Auto-save when the script loads
+saveProductsToLocalStorage();
 
 // === COLOR SWATCH HELPER ===
 function getColorSwatchHTML(colorName) {
