@@ -3156,7 +3156,389 @@ function testCart() {
   }, 5000);
 }
 
-// Run test on load (optional)
-// document.addEventListener('DOMContentLoaded', function() {
-//   setTimeout(testCart, 1000);
-// });
+// Clear entire cart
+function clearCart() {
+  if (cart.length === 0) {
+    alert('Cart is already empty');
+    return;
+  }
+  
+  if (confirm('Are you sure you want to clear your entire cart?')) {
+    cart = [];
+    localStorage.setItem('acidicCart', JSON.stringify(cart));
+    updateCartCount();
+    loadCartItems();
+    
+    if (typeof showNotification === 'function') {
+      showNotification('Cart cleared successfully', 'success');
+    } else {
+      alert('Cart cleared!');
+    }
+  }
+}
+
+// ===== CART DELETE & CLEAR FIX =====
+// This fixes the delete item and clear cart functionality
+// Load this AFTER cart.js and cart-fix.js
+
+(function() {
+  'use strict';
+  
+  console.log('🔧 Loading Cart Delete & Clear Fix...');
+  
+  // Wait for DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDeleteClearFix);
+  } else {
+    initDeleteClearFix();
+  }
+  
+  function initDeleteClearFix() {
+    console.log('Initializing delete & clear fix...');
+    
+    // Fix 1: Clear Cart Function
+    fixClearCart();
+    
+    // Fix 2: Remove Item Function  
+    fixRemoveItem();
+    
+    // Fix 3: Quick Remove Function
+    fixQuickRemove();
+    
+    // Fix 4: Confirm Remove Function
+    fixConfirmRemove();
+    
+    // Fix 5: Re-bind buttons when cart loads
+    enhanceLoadCartItems();
+    
+    console.log('✅ Delete & Clear fix initialized');
+  }
+  
+  // Fix 1: CLEAR CART - Completely empties the cart
+  function fixClearCart() {
+    window.clearCart = function() {
+      console.log('🗑️ Clear cart clicked');
+      
+      // Get current cart to check if empty
+      const currentCart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+      
+      if (currentCart.length === 0) {
+        alert('Cart is already empty!');
+        return;
+      }
+      
+      // Show confirmation
+      if (!confirm(`Are you sure you want to remove all ${currentCart.length} items from your cart?`)) {
+        console.log('Clear cart cancelled');
+        return;
+      }
+      
+      try {
+        // Clear cart in localStorage
+        localStorage.setItem('acidicCart', '[]');
+        
+        // Clear global cart variable
+        window.cart = [];
+        
+        console.log('✅ Cart cleared successfully');
+        
+        // Update the UI
+        if (typeof updateCartCount === 'function') {
+          updateCartCount();
+        }
+        
+        // Reload cart display
+        if (typeof loadCartItems === 'function') {
+          loadCartItems();
+        }
+        
+        // Show success message
+        if (typeof showNotification === 'function') {
+          showNotification('Cart cleared successfully!', 'success');
+        } else {
+          alert('Cart cleared!');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error clearing cart:', error);
+        alert('Error clearing cart. Please try again.');
+      }
+    };
+    
+    console.log('✓ clearCart() function fixed');
+  }
+  
+  // Fix 2: REMOVE ITEM - Removes a single item by index
+  function fixRemoveItem() {
+    window.removeFromCart = function(index) {
+      console.log('🗑️ Remove item at index:', index);
+      
+      try {
+        // Get current cart from localStorage
+        const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+        
+        // Validate index
+        if (index < 0 || index >= cart.length) {
+          console.error('Invalid index:', index, 'Cart length:', cart.length);
+          return;
+        }
+        
+        // Get item name before removing
+        const itemName = cart[index].name;
+        
+        // Remove item
+        cart.splice(index, 1);
+        
+        // Save updated cart
+        localStorage.setItem('acidicCart', JSON.stringify(cart));
+        window.cart = cart;
+        
+        console.log('✅ Removed:', itemName, '- Remaining items:', cart.length);
+        
+        // Update UI
+        if (typeof updateCartCount === 'function') {
+          updateCartCount();
+        }
+        
+        // Reload cart display
+        if (typeof loadCartItems === 'function') {
+          loadCartItems();
+        }
+        
+        // Show success message
+        if (typeof showNotification === 'function') {
+          showNotification(`${itemName} removed from cart`, 'info');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error removing item:', error);
+        alert('Error removing item. Please try again.');
+      }
+    };
+    
+    console.log('✓ removeFromCart() function fixed');
+  }
+  
+  // Fix 3: QUICK REMOVE - Fast remove without confirmation
+  function fixQuickRemove() {
+    window.quickRemoveItem = function(index) {
+      console.log('⚡ Quick remove at index:', index);
+      
+      try {
+        // Get current cart from localStorage
+        const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+        
+        // Validate index
+        if (index < 0 || index >= cart.length) {
+          console.error('Invalid index:', index, 'Cart length:', cart.length);
+          return;
+        }
+        
+        // Get item name
+        const itemName = cart[index].name;
+        
+        // Remove item
+        cart.splice(index, 1);
+        
+        // Save
+        localStorage.setItem('acidicCart', JSON.stringify(cart));
+        window.cart = cart;
+        
+        console.log('✅ Quick removed:', itemName);
+        
+        // Update UI
+        if (typeof updateCartCount === 'function') {
+          updateCartCount();
+        }
+        
+        // Reload cart
+        if (typeof loadCartItems === 'function') {
+          loadCartItems();
+        }
+        
+      } catch (error) {
+        console.error('❌ Error in quick remove:', error);
+      }
+    };
+    
+    console.log('✓ quickRemoveItem() function fixed');
+  }
+  
+  // Fix 4: CONFIRM REMOVE - Remove with confirmation
+  function fixConfirmRemove() {
+    window.confirmRemoveItem = function(index) {
+      console.log('❓ Confirm remove at index:', index);
+      
+      try {
+        // Get cart
+        const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+        
+        if (index < 0 || index >= cart.length) {
+          console.error('Invalid index:', index);
+          return;
+        }
+        
+        const itemName = cart[index].name;
+        
+        // Ask for confirmation
+        if (confirm(`Remove ${itemName} from cart?`)) {
+          // Remove
+          cart.splice(index, 1);
+          
+          // Save
+          localStorage.setItem('acidicCart', JSON.stringify(cart));
+          window.cart = cart;
+          
+          console.log('✅ Confirmed remove:', itemName);
+          
+          // Update UI
+          if (typeof updateCartCount === 'function') {
+            updateCartCount();
+          }
+          
+          if (typeof loadCartItems === 'function') {
+            loadCartItems();
+          }
+          
+          if (typeof showNotification === 'function') {
+            showNotification(`${itemName} removed`, 'info');
+          }
+        } else {
+          console.log('Remove cancelled');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error in confirm remove:', error);
+      }
+    };
+    
+    console.log('✓ confirmRemoveItem() function fixed');
+  }
+  
+  // Fix 5: ENHANCE LOAD CART ITEMS - Fix remove buttons
+  function enhanceLoadCartItems() {
+    const originalLoadCartItems = window.loadCartItems;
+    
+    if (!originalLoadCartItems) {
+      console.warn('⚠️ loadCartItems function not found');
+      return;
+    }
+    
+    window.loadCartItems = function() {
+      // Call original function
+      originalLoadCartItems.apply(this, arguments);
+      
+      // Wait a bit for DOM to update, then fix buttons
+      setTimeout(() => {
+        fixAllRemoveButtons();
+      }, 100);
+    };
+    
+    console.log('✓ loadCartItems enhanced');
+  }
+  
+  // Fix ALL remove buttons in the cart
+  function fixAllRemoveButtons() {
+    console.log('🔧 Fixing all remove buttons...');
+    
+    // Find all remove buttons
+    const removeButtons = document.querySelectorAll('.remove-item, .remove-btn, [onclick*="remove"]');
+    
+    console.log(`Found ${removeButtons.length} remove buttons`);
+    
+    removeButtons.forEach((button, buttonIndex) => {
+      // Get the cart item this button belongs to
+      const cartItem = button.closest('.cart-item');
+      
+      if (cartItem) {
+        // Get the item index from data attribute
+        let itemIndex = cartItem.getAttribute('data-item-index');
+        
+        if (itemIndex !== null) {
+          itemIndex = parseInt(itemIndex);
+          
+          // Remove old onclick
+          button.onclick = null;
+          button.removeAttribute('onclick');
+          
+          // Add new click handler
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log(`🗑️ Remove button clicked for index: ${itemIndex}`);
+            
+            // Call quick remove (no confirmation)
+            if (typeof quickRemoveItem === 'function') {
+              quickRemoveItem(itemIndex);
+            } else if (typeof removeFromCart === 'function') {
+              removeFromCart(itemIndex);
+            }
+          });
+          
+          console.log(`✓ Fixed button ${buttonIndex} for item ${itemIndex}`);
+        }
+      }
+    });
+    
+    // Also fix clear cart button
+    fixClearCartButton();
+  }
+  
+  // Fix the clear cart button specifically
+  function fixClearCartButton() {
+    const clearButtons = document.querySelectorAll('.clear-cart-btn, [onclick*="clearCart"]');
+    
+    clearButtons.forEach(button => {
+      // Remove old onclick
+      button.onclick = null;
+      button.removeAttribute('onclick');
+      
+      // Add new handler
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (typeof clearCart === 'function') {
+          clearCart();
+        }
+      });
+    });
+    
+    if (clearButtons.length > 0) {
+      console.log(`✓ Fixed ${clearButtons.length} clear cart button(s)`);
+    }
+  }
+  
+  // Initial fix of buttons
+  setTimeout(() => {
+    fixAllRemoveButtons();
+  }, 500);
+  
+  // Also fix when cart opens
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('[onclick*="toggleCart"], #cart-icon, .cart-icon')) {
+      setTimeout(() => {
+        fixAllRemoveButtons();
+      }, 300);
+    }
+  });
+  
+})();
+
+// Debug helper
+window.debugCart = function() {
+  const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+  console.log('=== CART DEBUG ===');
+  console.log('Items:', cart.length);
+  console.log('Cart:', cart);
+  console.log('Functions available:');
+  console.log('- clearCart:', typeof clearCart);
+  console.log('- removeFromCart:', typeof removeFromCart);
+  console.log('- quickRemoveItem:', typeof quickRemoveItem);
+  console.log('==================');
+  return cart;
+};
+
+console.log('🎉 Cart Delete & Clear Fix Loaded!');
+console.log('💡 Type debugCart() in console to check cart status');

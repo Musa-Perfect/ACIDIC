@@ -134,7 +134,7 @@
       </div>
 
       <div class="hero-content">
-  <h2 class="hero-title">ACIDIC®</h2>
+  <h2 class="hero-title">ACIDIC</h2>
   <p class="hero-subtitle">
     Streetwear for the bold. Designed to stand out.
   </p>
@@ -211,365 +211,320 @@
 </button>
 </section>
 
-<section class="experience-section">
-  <!-- Slideshow Background -->
-  <div class="experience-slideshow-bg" id="experienceSlideshow">
-    <div class="exp-bg-slide active" style="background-image: url('acidic.jpg')"></div>
-    <div class="exp-bg-slide" style="background-image: url('acidic 32.jpg')"></div>
-    <div class="exp-bg-slide" style="background-image: url('acidic 29.jpg')"></div>
-    <div class="exp-bg-slide" style="background-image: url('acidic 2.jpg')"></div>
-    <div class="exp-bg-slide" style="background-image: url('acidic 3.jpg')"></div>
+<!-- REDESIGNED ACIDIC EXPERIENCE SECTION -->
+<!-- Replace your current experience-section with this -->
+
+<section class="experience-section-new">
+  <div class="experience-header">
+    <div class="header-content">
+      <span class="section-label">DISCOVER</span>
+      <h2 class="section-title-new">The ACIDIC Experience</h2>
+      <p class="section-subtitle">Innovative features designed to elevate your shopping journey</p>
+    </div>
   </div>
 
-  <!-- Navigation Buttons -->
-  <button class="exp-slideshow-nav exp-slideshow-prev" onclick="prevExpSlide()">❮</button>
-  <button class="exp-slideshow-nav exp-slideshow-next" onclick="nextExpSlide()">❯</button>
-  
-  <!-- Slideshow Dots -->
-  <div class="exp-slideshow-dots">
-    <div class="exp-dot active" onclick="goToExpSlide(0)"></div>
-    <div class="exp-dot" onclick="goToExpSlide(1)"></div>
-    <div class="exp-dot" onclick="goToExpSlide(2)"></div>
-    <div class="exp-dot" onclick="goToExpSlide(3)"></div>
-    <div class="exp-dot" onclick="goToExpSlide(4)"></div>
-  </div>
-
-  <h2 class="section-title">The ACIDIC Experience</h2>
-
-  <div class="experience-grid">
-    <!-- AI STYLIST -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('ai-stylist')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">🤖</div>
-                <h3>Creative AI Stylist</h3>
-              </div>
-              <p class="experience-description">
-                Get personalized outfit recommendations based on your style, mood, and trends.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Personalized</span>
-                <span class="tag">AI-Powered</span>
-              </div>
-            </div>
+  <div class="experience-grid-new">
+    
+    <!-- AI STYLIST CARD -->
+    <div class="exp-card" data-color="purple" onclick="openExperienceModal('ai-stylist')">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
           </div>
+          <span class="card-badge">AI POWERED</span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-title">AI Stylist</h3>
+          <p class="card-description">Get personalized outfit recommendations based on your unique style, mood, and the latest trends.</p>
           
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
-                  <path d="M19 13v-2a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
-                  <path d="M21 6h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"/>
-                </svg>
-              </div>
-              <h4>AI Stylist Details</h4>
-              <ul class="back-details">
-                <li>Style quiz with 4 personality types</li>
-                <li>Color palette recommendations</li>
-                <li>Occasion-based suggestions</li>
-                <li>Trend analysis</li>
-              </ul>
-              <div class="action-hint">
-                <span class="hint-text">Click to try the AI Stylist</span>
-                <span class="hint-arrow">→</span>
-              </div>
+          <div class="card-features">
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Style Quiz</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Color Analysis</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Trend Predictions</span>
             </div>
           </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="card-action-btn">
+            <span>Explore</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- VIRTUAL TRY-ON -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('virtual-tryon')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">👕</div>
-                <h3>Virtual Try-On</h3>
-              </div>
-              <p class="experience-description">
-                See how ACIDIC pieces look on you before purchasing with AR technology.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">AR Technology</span>
-                <span class="tag">Live Preview</span>
-              </div>
-            </div>
+    <!-- VIRTUAL TRY-ON CARD -->
+    <div class="exp-card" data-color="blue" onclick="openExperienceModal('virtual-tryon')">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 20h3c1.11 0 2-.89 2-2v-6.7c0-.66-.32-1.27-.86-1.64L17 7.54V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v3.54L3.86 9.66C3.32 10.03 3 10.64 3 11.3V18c0 1.11.89 2 2 2h3v-7h8v7zM9 4h6v3L12 5 9 7V4z"/>
+            </svg>
           </div>
+          <span class="card-badge">AR TECH</span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-title">Virtual Try-On</h3>
+          <p class="card-description">See how clothes look on you instantly with augmented reality technology before you buy.</p>
           
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-              </div>
-              <h4>Try-On Features</h4>
-              <ul class="back-details">
-                <li>Webcam integration</li>
-                <li>Real-time visualization</li>
-                <li>Multiple product try-ons</li>
-                <li>Save & compare looks</li>
-              </ul>
-              <div class="action-hint">
-                <span class="hint-text">Click to try Virtual Try-On</span>
-                <span class="hint-arrow">→</span>
-              </div>
+          <div class="card-features">
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Real-time Preview</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Multiple Angles</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Share Photos</span>
             </div>
           </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="card-action-btn">
+            <span>Try Now</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- SUSTAINABILITY -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('sustainability')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">🌱</div>
-                <h3>Sustainability</h3>
-              </div>
-              <p class="experience-description">
-                Built responsibly with ethical sourcing and low-impact materials.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Eco-Friendly</span>
-                <span class="tag">Ethical</span>
-              </div>
-            </div>
+    <!-- SUSTAINABILITY CARD -->
+    <div class="exp-card" data-color="green" onclick="openExperienceModal('sustainability')">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.25-.87C6.5 20.5 7 19 7 19c.5 1 1 2 1 2 1-1 1.5-2 1.5-2 .5 1 1 2 1 2 1-1 1.5-2 1.5-2 .5 1 1 2 1 2s1.5-1 2-2c.5 1 1 2 1 2 1-1 1.5-2 1.5-2 .5 1 1 2 1 2 1-1 1.5-2 1.5-2s1 1.5 1.5 2.5c0 0 .5-1.5 1-2.5l.42-1.4C21.2 12.5 19 10 17 8z"/>
+            </svg>
           </div>
+          <span class="card-badge">ECO FRIENDLY</span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-title">Sustainability</h3>
+          <p class="card-description">Shop with a conscience. Every purchase contributes to a greener future and ethical fashion.</p>
           
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                </svg>
-              </div>
-              <h4>Our Impact</h4>
-              <div class="impact-stats-back">
-                <div class="impact-stat">
-                  <span class="stat-number">12,450L</span>
-                  <span class="stat-label">Water Saved</span>
-                </div>
-                <div class="impact-stat">
-                  <span class="stat-number">2,840kg</span>
-                  <span class="stat-label">CO₂ Reduced</span>
-                </div>
-                <div class="impact-stat">
-                  <span class="stat-number">1,250</span>
-                  <span class="stat-label">Items Upcycled</span>
-                </div>
-              </div>
-              <div class="action-hint">
-                <span class="hint-text">Click to see full impact</span>
-                <span class="hint-arrow">→</span>
-              </div>
+          <div class="card-features">
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Recycled Materials</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Carbon Neutral</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Ethical Production</span>
             </div>
           </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="card-action-btn">
+            <span>Learn More</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- REWARDS -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('rewards')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">🎁</div>
-                <h3>Rewards</h3>
-              </div>
-              <p class="experience-description">
-                Earn points for every interaction and unlock exclusive benefits.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Loyalty</span>
-                <span class="tag">Exclusive</span>
-              </div>
-            </div>
+    <!-- LOYALTY REWARDS CARD -->
+    <div class="exp-card" data-color="gold" onclick="openExperienceModal('rewards')">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 00-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/>
+            </svg>
           </div>
+          <span class="card-badge">VIP ACCESS</span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-title">Loyalty Rewards</h3>
+          <p class="card-description">Earn points with every purchase and unlock exclusive perks, discounts, and early access.</p>
           
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                </svg>
-              </div>
-              <h4>Rewards Program</h4>
-              <div class="tiers-back">
-                <div class="tier-back">
-                  <span class="tier-name">Bronze</span>
-                  <span class="tier-points">100 pts • 10% Off</span>
-                </div>
-                <div class="tier-back">
-                  <span class="tier-name">Silver</span>
-                  <span class="tier-points">200 pts • Free Delivery</span>
-                </div>
-                <div class="tier-back">
-                  <span class="tier-name">Gold</span>
-                  <span class="tier-points">500 pts • Exclusive Drops</span>
-                </div>
-              </div>
-              <div class="action-hint">
-                <span class="hint-text">Click to view rewards</span>
-                <span class="hint-arrow">→</span>
-              </div>
+          <div class="card-features">
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Points System</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Exclusive Drops</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Birthday Gifts</span>
             </div>
           </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="card-action-btn">
+            <span>Join Now</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- OUTFIT BUILDER -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('outfit-builder')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">🧩</div>
-                <h3>Outfit Builder</h3>
-              </div>
-              <p class="experience-description">
-                Mix and match tops, bottoms, and accessories in real time.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Creative</span>
-                <span class="tag">Interactive</span>
-              </div>
-            </div>
+    <!-- OUTFIT BUILDER CARD -->
+    <div class="exp-card" data-color="pink" onclick="openExperienceModal('outfit-builder')">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"/>
+            </svg>
           </div>
+          <span class="card-badge">CREATIVE</span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-title">Outfit Builder</h3>
+          <p class="card-description">Mix and match pieces to create perfect outfits. Save your favorites and share with friends.</p>
           
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                </svg>
-              </div>
-              <h4>Builder Features</h4>
-              <ul class="back-details">
-                <li>Mix & match tops & bottoms</li>
-                <li>Add accessories</li>
-                <li>Save outfit combinations</li>
-                <li>Add entire outfit to cart</li>
-              </ul>
-              <div class="action-hint">
-                <span class="hint-text">Click to build outfits</span>
-                <span class="hint-arrow">→</span>
-              </div>
+          <div class="card-features">
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Drag & Drop</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Save Looks</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Social Sharing</span>
             </div>
           </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="card-action-btn">
+            <span>Start Building</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- COMMUNITY -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('community')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">👥</div>
-                <h3>Community</h3>
-              </div>
-              <p class="experience-description">
-                Connect with creators, artists, and trendsetters in the ACIDIC community.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Social</span>
-                <span class="tag">Creative</span>
-              </div>
-            </div>
+    <!-- COMMUNITY CARD -->
+    <div class="exp-card" data-color="orange" onclick="openExperienceModal('community')">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
           </div>
+          <span class="card-badge">CONNECT</span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-title">Community</h3>
+          <p class="card-description">Join our vibrant community. Share your style, get inspired, and connect with fashion lovers.</p>
           
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <h4>Community Features</h4>
-              <ul class="back-details">
-                <li>Share your style with #ACIDICStyle</li>
-                <li>Connect with fashion creators</li>
-                <li>Exclusive community events</li>
-                <li>Style inspiration gallery</li>
-              </ul>
-              <div class="action-hint">
-                <span class="hint-text">Click to join community</span>
-                <span class="hint-arrow">→</span>
-              </div>
+          <div class="card-features">
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Style Feed</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Influencer Tips</span>
+            </div>
+            <div class="feature-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>Exclusive Events</span>
             </div>
           </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="card-action-btn">
+            <span>Join Community</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- SIZE FINDER -->
-    <div class="experience-card-wrapper" onclick="openExperienceModal('size-finder')">
-      <div class="experience-card">
-        <div class="card-content">
-          <div class="card-front">
-            <div class="front-content">
-              <div class="experience-header">
-                <div class="experience-icon">📏</div>
-                <h3>Size Finder</h3>
-              </div>
-              <p class="experience-description">
-                Find your perfect fit using smart measurements and body-based sizing.
-              </p>
-              <div class="feature-tags">
-                <span class="tag">Accurate</span>
-                <span class="tag">Smart</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="card-back">
-            <div class="back-content">
-              <div class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2v20"/>
-                  <path d="M2 12h20"/>
-                  <circle cx="12" cy="12" r="4"/>
-                </svg>
-              </div>
-              <h4>Size Finder Tools</h4>
-              <ul class="back-details">
-                <li>Body measurements input</li>
-                <li>Brand-accurate sizing</li>
-                <li>Reduce returns by 85%</li>
-                <li>Fit recommendations</li>
-              </ul>
-              <div class="action-hint">
-                <span class="hint-text">Click to find your size</span>
-                <span class="hint-arrow">→</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -812,11 +767,104 @@
   </div>
 </header>
 
-<section id="shop-page" style="display:none;">
-  <h2 class="section-title">All Products</h2>
+<!-- ENHANCED SHOP PAGE - Replace your shop-page section with this -->
 
+<section id="shop-page" style="display:none;">
+  <!-- Shop Header with Category Filters -->
+  <div class="shop-header">
+    <div class="shop-header-content">
+      <h2 class="section-title" id="shop-title">All Products</h2>
+      <p class="shop-subtitle">Discover our latest streetwear collection</p>
+    </div>
+    
+    <!-- Category Filter Pills -->
+    <div class="category-filter-pills">
+      <button class="filter-pill active" data-category="all" onclick="filterCategory('all')">
+        <span class="pill-icon">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
+        All Products
+        <span class="pill-count" id="count-all">0</span>
+      </button>
+      
+      <button class="filter-pill" data-category="tshirts" onclick="filterCategory('tshirts')">
+        <span class="pill-icon">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16 20h3c1.11 0 2-.89 2-2v-6.7c0-.66-.32-1.27-.86-1.64L17 7.54V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v3.54L3.86 9.66C3.32 10.03 3 10.64 3 11.3V18c0 1.11.89 2 2 2h3v-7h8v7zM9 4h6v3L12 5 9 7V4z"/>
+          </svg>
+        </span>
+        T-Shirts
+        <span class="pill-count" id="count-tshirts">0</span>
+      </button>
+      
+      <button class="filter-pill" data-category="hoodies" onclick="filterCategory('hoodies')">
+        <span class="pill-icon">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v7M8.5 8.5l-4-4M15.5 8.5l4-4"/>
+          </svg>
+        </span>
+        Hoodies
+        <span class="pill-count" id="count-hoodies">0</span>
+      </button>
+      
+      <button class="filter-pill" data-category="sweaters" onclick="filterCategory('sweaters')">
+        <span class="pill-icon">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9.5 4c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v.5h-5V4zM6 6v14h12V6H6zm10 12H8V8h8v10z"/>
+            <path d="M10 10h4v2h-4zM10 14h4v2h-4z"/>
+          </svg>
+        </span>
+        Sweaters
+        <span class="pill-count" id="count-sweaters">0</span>
+      </button>
+      
+      <button class="filter-pill" data-category="pants" onclick="filterCategory('pants')">
+        <span class="pill-icon">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16.5 2h-9C6.67 2 6 2.67 6 3.5v17c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-8h2v8c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-17c0-.83-.67-1.5-1.5-1.5zm-8 18h-2V4h2v16zm9 0h-2V4h2v16z"/>
+          </svg>
+        </span>
+        Pants
+        <span class="pill-count" id="count-pants">0</span>
+      </button>
+      
+      <button class="filter-pill" data-category="accessories" onclick="filterCategory('accessories')">
+        <span class="pill-icon">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z"/>
+          </svg>
+        </span>
+        Accessories
+        <span class="pill-count" id="count-accessories">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="products-loading" style="display:none;">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading amazing products...</p>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
   <div id="product-grid" class="products-grid">
-    <!-- Products render here -->
+    <!-- Products render here dynamically -->
+  </div>
+
+  <!-- Empty State -->
+  <div id="empty-state" style="display:none;">
+    <div class="empty-state-content">
+      <div class="empty-icon">🛍️</div>
+      <h3>No products found</h3>
+      <p>Try selecting a different category</p>
+      <button class="primary-btn" onclick="filterCategory('all')">View All Products</button>
+    </div>
   </div>
 </section>
 
@@ -1205,7 +1253,11 @@
     <!-- PRODUCT DETAILS MODAL -->
 <div id="product-modal" class="modal">
   <div class="modal-content">
-    <span class="close-modal" onclick="closeModal()">×</span>
+    <span class="close-modal" onclick="closeModal()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </span>
     
     <!-- Product Images Carousel -->
     <div class="product-images-carousel">
@@ -1270,7 +1322,11 @@
     <!-- CUSTOMIZATION MODAL -->
     <div id="customize-modal" class="modal">
       <div class="modal-content">
-        <span class="close-modal" onclick="closeCustomize()">×</span>
+        <span class="close-modal" onclick="closeCustomize()">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </span>
         <h3>Customize Your Item</h3>
         <div class="customization-options">
           <div class="color-picker">
@@ -1371,7 +1427,11 @@
     <!-- SIZE RECOMMENDER MODAL -->
     <div id="size-recommender-modal" class="modal">
       <div class="modal-content">
-        <span class="close-modal" onclick="closeSizeRecommender()">×</span>
+        <span class="close-modal" onclick="closeSizeRecommender()">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </span>
         <h3>Find Your Perfect Fit</h3>
         <div class="size-quiz">
           <div class="quiz-step">
@@ -1412,7 +1472,11 @@
     <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="modal">
       <div class="modal-content checkout-form">
-        <span class="close-modal" onclick="closeCheckout()">×</span>
+        <span class="close-modal" onclick="closeCheckout()">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </span>
         <h3>Checkout Details</h3>
         <p>Delivery Fee: <strong>R150</strong></p>
 
@@ -1519,7 +1583,11 @@
           class="payment-form"
           onsubmit="event.preventDefault(); processPayment();"
         >
-          <span class="close-modal" onclick="closePayment()">×</span>
+          <span class="close-modal" onclick="closePayment()">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </span>
 
           <!-- Order Summary -->
           <div class="order-summary">
@@ -1876,11 +1944,11 @@
               </a>
               
               <!-- Email (if you want to add) -->
-              <a href="mailto:info@acidicclothing.co.za" style="color: #ccc; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 14px; transition: color 0.3s;">
+              <a href="/cdn-cgi/l/email-protection#bad3d4dcd5fadbd9d3ded3d9d9d6d5ced2d3d4dd94d9d594c0db" style="color: #ccc; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 14px; transition: color 0.3s;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#f4b400">
                   <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
-                <span>info@acidicclothing.co.za</span>
+                <span><span class="__cf_email__" data-cfemail="f891969e97b8999b919c919b9b94978c9091969fd69b97d68299">[email&#160;protected]</span></span>
               </a>
               
             </div>
@@ -1926,7 +1994,9 @@
         <!-- Bottom Bar -->
         <div style="border-top: 1px solid #333; padding-top: 30px; text-align: center;">
           <p style="color: #999; font-size: 13px; line-height: 1.6;">
-            Made with <span style="color: #f4b400;">♥</span> in South Africa
+            Made with <svg width="14" height="14" fill="#f4b400" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin: 0 2px;">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg> in South Africa
             <br>
             <a href="#" style="color: #999; text-decoration: none; margin: 0 10px;">Privacy Policy</a> |
             <a href="#" style="color: #999; text-decoration: none; margin: 0 10px;">Terms & Conditions</a> |
@@ -1945,10 +2015,330 @@
       </div>
     </div>
 
+    <!-- QUICK ADD MODAL -->
+    <div id="quick-add-modal" class="quick-modal" style="display: none;">
+      <div class="quick-modal-overlay" onclick="closeQuickAddModal()"></div>
+      
+      <div class="quick-modal-content">
+        <button class="quick-modal-close" onclick="closeQuickAddModal()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        
+        <div class="quick-modal-header">
+          <img id="quick-product-img" src="" alt="">
+          <div>
+            <h3 id="quick-product-name">Product Name</h3>
+            <p id="quick-product-price" class="quick-price">R0.00</p>
+          </div>
+        </div>
+        
+        <div class="quick-option-group">
+          <label class="quick-label">Color: <span id="quick-selected-color">Black</span></label>
+          <div class="quick-color-options" id="quick-color-options"></div>
+        </div>
+        
+        <div class="quick-option-group">
+          <label class="quick-label">Size: <span id="quick-selected-size">M</span></label>
+          <div class="quick-size-options" id="quick-size-options"></div>
+        </div>
+        
+        <div class="quick-option-group">
+          <label class="quick-label">Quantity</label>
+          <div class="quick-quantity-selector">
+            <button class="quick-qty-btn" onclick="changeQuickQuantity(-1)">−</button>
+            <input type="number" id="quick-quantity" value="1" min="1" max="10" readonly>
+            <button class="quick-qty-btn" onclick="changeQuickQuantity(1)">+</button>
+          </div>
+        </div>
+        
+        <button class="quick-add-btn" onclick="confirmQuickAdd()">
+          Add to Cart - <span id="quick-total-price">R0.00</span>
+        </button>
+      </div>
+    </div>
+
+    <style>
+    /* Quick Add Modal Styles */
+    .quick-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .quick-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .quick-modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+    }
+
+    .quick-modal-content {
+      position: relative;
+      background: #fff;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 20px;
+      padding: 2rem;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .quick-modal.active .quick-modal-content {
+      transform: scale(1);
+    }
+
+    .quick-modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 35px;
+      height: 35px;
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      line-height: 1;
+    }
+
+    .quick-modal-close:hover {
+      background: #f4b400;
+      transform: rotate(90deg);
+    }
+
+    .quick-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .quick-modal-header img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .quick-modal-header h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: #000;
+    }
+
+    .quick-price {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #f4b400;
+      margin: 0;
+    }
+
+    .quick-option-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .quick-label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      color: #333;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-label span {
+      color: #f4b400;
+      font-weight: 800;
+    }
+
+    .quick-color-options {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .quick-color-swatch {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .quick-color-swatch:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .quick-color-swatch.active {
+      border-color: #f4b400;
+      box-shadow: 0 0 0 4px rgba(244, 180, 0, 0.2);
+    }
+
+    .quick-color-swatch.active::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.2rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .quick-size-options {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .quick-size-btn {
+      padding: 0.7rem 1.3rem;
+      background: #f8f8f8;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    .quick-size-btn:hover {
+      border-color: #f4b400;
+      background: rgba(244, 180, 0, 0.05);
+    }
+
+    .quick-size-btn.active {
+      background: linear-gradient(135deg, #f4b400, #ffcd3c);
+      border-color: #f4b400;
+      color: #000;
+      box-shadow: 0 4px 15px rgba(244, 180, 0, 0.3);
+    }
+
+    .quick-quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: fit-content;
+    }
+
+    .quick-qty-btn {
+      width: 42px;
+      height: 42px;
+      background: #f8f8f8;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+
+    .quick-qty-btn:hover {
+      background: #f4b400;
+      border-color: #f4b400;
+      color: #000;
+    }
+
+    .quick-quantity-selector input {
+      width: 65px;
+      height: 42px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      color: #000;
+    }
+
+    .quick-add-btn {
+      width: 100%;
+      padding: 1.2rem 2rem;
+      background: linear-gradient(135deg, #f4b400, #ffcd3c);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-add-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(244, 180, 0, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .quick-modal-content {
+        width: 95%;
+        padding: 1.5rem;
+      }
+      
+      .quick-modal-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .quick-modal-header img {
+        width: 100px;
+        height: 100px;
+      }
+    }
+    </style>
+
     <!-- EXPERIENCE MODAL -->
 <div id="experience-modal" class="modal">
   <div class="modal-content experience-modal-content">
-    <span class="close-modal" onclick="closeExperienceModal()">×</span>
+    <span class="close-modal" onclick="closeExperienceModal()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </span>
     <div id="experience-modal-body">
       <!-- Dynamic content injected here -->
     </div>
@@ -1959,7 +2349,11 @@
 <div id="cart-sidebar" class="cart-sidebar">
   <div class="cart-header">
     <h3>Your Cart</h3>
-    <button class="close-cart" onclick="toggleCart(false)">×</button>
+    <button class="close-cart" onclick="toggleCart(false)">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
   </div>
   
   <div class="cart-items" id="cart-items">
@@ -1974,9 +2368,10 @@
     <button class="checkout-btn" onclick="checkout()">Checkout</button>
     <button class="continue-shopping" onclick="toggleCart(false)">Continue Shopping</button>
   </div>
+  <button class="clear-cart-btn" onclick="clearCart()">Clear Cart</button>
 </div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
       function accessAdmin() {
         const password = prompt("Enter admin access code:");
         if (password === "acidic123") {
@@ -2007,10 +2402,944 @@
 <script src="scripts/auth.js"></script>
 <script src="scripts/rewards.js"></script>
 <script src="scripts/main.js"></script>
+<script src="scripts/experience-direct-navigation.js"></script>
+<script src="scripts/enhanced-category-system.js"></script>
+<script src="scripts/product-modal.js"></script>
 <script src="scripts/payfast-integration.js"></script>
 
 <script src="https://www.payfast.co.za/onsite/engine.js"></script>
 <script src="https://www.paypal.com/sdk/js?client-id=AT0SnUwGEExnXMXhFZFq8hsCh12-A4gH8VsC2f3rR5C3xfDVawCVRmKbAk-YrNjWfG2zQjmCADVDhQ94&currency=ZAR"></script>
 
-  </body>
+<script>
+  console.log('🔍 FINAL CHECK:');
+  console.log('productData exists:', !!window.productData);
+  console.log('allproducts length:', window.productData?.allproducts?.length || 0);
+  
+  if (!window.productData || !window.productData.allproducts) {
+    console.error('❌ CRITICAL: productData not loaded properly!');
+    console.log('Check that scripts/products.js exists and is loading correctly');
+  } else {
+    console.log('✅ All good! Products ready to go!');
+  }
+</script>
+
+<!-- FIXED Enhanced Category System - Paste at bottom before </body> -->
+<script>
+console.log('🎨 Loading FIXED Enhanced Category System...');
+
+(function() {
+  'use strict';
+  
+  let productsLoaded = false;
+  let retryCount = 0;
+  const maxRetries = 20;
+  
+  // Wait for products to load
+  function waitForProducts() {
+    if (window.productData && window.productData.allproducts && window.productData.allproducts.length > 0) {
+      console.log('✅ Products loaded:', window.productData.allproducts.length);
+      productsLoaded = true;
+      initEnhancedShop();
+    } else if (retryCount < maxRetries) {
+      retryCount++;
+      console.log('⏳ Waiting for products... attempt', retryCount);
+      setTimeout(waitForProducts, 200);
+    } else {
+      console.error('❌ Products failed to load after', maxRetries, 'attempts');
+    }
+  }
+  
+  // Start waiting
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(waitForProducts, 500);
+    });
+  } else {
+    setTimeout(waitForProducts, 500);
+  }
+  
+  function initEnhancedShop() {
+    console.log('Initializing enhanced shop...');
+    
+    setupCategorySystem();
+    enhanceCategoryCards();
+    updateProductCounts();
+    
+    // DON'T auto-load shop - let user navigate naturally
+    // Removed: filterCategory('all') to prevent auto-redirect
+    
+    // Ensure homepage is visible on load
+    ensureHomepageVisible();
+    
+    console.log('✅ Enhanced shop ready!');
+  }
+  
+  // Ensure homepage displays first (no auto-redirect to shop)
+  function ensureHomepageVisible() {
+    const homepage = document.getElementById('home-page');
+    const shopPage = document.getElementById('shop-page');
+    
+    if (homepage) {
+      homepage.style.display = 'block';
+      console.log('✅ Homepage visible');
+    }
+    
+    if (shopPage && shopPage.style.display === 'block') {
+      shopPage.style.display = 'none';
+      console.log('✅ Shop hidden (will open when user clicks category)');
+    }
+  }
+  
+  // Setup category system
+  function setupCategorySystem() {
+    
+    // showCategory - called from homepage category cards
+    window.showCategory = function(category) {
+      console.log('🎯 showCategory:', category);
+      
+      openShopPage();
+      
+      setTimeout(() => {
+        filterCategory(category);
+        setTimeout(() => scrollToProducts(), 300);
+      }, 600);
+    };
+    
+    // filterCategory - called from filter pills
+    window.filterCategory = function(category) {
+      console.log('🔍 Filtering:', category);
+      
+      if (!productsLoaded) {
+        console.warn('Products not loaded yet');
+        return;
+      }
+      
+      showLoadingState();
+      
+      setTimeout(() => {
+        performFilter(category);
+        hideLoadingState();
+      }, 300);
+    };
+  }
+  
+  // Open shop page
+  function openShopPage() {
+    if (typeof goToShop === 'function') {
+      goToShop();
+    } else {
+      // Hide all sections
+      document.querySelectorAll('section[id$="-page"], section[id$="-section"]').forEach(s => {
+        s.style.display = 'none';
+      });
+      
+      const shop = document.getElementById('shop-page');
+      if (shop) {
+        shop.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }
+  
+  // Perform filtering
+  function performFilter(category) {
+    const allProducts = window.productData.allproducts;
+    
+    let filtered = category === 'all' || category === 'allproducts'
+      ? allProducts
+      : allProducts.filter(p => matchesCategory(p, category));
+    
+    console.log(`Filtered: ${filtered.length} products in "${category}"`);
+    
+    updateActiveFilter(category);
+    updatePageTitle(category);
+    displayProducts(filtered);
+    
+    if (filtered.length > 0) {
+      hideEmptyState();
+    } else {
+      showEmptyState();
+    }
+  }
+  
+  // Check if product matches category
+  function matchesCategory(product, category) {
+    const pCat = (product.category || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const sCat = category.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    return pCat === sCat || pCat.includes(sCat) || sCat.includes(pCat);
+  }
+  
+  // Display products
+  function displayProducts(products) {
+    const grid = document.getElementById('product-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    products.forEach((product, index) => {
+      const card = createProductCard(product, index);
+      grid.appendChild(card);
+    });
+    
+    console.log('✅ Displayed', products.length, 'products');
+  }
+  
+  // Create product card
+  function createProductCard(product, index) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.style.animationDelay = `${Math.min(index * 0.1, 0.6)}s`;
+    
+    const img = product.images?.[0] || product.image || 'acidic 1.jpg';
+    const isNew = product.isNew || product.new || false;
+    
+    card.innerHTML = `
+      <div class="product-image-container">
+        ${isNew ? '<span class="new-badge">NEW</span>' : ''}
+        <img src="${img}" alt="${product.name}" class="product-image" 
+             onerror="this.src='acidic 1.jpg'" loading="lazy">
+        <button class="quick-add-cart">
+          <svg class="cart-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="product-info">
+        <p class="product-category">${product.category || 'Clothing'}</p>
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-price">R${parseFloat(product.price).toFixed(2)}</p>
+        ${product.description ? `<p class="product-description">${product.description.substring(0, 80)}${product.description.length > 80 ? '...' : ''}</p>` : ''}
+      </div>
+    `;
+    
+    // Click card to open details
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.quick-add-cart')) {
+        openProductDetails(product);
+      }
+    });
+    
+    // Quick add button
+    const btn = card.querySelector('.quick-add-cart');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      quickAdd(product, btn);
+    });
+    
+    return card;
+  }
+  
+  // Open product details
+  function openProductDetails(product) {
+    if (typeof viewProduct === 'function') {
+      viewProduct(product.id);
+    } else if (typeof showProductDetails === 'function') {
+      showProductDetails(product);
+    } else {
+      console.log('No product modal function found');
+    }
+  }
+  
+  // Quick add - opens modal for size/color/quantity selection
+  function quickAdd(product, btn) {
+    // Open Quick Add Modal
+    openQuickAddModal(product);
+  }
+  
+  // Update active filter
+  function updateActiveFilter(category) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    
+    const active = document.querySelector(`[data-category="${category}"]`) ||
+                   document.querySelector('[data-category="all"]');
+    if (active) active.classList.add('active');
+  }
+  
+  // Update title
+  function updatePageTitle(category) {
+    const title = document.getElementById('shop-title');
+    if (!title) return;
+    
+    const titles = {
+      'all': 'All Products',
+      'allproducts': 'All Products',
+      'tshirts': 'T-Shirts Collection',
+      'hoodies': 'Hoodies Collection',
+      'sweaters': 'Sweaters Collection',
+      'pants': 'Pants Collection',
+      'accessories': 'Accessories'
+    };
+    
+    title.textContent = titles[category.toLowerCase()] || 'Products';
+  }
+  
+  // Update product counts
+  function updateProductCounts() {
+    if (!productsLoaded) return;
+    
+    const products = window.productData.allproducts;
+    
+    const counts = {
+      'all': products.length,
+      'tshirts': products.filter(p => matchesCategory(p, 'tshirts')).length,
+      'hoodies': products.filter(p => matchesCategory(p, 'hoodies')).length,
+      'sweaters': products.filter(p => matchesCategory(p, 'sweaters')).length,
+      'pants': products.filter(p => matchesCategory(p, 'pants')).length,
+      'accessories': products.filter(p => matchesCategory(p, 'accessories')).length
+    };
+    
+    console.log('Product counts:', counts);
+    
+    Object.keys(counts).forEach(cat => {
+      const badge = document.getElementById(`count-${cat}`);
+      if (badge) badge.textContent = counts[cat];
+    });
+  }
+  
+  // Enhance homepage category cards
+  function enhanceCategoryCards() {
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.category-card');
+      
+      cards.forEach(card => {
+        const onclick = card.getAttribute('onclick');
+        if (onclick && onclick.includes('showCategory')) {
+          const match = onclick.match(/showCategory\(['"]([^'"]+)['"]\)/);
+          if (match) {
+            const cat = match[1];
+            card.removeAttribute('onclick');
+            card.addEventListener('click', () => showCategory(cat));
+            card.style.cursor = 'pointer';
+            card.style.transition = 'all 0.4s ease';
+            
+            card.addEventListener('mouseenter', function() {
+              this.style.transform = 'translateY(-10px) scale(1.02)';
+              this.style.boxShadow = '0 15px 40px rgba(244,180,0,0.4)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+              this.style.transform = 'translateY(0) scale(1)';
+              this.style.boxShadow = '';
+            });
+          }
+        }
+      });
+    }, 1000);
+  }
+  
+  // Scroll to products
+  function scrollToProducts() {
+    const grid = document.getElementById('product-grid');
+    if (grid && grid.children.length > 0) {
+      const pos = grid.getBoundingClientRect().top + window.pageYOffset - 120;
+      window.scrollTo({ top: pos, behavior: 'smooth' });
+    }
+  }
+  
+  // Loading state
+  function showLoadingState() {
+    const loading = document.getElementById('products-loading');
+    const grid = document.getElementById('product-grid');
+    if (loading) loading.style.display = 'block';
+    if (grid) grid.style.opacity = '0.3';
+  }
+  
+  function hideLoadingState() {
+    const loading = document.getElementById('products-loading');
+    const grid = document.getElementById('product-grid');
+    if (loading) loading.style.display = 'none';
+    if (grid) grid.style.opacity = '1';
+  }
+  
+  // Empty state
+  function showEmptyState() {
+    const empty = document.getElementById('empty-state');
+    const grid = document.getElementById('product-grid');
+    if (empty) empty.style.display = 'block';
+    if (grid) grid.style.display = 'none';
+  }
+  
+  function hideEmptyState() {
+    const empty = document.getElementById('empty-state');
+    const grid = document.getElementById('product-grid');
+    if (empty) empty.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+  }
+  
+  // Notification
+  function showNotif(msg) {
+    if (typeof showNotification === 'function') {
+      showNotification(msg, 'success');
+      return;
+    }
+    
+    const n = document.createElement('div');
+    n.style.cssText = `
+      position:fixed;top:80px;right:20px;
+      background:linear-gradient(135deg,#4caf50,#45a049);
+      color:white;padding:1rem 1.5rem;border-radius:12px;
+      box-shadow:0 8px 25px rgba(76,175,80,0.4);
+      z-index:100000;font-weight:600;
+      animation:slideIn 0.4s ease;
+    `;
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(() => {
+      n.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => n.remove(), 300);
+    }, 2500);
+  }
+  
+  // Debug helper
+  window.debugShop = function() {
+    console.log('=== SHOP DEBUG ===');
+    console.log('Products loaded:', productsLoaded);
+    console.log('Total products:', window.productData?.allproducts?.length || 0);
+    console.log('Product categories:');
+    window.productData?.allproducts?.forEach(p => {
+      console.log(p.name, '→', p.category);
+    });
+    console.log('==================');
+  };
+  
+  // === QUICK ADD MODAL FUNCTIONS ===
+  let quickProduct = null;
+  let quickColor = 'Black';
+  let quickSize = 'M';
+  
+  // Setup Quick Add Modal functions
+  window.openQuickAddModal = openQuickAddModal;
+  window.closeQuickAddModal = closeQuickAddModal;
+  window.changeQuickQuantity = changeQuickQuantity;
+  window.confirmQuickAdd = confirmQuickAdd;
+  window.selectQuickColor = selectQuickColor;
+  window.selectQuickSize = selectQuickSize;
+  
+  function openQuickAddModal(product) {
+    console.log('Opening quick add for:', product.name);
+    
+    quickProduct = product;
+    quickColor = 'Black';
+    quickSize = 'M';
+    
+    const modal = document.getElementById('quick-add-modal');
+    if (!modal) {
+      console.error('Quick add modal not found!');
+      return;
+    }
+    
+    // Populate modal
+    document.getElementById('quick-product-name').textContent = product.name;
+    document.getElementById('quick-product-price').textContent = `R${parseFloat(product.price).toFixed(2)}`;
+    document.getElementById('quick-product-img').src = product.images?.[0] || product.image || 'acidic 1.jpg';
+    document.getElementById('quick-quantity').value = 1;
+    document.getElementById('quick-total-price').textContent = `R${parseFloat(product.price).toFixed(2)}`;
+    document.getElementById('quick-selected-color').textContent = 'Black';
+    document.getElementById('quick-selected-size').textContent = 'M';
+    
+    populateQuickColors();
+    populateQuickSizes();
+    
+    // Show modal
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeQuickAddModal() {
+    const modal = document.getElementById('quick-add-modal');
+    if (!modal) return;
+    
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 300);
+  }
+  
+  function populateQuickColors() {
+    const container = document.getElementById('quick-color-options');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    const colors = [
+      { name: 'Black', hex: '#000000' },
+      { name: 'White', hex: '#ffffff' },
+      { name: 'Red', hex: '#ff0000' },
+      { name: 'Blue', hex: '#0000ff' },
+      { name: 'Green', hex: '#00ff00' }
+    ];
+    
+    colors.forEach((color, i) => {
+      const swatch = document.createElement('div');
+      swatch.className = 'quick-color-swatch' + (i === 0 ? ' active' : '');
+      swatch.style.background = color.hex;
+      if (color.name === 'White') {
+        swatch.style.border = '3px solid #e0e0e0';
+      }
+      swatch.title = color.name;
+      swatch.onclick = () => selectQuickColor(color.name, swatch);
+      container.appendChild(swatch);
+    });
+  }
+  
+  function selectQuickColor(colorName, swatch) {
+    quickColor = colorName;
+    document.getElementById('quick-selected-color').textContent = colorName;
+    
+    document.querySelectorAll('.quick-color-swatch').forEach(s => {
+      s.classList.remove('active');
+    });
+    swatch.classList.add('active');
+  }
+  
+  function populateQuickSizes() {
+    const container = document.getElementById('quick-size-options');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    ['XS', 'S', 'M', 'L', 'XL', 'XXL'].forEach((size) => {
+      const btn = document.createElement('button');
+      btn.className = 'quick-size-btn' + (size === 'M' ? ' active' : '');
+      btn.textContent = size;
+      btn.onclick = () => selectQuickSize(size, btn);
+      container.appendChild(btn);
+    });
+  }
+  
+  function selectQuickSize(size, btn) {
+    quickSize = size;
+    document.getElementById('quick-selected-size').textContent = size;
+    
+    document.querySelectorAll('.quick-size-btn').forEach(b => {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+  }
+  
+  function changeQuickQuantity(change) {
+    const input = document.getElementById('quick-quantity');
+    if (!input) return;
+    
+    let qty = parseInt(input.value) + change;
+    qty = Math.max(1, Math.min(qty, 10));
+    input.value = qty;
+    
+    // Update total price
+    if (quickProduct) {
+      const total = quickProduct.price * qty;
+      document.getElementById('quick-total-price').textContent = `R${total.toFixed(2)}`;
+    }
+  }
+  
+  function confirmQuickAdd() {
+    if (!quickProduct) return;
+    
+    const qty = parseInt(document.getElementById('quick-quantity').value) || 1;
+    
+    // Add to cart
+    const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');
+    
+    cart.push({
+      id: quickProduct.id,
+      name: quickProduct.name,
+      price: quickProduct.price,
+      image: quickProduct.images?.[0] || quickProduct.image || 'acidic 1.jpg',
+      size: quickSize,
+      color: quickColor,
+      quantity: qty,
+      addedAt: new Date().toISOString()
+    });
+    
+    localStorage.setItem('acidicCart', JSON.stringify(cart));
+    window.cart = cart;
+    
+    // Update cart count
+    if (typeof updateCartCount === 'function') {
+      updateCartCount();
+    }
+    
+    // Show notification
+    showNotif(`${quickProduct.name} added to cart!`);
+    
+    // Close modal
+    closeQuickAddModal();
+  }
+  
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeQuickAddModal();
+    }
+  });
+  
+})();
+
+console.log('🎉 Enhanced Category System + Quick Add Ready!');
+console.log('✅ Homepage loads first (no auto-redirect)');
+console.log('✅ Quick Add modal with color, size, quantity selection');
+</script>
+
+<!-- MODERN PRODUCT DETAIL MODAL -->
+<!-- Add this to your index.html (replace old customize-modal if exists) -->
+
+<div id="product-detail-modal" class="product-modal">
+  <div class="product-modal-overlay" onclick="closeProductModal()"></div>
+  
+  <div class="product-modal-container">
+    <!-- Close Button -->
+    <button class="product-modal-close" onclick="closeProductModal()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="product-modal-content">
+      
+      <!-- LEFT SIDE: Image Gallery -->
+      <div class="product-modal-gallery">
+        <div class="main-image-wrapper">
+          <div class="product-badge" id="product-badge">NEW</div>
+          <img id="product-main-image" src="" alt="Product" class="product-main-image">
+          
+          <!-- Image Navigation Arrows -->
+          <button class="gallery-nav prev" onclick="changeProductImage(-1)">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="gallery-nav next" onclick="changeProductImage(1)">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Thumbnail Gallery -->
+        <div class="thumbnail-gallery" id="thumbnail-gallery">
+          <!-- Thumbnails will be inserted here dynamically -->
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: Product Info -->
+      <div class="product-modal-info">
+        
+        <!-- Product Header -->
+        <div class="product-header">
+          <span class="product-category" id="product-category">T-SHIRTS</span>
+          <h2 class="product-name" id="product-name">Premium Streetwear Tee</h2>
+          <div class="product-rating">
+            <div class="stars">
+              <svg width="18" height="18" fill="#f4b400" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <svg width="18" height="18" fill="#f4b400" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <svg width="18" height="18" fill="#f4b400" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <svg width="18" height="18" fill="#f4b400" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <svg width="18" height="18" fill="#ddd" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <span class="rating-text">4.0 (128 reviews)</span>
+          </div>
+        </div>
+
+        <!-- Price Section -->
+        <div class="product-price-section">
+          <div class="price-wrapper">
+            <span class="current-price" id="product-price">R599</span>
+            <span class="original-price" id="product-original-price">R799</span>
+            <span class="discount-badge">-25%</span>
+          </div>
+        </div>
+
+        <!-- Product Description -->
+        <div class="product-description">
+          <p id="product-description">Premium quality streetwear designed for everyday comfort and style. Made with sustainable materials.</p>
+        </div>
+
+        <!-- Color Selection -->
+        <div class="product-option-group">
+          <label class="option-label">
+            <span>Color</span>
+            <span class="selected-value" id="selected-color-display">Black</span>
+          </label>
+          <div class="color-selector" id="color-selector">
+            <!-- Colors will be inserted dynamically -->
+            <div class="color-swatch active" data-color="Black" style="background: #000" onclick="selectProductColor(this, 'Black')">
+              <div class="color-checkmark">
+                <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="color-swatch" data-color="White" style="background: #fff; border: 2px solid #ddd" onclick="selectProductColor(this, 'White')">
+              <div class="color-checkmark">
+                <svg width="16" height="16" fill="#000" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="color-swatch" data-color="Red" style="background: #ff0000" onclick="selectProductColor(this, 'Red')">
+              <div class="color-checkmark">
+                <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="color-swatch" data-color="Blue" style="background: #0000ff" onclick="selectProductColor(this, 'Blue')">
+              <div class="color-checkmark">
+                <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="color-swatch" data-color="Green" style="background: #00ff00" onclick="selectProductColor(this, 'Green')">
+              <div class="color-checkmark">
+                <svg width="16" height="16" fill="#000" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Size Selection -->
+        <div class="product-option-group">
+          <label class="option-label">
+            <span>Size</span>
+            <button class="size-guide-btn" onclick="openSizeRecommender()">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z"/>
+              </svg>
+              Size Guide
+            </button>
+          </label>
+          <div class="size-selector" id="size-selector">
+            <button class="size-btn" data-size="XS" onclick="selectProductSize(this, 'XS')">XS</button>
+            <button class="size-btn" data-size="S" onclick="selectProductSize(this, 'S')">S</button>
+            <button class="size-btn active" data-size="M" onclick="selectProductSize(this, 'M')">M</button>
+            <button class="size-btn" data-size="L" onclick="selectProductSize(this, 'L')">L</button>
+            <button class="size-btn" data-size="XL" onclick="selectProductSize(this, 'XL')">XL</button>
+            <button class="size-btn" data-size="XXL" onclick="selectProductSize(this, 'XXL')">XXL</button>
+          </div>
+        </div>
+
+        <!-- Quantity Selector -->
+        <div class="product-option-group">
+          <label class="option-label">Quantity</label>
+          <div class="quantity-selector">
+            <button class="qty-btn" onclick="changeProductQuantity(-1)">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 13H5v-2h14v2z"/>
+              </svg>
+            </button>
+            <input type="number" id="product-quantity" value="1" min="1" max="10" readonly>
+            <button class="qty-btn" onclick="changeProductQuantity(1)">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="product-actions">
+          <button class="btn-add-to-cart" onclick="addProductToCart()">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+            <span>Add to Cart</span>
+          </button>
+          
+          <button class="btn-wishlist" onclick="toggleWishlist()">
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Product Features -->
+        <div class="product-features">
+          <div class="feature-item">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+            </svg>
+            <span>Free delivery on orders over R500</span>
+          </div>
+          <div class="feature-item">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>30-day easy returns</span>
+          </div>
+          <div class="feature-item">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.25-.87C6.5 20.5 7 19 7 19c.5 1 1 2 1 2 1-1 1.5-2 1.5-2 .5 1 1 2 1 2 1-1 1.5-2 1.5-2 .5 1 1 2 1 2s1.5-1 2-2c.5 1 1 2 1 2 1-1 1.5-2 1.5-2 .5 1 1 2 1 2 1-1 1.5-2 1.5-2s1 1.5 1.5 2.5c0 0 .5-1.5 1-2.5l.42-1.4C21.2 12.5 19 10 17 8z"/>
+            </svg>
+            <span>Sustainable & eco-friendly</span>
+          </div>
+        </div>
+
+        <!-- Product Details Accordion -->
+        <div class="product-details-accordion">
+          <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Product Details</span>
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+              </svg>
+            </button>
+            <div class="accordion-content">
+              <ul>
+                <li>100% Premium Cotton</li>
+                <li>Heavyweight 220gsm fabric</li>
+                <li>Ribbed crew neckline</li>
+                <li>Pre-shrunk for perfect fit</li>
+                <li>Screen-printed graphics</li>
+                <li>Made in South Africa</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Care Instructions</span>
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+              </svg>
+            </button>
+            <div class="accordion-content">
+              <ul>
+                <li>Machine wash cold</li>
+                <li>Tumble dry low heat</li>
+                <li>Do not bleach</li>
+                <li>Iron on low if needed</li>
+                <li>Do not dry clean</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Shipping & Returns</span>
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+              </svg>
+            </button>
+            <div class="accordion-content">
+              <ul>
+                <li>Free standard shipping on orders R500+</li>
+                <li>Express shipping available</li>
+                <li>Delivery within 3-7 business days</li>
+                <li>30-day return policy</li>
+                <li>Easy returns process</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT NAVIGATION FIX -->
+<script>
+// Override openProductModal to navigate to product page
+window.openProductModal = function(productId) {
+  console.log('Opening product:', productId);
+  
+  // Find the product
+  let product = null;
+  
+  // Search in window.productData
+  if (window.productData) {
+    // Try allproducts first
+    if (window.productData.allproducts) {
+      product = window.productData.allproducts.find(p => p.id == productId);
+    }
+    
+    // Try categories if not found
+    if (!product) {
+      const categories = ['tshirts', 'hoodies', 'sweaters', 'pants', 'twopieces', 'accessories'];
+      for (let cat of categories) {
+        if (window.productData[cat]) {
+          product = window.productData[cat].find(p => p.id == productId);
+          if (product) break;
+        }
+      }
+    }
+  }
+  
+  if (product) {
+    // Save product to localStorage (THIS IS THE KEY!)
+    localStorage.setItem(`acidic_product_${productId}`, JSON.stringify(product));
+    console.log('✅ Product saved:', product.name);
+    
+    // Navigate to product page
+    window.location.href = `product.html?id=${productId}`;
+  } else {
+    console.error('❌ Product not found:', productId);
+    alert('Product not found. Please refresh the page.');
+  }
+};
+
+console.log('✅ Product navigation fixed');
+</script>
+
+</body>
 </html>
+
+<!-- Additional CSS for SVG Icons -->
+<style>
+/* Ensure SVG icons display properly */
+.pill-icon svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.experience-icon svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.close-modal svg,
+.close-cart svg,
+.quick-modal-close svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Quick modal close button adjustment */
+.quick-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth transitions for icons */
+.pill-icon svg,
+.experience-icon svg {
+  transition: transform 0.3s ease;
+}
+
+.filter-pill:hover .pill-icon svg {
+  transform: scale(1.1);
+}
+
+.experience-card:hover .experience-icon svg {
+  transform: scale(1.1);
+}
+</style>
