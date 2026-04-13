@@ -1,5 +1,54 @@
 // === PRODUCT DATA WITH VARIANTS & REAL IMAGES ===
 
+// Load products from shared API
+async function loadProductsFromAPI() {
+    try {
+        const response = await fetch('/api/products.php');
+        const products = await response.json();
+        
+        if (products && products.length > 0) {
+            // Update window.productData
+            window.productData = {
+                allproducts: products,
+                tshirts: products.filter(p => p.category === 'tshirts'),
+                hoodies: products.filter(p => p.category === 'hoodies'),
+                sweaters: products.filter(p => p.category === 'sweaters'),
+                pants: products.filter(p => p.category === 'pants'),
+                twopieces: products.filter(p => p.category === 'twopieces'),
+                accessories: products.filter(p => p.category === 'accessories')
+            };
+            
+            // Also save to localStorage for backup
+            localStorage.setItem('acidicProducts', JSON.stringify(products));
+            
+            console.log('✅ Products loaded from API:', products.length);
+            return true;
+        }
+    } catch (error) {
+        console.warn('Failed to load from API, using localStorage:', error);
+        
+        // Fallback to localStorage
+        const stored = localStorage.getItem('acidicProducts');
+        if (stored) {
+            const products = JSON.parse(stored);
+            window.productData = {
+                allproducts: products,
+                tshirts: products.filter(p => p.category === 'tshirts'),
+                hoodies: products.filter(p => p.category === 'hoodies'),
+                sweaters: products.filter(p => p.category === 'sweaters'),
+                pants: products.filter(p => p.category === 'pants'),
+                twopieces: products.filter(p => p.category === 'twopieces'),
+                accessories: products.filter(p => p.category === 'accessories')
+            };
+            console.log('✅ Products loaded from localStorage');
+        }
+    }
+    return false;
+}
+
+// Initialize
+loadProductsFromAPI();
+
 // Generate unique IDs for products
 function generateProductId() {
     return Date.now() + Math.floor(Math.random() * 1000);

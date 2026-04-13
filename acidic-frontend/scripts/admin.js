@@ -1,2645 +1,666 @@
-// ===== ADMIN MANAGEMENT SYSTEM =====
+/**
+ * ACIDIC Admin Dashboard — admin.js
+ * Reads & writes products and orders via window.AcidicStore (acidic-store.js)
+ */
 
-// Product Management
-class ProductManager {
-    constructor() {
-        this.products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        this.categories = ['tshirts', 'sweaters', 'hoodies', 'pants', 'twopieces', 'accessories'];
-        this.loadProducts();
-    }
+// ─── SECTION NAVIGATION ──────────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll(".admin-section").forEach(s => s.style.display = "none");
+  document.querySelectorAll(".admin-sidebar li").forEach(li => li.classList.remove("active"));
 
-    loadProducts() {
-        // Load from localStorage
-        this.products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        
-        // If no products exist, load sample data
-        if (this.products.length === 0) {
-            this.loadSampleProducts();
-        }
-    }
+  const section = document.getElementById(name + "-section");
+  if (section) section.style.display = "block";
 
-    loadSampleProducts() {
-        const sampleProducts = [
-            {
-                id: 1,
-                name: 'ACIDIC Logo T-Shirt',
-                category: 'tshirts',
-                price: 299,
-                comparePrice: 399,
-                description: 'Premium cotton t-shirt with ACIDIC logo.',
-                images: ['acidic 9.jpg'],
-                variants: [
-                    { name: 'Color', options: ['Black', 'White', 'Grey'] },
-                    { name: 'Size', options: ['S', 'M', 'L', 'XL'] }
-                ],
-                inventory: [
-                    { sku: 'ACID-TSH-BLK-S', color: 'Black', size: 'S', stock: 15, lowStock: 5 },
-                    { sku: 'ACID-TSH-BLK-M', color: 'Black', size: 'M', stock: 20, lowStock: 5 },
-                    { sku: 'ACID-TSH-WHT-M', color: 'White', size: 'M', stock: 10, lowStock: 5 }
-                ],
-                totalStock: 45,
-                lowStockThreshold: 5,
-                status: 'active',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            }
-        ];
-        
-        this.products = sampleProducts;
-        this.saveProducts();
-    }
+  const navItem = [...document.querySelectorAll(".admin-sidebar li")]
+    .find(li => li.getAttribute("onclick") && li.getAttribute("onclick").includes(`'${name}'`));
+  if (navItem) navItem.classList.add("active");
 
-    saveProducts() {
-        localStorage.setItem('acidicProducts', JSON.stringify(this.products));
-        this.updateDashboardStats();
-    }
-
-    addProduct(productData) {
-        const newProduct = {
-            id: Date.now(),
-            ...productData,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        
-        this.products.push(newProduct);
-        this.saveProducts();
-        return newProduct;
-    }
-
-    updateProduct(id, productData) {
-        const index = this.products.findIndex(p => p.id == id);
-        if (index !== -1) {
-            this.products[index] = {
-                ...this.products[index],
-                ...productData,
-                updatedAt: new Date().toISOString()
-            };
-            this.saveProducts();
-            return true;
-        }
-        return false;
-    }
-
-    deleteProduct(id) {
-        const index = this.products.findIndex(p => p.id == id);
-        if (index !== -1) {
-            this.products.splice(index, 1);
-            this.saveProducts();
-            return true;
-        }
-        return false;
-    }
-
-    getProduct(id) {
-        return this.products.find(p => p.id == id);
-    }
-
-    getProductsByCategory(category) {
-        return this.products.filter(p => p.category === category);
-    }
-
-    searchProducts(query) {
-        if (!query) return this.products;
-        
-        return this.products.filter(product => 
-            product.name.toLowerCase().includes(query.toLowerCase()) ||
-            product.description.toLowerCase().includes(query.toLowerCase()) ||
-            product.category.toLowerCase().includes(query.toLowerCase())
-        );
-    }
-
-    getLowStockProducts() {
-        return this.products.filter(product => 
-            product.totalStock <= product.lowStockThreshold
-        );
-    }
-
-    updateStock(sku, quantity) {
-        const product = this.products.find(p => 
-            p.inventory?.some(item => item.sku === sku)
-        );
-        
-        if (product && product.inventory) {
-            const item = product.inventory.find(i => i.sku === sku);
-            if (item) {
-                item.stock = quantity;
-                product.totalStock = product.inventory.reduce((sum, i) => sum + i.stock, 0);
-                product.updatedAt = new Date().toISOString();
-                this.saveProducts();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    updateDashboardStats() {
-        // Update dashboard statistics
-        const totalProducts = this.products.length;
-        const lowStockItems = this.getLowStockProducts().length;
-        
-        // Calculate total sales (mock data for now)
-        const orders = JSON.parse(localStorage.getItem('acidicOrders')) || [];
-        const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
-        
-        // Update UI
-        document.getElementById('total-products').textContent = totalProducts;
-        document.getElementById('low-stock').textContent = lowStockItems;
-        document.getElementById('total-sales').textContent = `R${totalSales}`;
-        
-        // Update active promotions count
-        const promotions = JSON.parse(localStorage.getItem('acidicPromotions')) || [];
-        const activePromotions = promotions.filter(p => p.status === 'active').length;
-        document.getElementById('active-promotions').textContent = activePromotions;
-    }
-
-    renderProductsTable(filter = '') {
-        const tbody = document.getElementById('products-table-body');
-        if (!tbody) return;
-        
-        let productsToShow = this.products;
-        if (filter) {
-            productsToShow = this.searchProducts(filter);
-        }
-        
-        if (productsToShow.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px;">
-                        <i class="fas fa-box-open" style="font-size: 48px; color: #ddd; margin-bottom: 10px;"></i>
-                        <p>No products found</p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        tbody.innerHTML = productsToShow.map(product => {
-            const status = product.totalStock <= 0 ? 'out-of-stock' : 
-                          product.totalStock <= product.lowStockThreshold ? 'low-stock' : 'in-stock';
-            const statusText = status === 'out-of-stock' ? 'Out of Stock' : 
-                              status === 'low-stock' ? 'Low Stock' : 'In Stock';
-            
-            return `
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            ${product.images && product.images.length > 0 ? 
-                                `<img src="${product.images[0]}" alt="${product.name}" 
-                                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">` : 
-                                `<div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 5px; 
-                                      display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-tshirt" style="color: #ccc;"></i>
-                                </div>`
-                            }
-                            <div>
-                                <strong>${product.name}</strong><br>
-                                <small style="color: #666;">SKU: ${product.id}</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td>${this.formatCategory(product.category)}</td>
-                    <td>R${product.price}</td>
-                    <td>${product.totalStock || 0}</td>
-                    <td>
-                        <span class="status ${status}">${statusText}</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn edit-btn" onclick="editProduct(${product.id})">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    formatCategory(category) {
-        return category.charAt(0).toUpperCase() + category.slice(1);
-    }
+  // Load data for the section
+  if (name === "dashboard")   loadDashboard();
+  if (name === "products")    renderProductsTable();
+  if (name === "inventory")   renderInventory();
+  if (name === "orders")      renderAdminOrders();
+  if (name === "analytics")   renderAnalytics();
+  if (name === "promotions")  renderPromotions();
 }
 
-// Promotion Management
-class PromotionManager {
-    constructor() {
-        this.promotions = JSON.parse(localStorage.getItem('acidicPromotions')) || [];
-        this.loadPromotions();
-    }
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function loadDashboard() {
+  const stats = AcidicStore.getStats();
+  setEl("total-products", stats.totalProducts);
+  setEl("total-sales", "R" + stats.totalSales.toFixed(2));
+  setEl("low-stock", stats.lowStock);
 
-    loadPromotions() {
-        if (this.promotions.length === 0) {
-            this.loadSamplePromotions();
-        }
-    }
+  // Recent orders preview (last 5)
+  const orders = AcidicStore.getOrders().slice(0, 5);
+  const container = document.getElementById("recent-orders");
+  if (!container) return;
 
-    loadSamplePromotions() {
-        const samplePromotions = [
-            {
-                id: 1,
-                name: 'Summer Sale',
-                type: 'percentage',
-                value: 20,
-                startDate: new Date().toISOString(),
-                endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                target: 'all',
-                status: 'active',
-                createdAt: new Date().toISOString()
-            }
-        ];
-        
-        this.promotions = samplePromotions;
-        this.savePromotions();
-    }
+  if (orders.length === 0) {
+    container.innerHTML = `<p style="text-align:center;padding:20px;color:#666">No orders yet. Orders placed on your website will appear here.</p>`;
+    return;
+  }
 
-    savePromotions() {
-        localStorage.setItem('acidicPromotions', JSON.stringify(this.promotions));
-    }
-
-    addPromotion(promotionData) {
-        const newPromotion = {
-            id: Date.now(),
-            ...promotionData,
-            status: this.getPromotionStatus(promotionData.startDate, promotionData.endDate),
-            createdAt: new Date().toISOString()
-        };
-        
-        this.promotions.push(newPromotion);
-        this.savePromotions();
-        return newPromotion;
-    }
-
-    getPromotionStatus(startDate, endDate) {
-        const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        
-        if (now < start) return 'upcoming';
-        if (now > end) return 'expired';
-        return 'active';
-    }
-
-    updatePromotionStatuses() {
-        this.promotions.forEach(promo => {
-            promo.status = this.getPromotionStatus(promo.startDate, promo.endDate);
-        });
-        this.savePromotions();
-    }
-
-    renderPromotions() {
-        const container = document.getElementById('promotions-list');
-        if (!container) return;
-        
-        this.updatePromotionStatuses();
-        
-        if (this.promotions.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px; background: white; border-radius: 10px;">
-                    <i class="fas fa-percentage" style="font-size: 48px; color: #ddd; margin-bottom: 10px;"></i>
-                    <p>No promotions found</p>
-                    <button class="btn-primary" onclick="showAddPromotionModal()" 
-                            style="margin-top: 20px;">
-                        Create Your First Promotion
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
-        container.innerHTML = this.promotions.map(promo => {
-            const badgeClass = `promotion-badge ${promo.status}`;
-            const badgeText = promo.status.charAt(0).toUpperCase() + promo.status.slice(1);
-            
-            let valueText = '';
-            if (promo.type === 'percentage') {
-                valueText = `${promo.value}% OFF`;
-            } else if (promo.type === 'fixed') {
-                valueText = `R${promo.value} OFF`;
-            } else if (promo.type === 'bogo') {
-                valueText = 'Buy One Get One';
-            } else if (promo.type === 'free_shipping') {
-                valueText = 'Free Shipping';
-            }
-            
-            const startDate = new Date(promo.startDate).toLocaleDateString();
-            const endDate = new Date(promo.endDate).toLocaleDateString();
-            
-            return `
-                <div class="promotion-card">
-                    <div class="promotion-header">
-                        <div>
-                            <h3 style="margin: 0;">${promo.name}</h3>
-                            <p style="margin: 5px 0 0 0; color: #666;">
-                                ${startDate} - ${endDate}
-                            </p>
-                        </div>
-                        <span class="${badgeClass}">${badgeText}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <p style="font-size: 24px; font-weight: bold; color: #000; margin: 10px 0;">
-                                ${valueText}
-                            </p>
-                            <p style="color: #666; margin: 5px 0;">
-                                Applies to: ${promo.target === 'all' ? 'All Products' : 
-                                            promo.target === 'category' ? 'Specific Category' : 
-                                            'Specific Products'}
-                            </p>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="action-btn edit-btn" onclick="editPromotion(${promo.id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete-btn" onclick="deletePromotion(${promo.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${orders.map(o => `
+          <tr>
+            <td><strong>${o.id}</strong></td>
+            <td>${o.customerName || o.email || "Guest"}</td>
+            <td>${(o.items || []).length} item(s)</td>
+            <td>R${parseFloat(o.total || 0).toFixed(2)}</td>
+            <td><span class="status ${statusClass(o.status)}">${capitalize(o.status || "pending")}</span></td>
+            <td>${formatDate(o.createdAt)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>`;
 }
 
-// Initialize Managers
-const productManager = new ProductManager();
-const promotionManager = new PromotionManager();
+// ─── PRODUCTS TABLE ───────────────────────────────────────────────────────────
+function renderProductsTable(filter = "") {
+  let products = AcidicStore.getProducts();
+  if (filter) {
+    const q = filter.toLowerCase();
+    products = products.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      (p.sku || "").toLowerCase().includes(q)
+    );
+  }
 
-// NEW: Inventory Manager
-class InventoryManager {
-    constructor() {
-        this.lowStockThreshold = 5;
-    }
+  const tbody = document.getElementById("products-table-body");
+  if (!tbody) return;
 
-    getInventorySummary() {
-        const products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        
-        const summary = {
-            totalProducts: products.length,
-            totalValue: 0,
-            totalStock: 0,
-            lowStockItems: 0,
-            outOfStockItems: 0,
-            byCategory: {},
-            recentMovements: []
-        };
+  if (products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#666">No products found. Add your first product!</td></tr>`;
+    return;
+  }
 
-        products.forEach(product => {
-            // Calculate product value
-            const productValue = (product.price || 0) * (product.totalStock || 0);
-            summary.totalValue += productValue;
-            summary.totalStock += product.totalStock || 0;
-
-            // Track stock status
-            if (product.totalStock === 0) {
-                summary.outOfStockItems++;
-            } else if (product.totalStock <= (product.lowStockThreshold || this.lowStockThreshold)) {
-                summary.lowStockItems++;
-            }
-
-            // Group by category
-            if (!summary.byCategory[product.category]) {
-                summary.byCategory[product.category] = {
-                    count: 0,
-                    stock: 0,
-                    value: 0
-                };
-            }
-            summary.byCategory[product.category].count++;
-            summary.byCategory[product.category].stock += product.totalStock || 0;
-            summary.byCategory[product.category].value += productValue;
-        });
-
-        return summary;
-    }
-
-    getLowStockProducts() {
-        const products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        return products.filter(product => 
-            product.totalStock > 0 && 
-            product.totalStock <= (product.lowStockThreshold || this.lowStockThreshold)
-        );
-    }
-
-    getOutOfStockProducts() {
-        const products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        return products.filter(product => product.totalStock === 0);
-    }
-
-    updateStock(productId, variantSku, newStock) {
-        const products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        const productIndex = products.findIndex(p => p.id == productId);
-        
-        if (productIndex !== -1) {
-            if (variantSku && products[productIndex].inventory) {
-                // Update specific variant
-                const variantIndex = products[productIndex].inventory.findIndex(v => v.sku === variantSku);
-                if (variantIndex !== -1) {
-                    products[productIndex].inventory[variantIndex].stock = parseInt(newStock);
-                    
-                    // Recalculate total stock
-                    products[productIndex].totalStock = products[productIndex].inventory.reduce(
-                        (sum, variant) => sum + (variant.stock || 0), 0
-                    );
-                }
-            } else {
-                // Update overall stock
-                products[productIndex].totalStock = parseInt(newStock);
-            }
-            
-            localStorage.setItem('acidicProducts', JSON.stringify(products));
-            return true;
-        }
-        return false;
-    }
+  tbody.innerHTML = products.map(p => {
+    const stockStatus = p.stock === 0 ? "out-of-stock" : p.stock <= (p.lowStockThreshold || 5) ? "low-stock" : "in-stock";
+    const stockLabel  = p.stock === 0 ? "Out of Stock" : p.stock <= (p.lowStockThreshold || 5) ? "Low Stock" : "In Stock";
+    return `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            <img src="${p.image || p.images?.[0] || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;background:#eee" onerror="this.style.background='#ddd'" />
+            <div>
+              <strong>${p.name}</strong>
+              <div style="font-size:12px;color:#666">${p.sku || ""}</div>
+            </div>
+          </div>
+        </td>
+        <td>${capitalize(p.category)}</td>
+        <td>R${parseFloat(p.price).toFixed(2)}</td>
+        <td>${p.stock}</td>
+        <td><span class="status ${stockStatus}">${stockLabel}</span></td>
+        <td>
+          <div class="action-buttons">
+            <button class="action-btn edit-btn" onclick="editProduct(${p.id})">Edit</button>
+            <button class="action-btn delete-btn" onclick="confirmDeleteProduct(${p.id}, '${escHtml(p.name)}')">Delete</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join("");
 }
 
-// NEW: Order Manager
-class OrderManager {
-    constructor() {
-        this.orders = JSON.parse(localStorage.getItem('acidicOrders')) || [];
-        this.loadSampleOrders();
-    }
-
-    loadSampleOrders() {
-        if (this.orders.length === 0) {
-            const sampleOrders = [
-                {
-                    id: 'ORD-' + Date.now().toString().slice(-8),
-                    customerName: 'John Doe',
-                    email: 'john@example.com',
-                    phone: '+27123456789',
-                    address: '123 Main St, Johannesburg',
-                    total: 898,
-                    items: [
-                        { name: 'ACIDIC Logo T-Shirt', price: 299, quantity: 2, size: 'M', color: 'Black' },
-                        { name: 'ACIDIC Hoodie', price: 599, quantity: 1, size: 'L', color: 'Grey' }
-                    ],
-                    status: 'processing',
-                    date: new Date().toISOString(),
-                    trackingNumber: 'TRK' + Date.now().toString().slice(-10)
-                },
-                {
-                    id: 'ORD-' + (Date.now() - 86400000).toString().slice(-8),
-                    customerName: 'Jane Smith',
-                    email: 'jane@example.com',
-                    phone: '+27876543210',
-                    address: '456 Oak Ave, Cape Town',
-                    total: 599,
-                    items: [
-                        { name: 'ACIDIC Sweater', price: 599, quantity: 1, size: 'S', color: 'White' }
-                    ],
-                    status: 'shipped',
-                    date: new Date(Date.now() - 86400000).toISOString(),
-                    trackingNumber: 'TRK' + (Date.now() - 86400000).toString().slice(-10)
-                }
-            ];
-            this.orders = sampleOrders;
-            this.saveOrders();
-        }
-    }
-
-    saveOrders() {
-        localStorage.setItem('acidicOrders', JSON.stringify(this.orders));
-    }
-
-    getOrders(filter = 'all', searchTerm = '') {
-        let filteredOrders = [...this.orders];
-        
-        // Apply status filter
-        if (filter !== 'all') {
-            filteredOrders = filteredOrders.filter(order => order.status === filter);
-        }
-        
-        // Apply search term
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            filteredOrders = filteredOrders.filter(order => 
-                order.id.toLowerCase().includes(term) ||
-                order.customerName.toLowerCase().includes(term) ||
-                order.email.toLowerCase().includes(term)
-            );
-        }
-        
-        return filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
-
-    updateOrderStatus(orderId, newStatus) {
-        const orderIndex = this.orders.findIndex(order => order.id === orderId);
-        if (orderIndex !== -1) {
-            this.orders[orderIndex].status = newStatus;
-            this.orders[orderIndex].updatedAt = new Date().toISOString();
-            this.saveOrders();
-            return true;
-        }
-        return false;
-    }
-
-    getOrderStats() {
-        const totalOrders = this.orders.length;
-        const totalRevenue = this.orders.reduce((sum, order) => sum + order.total, 0);
-        
-        const statusCounts = {
-            processing: 0,
-            shipped: 0,
-            delivered: 0,
-            cancelled: 0
-        };
-        
-        this.orders.forEach(order => {
-            if (statusCounts[order.status] !== undefined) {
-                statusCounts[order.status]++;
-            }
-        });
-        
-        return {
-            totalOrders,
-            totalRevenue,
-            statusCounts,
-            averageOrderValue: totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0
-        };
-    }
+function searchProducts(value) {
+  renderProductsTable(value);
 }
 
-// NEW: Category Manager
-class CategoryManager {
-    constructor() {
-        this.categories = [
-            { id: 'tshirts', name: 'T-Shirts', description: 'Caswear t-shirts', productCount: 0 },
-            { id: 'sweaters', name: 'Sweaters', description: 'Winter sweaters', productCount: 0 },
-            { id: 'hoodies', name: 'Hoodies', description: 'Streetwear hoodies', productCount: 0 },
-            { id: 'pants', name: 'Pants', description: 'Casual and formal pants', productCount: 0 },
-            { id: 'twopieces', name: 'Two Pieces', description: 'Matching sets', productCount: 0 },
-            { id: 'accessories', name: 'Accessories', description: 'Fashion accessories', productCount: 0 }
-        ];
-        this.updateCategoryCounts();
-    }
+// ─── ADD / EDIT PRODUCT ───────────────────────────────────────────────────────
+let editingProductId = null;
 
-    updateCategoryCounts() {
-        const products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-        
-        // Reset counts
-        this.categories.forEach(cat => cat.productCount = 0);
-        
-        // Count products in each category
-        products.forEach(product => {
-            const category = this.categories.find(cat => cat.id === product.category);
-            if (category) {
-                category.productCount++;
-            }
-        });
-    }
-
-    getCategories() {
-        this.updateCategoryCounts();
-        return this.categories;
-    }
-
-    updateCategory(categoryId, updates) {
-        const categoryIndex = this.categories.findIndex(cat => cat.id === categoryId);
-        if (categoryIndex !== -1) {
-            this.categories[categoryIndex] = { ...this.categories[categoryIndex], ...updates };
-            return true;
-        }
-        return false;
-    }
+function clearProductForm() {
+  editingProductId = null;
+  document.getElementById("add-product-form")?.reset();
+  const heading = document.querySelector("#add-product-section h2");
+  if (heading) heading.textContent = "Add New Product";
+  const btn = document.querySelector("#add-product-section .btn-primary[type='submit']");
+  if (btn) btn.textContent = "💾 Save Product";
 }
 
-// NEW: Analytics Manager
-class AnalyticsManager {
-    constructor() {
-        this.orders = JSON.parse(localStorage.getItem('acidicOrders')) || [];
-        this.products = JSON.parse(localStorage.getItem('acidicProducts')) || [];
-    }
+function editProduct(id) {
+  const p = AcidicStore.getProduct(id);
+  if (!p) return alert("Product not found.");
 
-    getSalesData(days = 30) {
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - days);
-        
-        const dailySales = {};
-        const categorySales = {};
-        let totalSales = 0;
-        let totalOrders = 0;
-        
-        // Initialize date range
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
-            dailySales[dateStr] = { sales: 0, orders: 0 };
-        }
-        
-        // Process orders
-        this.orders.forEach(order => {
-            const orderDate = new Date(order.date);
-            if (orderDate >= startDate && orderDate <= endDate) {
-                const dateStr = orderDate.toISOString().split('T')[0];
-                dailySales[dateStr].sales += order.total;
-                dailySales[dateStr].orders += 1;
-                totalSales += order.total;
-                totalOrders += 1;
-                
-                // Track category sales
-                order.items.forEach(item => {
-                    const product = this.products.find(p => p.name === item.name);
-                    if (product) {
-                        if (!categorySales[product.category]) {
-                            categorySales[product.category] = 0;
-                        }
-                        categorySales[product.category] += item.price * item.quantity;
-                    }
-                });
-            }
-        });
-        
-        return {
-            dailySales: Object.entries(dailySales).map(([date, data]) => ({
-                date,
-                sales: data.sales,
-                orders: data.orders
-            })),
-            categorySales,
-            totalSales,
-            totalOrders,
-            averageOrderValue: totalOrders > 0 ? (totalSales / totalOrders).toFixed(2) : 0
-        };
-    }
+  editingProductId = id;
+  showSection("add-product");
 
-    getTopProducts(limit = 5) {
-        const productSales = {};
-        
-        this.orders.forEach(order => {
-            order.items.forEach(item => {
-                if (!productSales[item.name]) {
-                    productSales[item.name] = {
-                        name: item.name,
-                        revenue: 0,
-                        quantity: 0
-                    };
-                }
-                productSales[item.name].revenue += item.price * item.quantity;
-                productSales[item.name].quantity += item.quantity;
-            });
-        });
-        
-        return Object.values(productSales)
-            .sort((a, b) => b.revenue - a.revenue)
-            .slice(0, limit);
-    }
+  setInputVal("product-name", p.name);
+  setInputVal("product-category", p.category);
+  setInputVal("product-price", p.price);
+  setInputVal("product-compare-price", p.comparePrice || "");
+  setInputVal("product-description", p.description || "");
+  setInputVal("product-sku", p.sku || "");
+  setInputVal("initial-stock", p.stock);
+  setInputVal("low-stock-threshold", p.lowStockThreshold || 5);
 
-    getCustomerMetrics() {
-        const customers = {};
-        let repeatCustomers = 0;
-        
-        this.orders.forEach(order => {
-            if (!customers[order.email]) {
-                customers[order.email] = {
-                    email: order.email,
-                    name: order.customerName,
-                    orders: 0,
-                    totalSpent: 0
-                };
-            }
-            customers[order.email].orders += 1;
-            customers[order.email].totalSpent += order.total;
-        });
-        
-        // Count repeat customers
-        Object.values(customers).forEach(customer => {
-            if (customer.orders > 1) repeatCustomers++;
-        });
-        
-        return {
-            totalCustomers: Object.keys(customers).length,
-            repeatCustomers,
-            repeatRate: Object.keys(customers).length > 0 ? 
-                (repeatCustomers / Object.keys(customers).length * 100).toFixed(1) : 0,
-            topCustomers: Object.values(customers)
-                .sort((a, b) => b.totalSpent - a.totalSpent)
-                .slice(0, 5)
-        };
-    }
+  const heading = document.querySelector("#add-product-section h2");
+  if (heading) heading.textContent = `Edit Product: ${p.name}`;
+  const btn = document.querySelector("#add-product-section .btn-primary[type='submit']");
+  if (btn) btn.textContent = "💾 Update Product";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Initialize Managers
-const inventoryManager = new InventoryManager();
-const orderManager = new OrderManager();
-const categoryManager = new CategoryManager();
-const analyticsManager = new AnalyticsManager();
-
-// ===== COMPLETE SECTION RENDERING FUNCTIONS =====
-
-// Show/Hide Sections
-function showSection(sectionId) {
-    // Hide all sections
-    document.querySelectorAll('.admin-section').forEach(section => {
-        section.style.display = 'none';
+// Hook up the form submission
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("add-product-form");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      saveProductForm();
     });
-    
-    // Show selected section
-    document.getElementById(`${sectionId}-section`).style.display = 'block';
-    
-    // Update active menu item
-    document.querySelectorAll('.admin-sidebar li').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Find and activate corresponding menu item
-    const menuItems = document.querySelectorAll('.admin-sidebar li');
-    for (let item of menuItems) {
-        const itemText = item.textContent.toLowerCase().replace(/\s+/g, '');
-        if (itemText.includes(sectionId.toLowerCase().replace('-', ''))) {
-            item.classList.add('active');
-            break;
-        }
-    }
-    
-    // Load section data
-    switch(sectionId) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'products':
-            productManager.renderProductsTable();
-            break;
-        case 'add-product':
-            // Already has form
-            break;
-        case 'inventory':
-            loadInventory();
-            break;
-        case 'categories':
-            loadCategories();
-            break;
-        case 'promotions':
-            promotionManager.renderPromotions();
-            break;
-        case 'orders':
-            loadOrders();
-            break;
-        case 'analytics':
-            loadAnalytics();
-            break;
-        case 'settings':
-            loadSettings();
-            break;
-        case 'bulk-upload':
-            // Already has upload area
-            break;
-    }
-}
-
-// ===== INVENTORY SECTION =====
-function loadInventory() {
-    const inventorySection = document.getElementById('inventory-section');
-    
-    if (!inventorySection) return;
-    
-    const summary = inventoryManager.getInventorySummary();
-    const lowStockProducts = inventoryManager.getLowStockProducts();
-    const outOfStockProducts = inventoryManager.getOutOfStockProducts();
-    
-    inventorySection.innerHTML = `
-        <h2>Inventory Management</h2>
-        
-        <!-- Inventory Summary Cards -->
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <h3>Total Stock Value</h3>
-                <div class="value">R${summary.totalValue.toFixed(2)}</div>
-                <div class="trend">Inventory worth</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Total Items in Stock</h3>
-                <div class="value">${summary.totalStock}</div>
-                <div class="trend">Across all products</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Low Stock Items</h3>
-                <div class="value" style="color: #ff9800;">${summary.lowStockItems}</div>
-                <div class="trend down">Needs restocking</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Out of Stock</h3>
-                <div class="value" style="color: #ff4444;">${summary.outOfStockItems}</div>
-                <div class="trend down">Urgent attention</div>
-            </div>
-        </div>
-        
-        <!-- Category Breakdown -->
-        <div class="product-table" style="margin-top: 30px;">
-            <div class="table-header">
-                <h3>Inventory by Category</h3>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Products</th>
-                        <th>Stock Count</th>
-                        <th>Total Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${Object.entries(summary.byCategory).map(([category, data]) => `
-                        <tr>
-                            <td>${categoryManager.categories.find(c => c.id === category)?.name || category}</td>
-                            <td>${data.count}</td>
-                            <td>${data.stock}</td>
-                            <td>R${data.value.toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Low Stock Alert -->
-        ${lowStockProducts.length > 0 ? `
-            <div class="product-table" style="margin-top: 30px; border-left: 4px solid #ff9800;">
-                <div class="table-header">
-                    <h3><i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i> Low Stock Items (${lowStockProducts.length})</h3>
-                    <button class="btn-primary" onclick="restockAllLowStock()">
-                        <i class="fas fa-boxes"></i> Restock All
-                    </button>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Current Stock</th>
-                            <th>Threshold</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${lowStockProducts.map(product => `
-                            <tr>
-                                <td>
-                                    <strong>${product.name}</strong><br>
-                                    <small>${productManager.formatCategory(product.category)}</small>
-                                </td>
-                                <td>${product.totalStock}</td>
-                                <td>${product.lowStockThreshold || inventoryManager.lowStockThreshold}</td>
-                                <td>
-                                    <span class="status low-stock">Low Stock</span>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn edit-btn" onclick="restockProduct(${product.id})">
-                                            <i class="fas fa-box"></i> Restock
-                                        </button>
-                                        <button class="action-btn edit-btn" onclick="editProduct(${product.id})">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        ` : ''}
-        
-        <!-- Out of Stock Alert -->
-        ${outOfStockProducts.length > 0 ? `
-            <div class="product-table" style="margin-top: 30px; border-left: 4px solid #ff4444;">
-                <div class="table-header">
-                    <h3><i class="fas fa-times-circle" style="color: #ff4444;"></i> Out of Stock Items (${outOfStockProducts.length})</h3>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Last Stock</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${outOfStockProducts.map(product => `
-                            <tr>
-                                <td>
-                                    <strong>${product.name}</strong><br>
-                                    <small>${productManager.formatCategory(product.category)}</small>
-                                </td>
-                                <td>0</td>
-                                <td>
-                                    <span class="status out-of-stock">Out of Stock</span>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn edit-btn" onclick="restockProduct(${product.id})">
-                                            <i class="fas fa-box"></i> Restock
-                                        </button>
-                                        <button class="action-btn delete-btn" onclick="toggleProductStatus(${product.id})">
-                                            <i class="fas fa-eye-slash"></i> Hide
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        ` : ''}
-        
-        <!-- Stock Adjustment Form -->
-        <div class="admin-form" style="margin-top: 30px;">
-            <h3>Manual Stock Adjustment</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="adjust-product">Select Product</label>
-                    <select id="adjust-product" onchange="loadProductVariants(this.value)">
-                        <option value="">Choose product...</option>
-                        ${productManager.products.map(product => `
-                            <option value="${product.id}">${product.name}</option>
-                        `).join('')}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="adjust-variant">Select Variant (Optional)</label>
-                    <select id="adjust-variant">
-                        <option value="">All variants</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="adjust-quantity">New Quantity</label>
-                    <input type="number" id="adjust-quantity" min="0" value="0">
-                </div>
-                <div class="form-group">
-                    <label for="adjust-reason">Reason for Adjustment</label>
-                    <select id="adjust-reason">
-                        <option value="restock">Restock</option>
-                        <option value="damaged">Damaged Items</option>
-                        <option value="return">Customer Return</option>
-                        <option value="theft">Theft/Loss</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-actions">
-                <button class="btn-primary" onclick="updateStock()">
-                    <i class="fas fa-save"></i> Update Stock
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// ===== CATEGORIES SECTION =====
-function loadCategories() {
-    const categoriesSection = document.getElementById('categories-section');
-    
-    if (!categoriesSection) return;
-    
-    const categories = categoryManager.getCategories();
-    
-    categoriesSection.innerHTML = `
-        <div class="table-header">
-            <h2>Category Management</h2>
-            <button class="btn-primary" onclick="showAddCategoryModal()">
-                <i class="fas fa-plus"></i> Add Category
-            </button>
-        </div>
-        
-        <div class="dashboard-stats">
-            ${categories.map(category => `
-                <div class="stat-card" style="cursor: pointer;" onclick="editCategory('${category.id}')">
-                    <h3>${category.name}</h3>
-                    <div class="value">${category.productCount}</div>
-                    <div class="trend">products</div>
-                    <p style="margin-top: 10px; font-size: 12px; color: #666;">${category.description}</p>
-                </div>
-            `).join('')}
-        </div>
-        
-        <!-- Category Products Table -->
-        <div class="product-table" style="margin-top: 30px;">
-            <div class="table-header">
-                <h3>Products by Category</h3>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Products</th>
-                        <th>Total Stock</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${categories.map(category => {
-                        const products = productManager.getProductsByCategory(category.id);
-                        const totalStock = products.reduce((sum, p) => sum + (p.totalStock || 0), 0);
-                        
-                        return `
-                            <tr>
-                                <td>
-                                    <strong>${category.name}</strong><br>
-                                    <small>${category.description}</small>
-                                </td>
-                                <td>${category.productCount}</td>
-                                <td>${totalStock}</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn edit-btn" onclick="editCategory('${category.id}')">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <button class="action-btn delete-btn" onclick="deleteCategory('${category.id}')" 
-                                                ${category.productCount > 0 ? 'disabled' : ''}>
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-// ===== ORDERS SECTION =====
-function loadOrders(filter = 'all', searchTerm = '') {
-    const ordersSection = document.getElementById('orders-section');
-    
-    if (!ordersSection) return;
-    
-    const orders = orderManager.getOrders(filter, searchTerm);
-    const stats = orderManager.getOrderStats();
-    
-    ordersSection.innerHTML = `
-        <div class="table-header">
-            <h2>Order Management</h2>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="order-search" placeholder="Search orders..." 
-                       value="${searchTerm}" onkeyup="searchOrders(this.value)">
-            </div>
-        </div>
-        
-        <!-- Order Stats -->
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <h3>Total Orders</h3>
-                <div class="value">${stats.totalOrders}</div>
-                <div class="trend">All time</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Total Revenue</h3>
-                <div class="value">R${stats.totalRevenue}</div>
-                <div class="trend up">+12% from last month</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Average Order</h3>
-                <div class="value">R${stats.averageOrderValue}</div>
-                <div class="trend">Per order</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Processing</h3>
-                <div class="value" style="color: #ff9800;">${stats.statusCounts.processing}</div>
-                <div class="trend">Orders to fulfill</div>
-            </div>
-        </div>
-        
-        <!-- Order Filters -->
-        <div style="margin: 20px 0; display: flex; gap: 10px;">
-            <button class="${filter === 'all' ? 'btn-primary' : 'btn-secondary'}" 
-                    onclick="loadOrders('all', '${searchTerm}')">All Orders</button>
-            <button class="${filter === 'processing' ? 'btn-primary' : 'btn-secondary'}" 
-                    onclick="loadOrders('processing', '${searchTerm}')">Processing (${stats.statusCounts.processing})</button>
-            <button class="${filter === 'shipped' ? 'btn-primary' : 'btn-secondary'}" 
-                    onclick="loadOrders('shipped', '${searchTerm}')">Shipped (${stats.statusCounts.shipped})</button>
-            <button class="${filter === 'delivered' ? 'btn-primary' : 'btn-secondary'}" 
-                    onclick="loadOrders('delivered', '${searchTerm}')">Delivered (${stats.statusCounts.delivered || 0})</button>
-        </div>
-        
-        <!-- Orders Table -->
-        <div class="product-table">
-            ${orders.length === 0 ? `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-box-open" style="font-size: 48px; color: #ddd;"></i>
-                    <p style="margin-top: 10px;">No orders found</p>
-                </div>
-            ` : `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Date</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${orders.map(order => `
-                            <tr>
-                                <td>
-                                    <strong>${order.id}</strong><br>
-                                    <small>${order.trackingNumber || 'No tracking'}</small>
-                                </td>
-                                <td>
-                                    <strong>${order.customerName}</strong><br>
-                                    <small>${order.email}</small>
-                                </td>
-                                <td>${new Date(order.date).toLocaleDateString()}</td>
-                                <td>${order.items.length} item${order.items.length > 1 ? 's' : ''}</td>
-                                <td>R${order.total}</td>
-                                <td>
-                                    <select class="status-select" data-order="${order.id}" 
-                                            onchange="updateOrderStatus('${order.id}', this.value)"
-                                            style="padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
-                                        <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn edit-btn" onclick="viewOrderDetails('${order.id}')">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                        <button class="action-btn edit-btn" onclick="printOrder('${order.id}')">
-                                            <i class="fas fa-print"></i> Print
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `}
-        </div>
-    `;
-}
-
-// ===== ANALYTICS SECTION =====
-function loadAnalytics() {
-    const analyticsSection = document.getElementById('analytics-section');
-    
-    if (!analyticsSection) return;
-    
-    const salesData = analyticsManager.getSalesData(30);
-    const topProducts = analyticsManager.getTopProducts(5);
-    const customerMetrics = analyticsManager.getCustomerMetrics();
-    
-    analyticsSection.innerHTML = `
-        <h2>Sales Analytics</h2>
-        
-        <!-- Analytics Summary -->
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <h3>30-Day Revenue</h3>
-                <div class="value">R${salesData.totalSales}</div>
-                <div class="trend up">+18% from last month</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>30-Day Orders</h3>
-                <div class="value">${salesData.totalOrders}</div>
-                <div class="trend up">+15% from last month</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Avg. Order Value</h3>
-                <div class="value">R${salesData.averageOrderValue}</div>
-                <div class="trend up">+8% from last month</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Repeat Customers</h3>
-                <div class="value">${customerMetrics.repeatCustomers}</div>
-                <div class="trend">${customerMetrics.repeatRate}% repeat rate</div>
-            </div>
-        </div>
-        
-        <!-- Sales Chart Placeholder -->
-        <div class="admin-form" style="margin-top: 30px;">
-            <h3>Sales Trend (Last 30 Days)</h3>
-            <div style="height: 300px; background: #f9f9f9; border-radius: 8px; padding: 20px; margin-top: 15px;">
-                <canvas id="salesChart"></canvas>
-            </div>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
-            <!-- Top Products -->
-            <div class="product-table">
-                <div class="table-header">
-                    <h3>Top Selling Products</h3>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Revenue</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${topProducts.map(product => `
-                            <tr>
-                                <td>
-                                    <strong>${product.name}</strong>
-                                </td>
-                                <td>R${product.revenue}</td>
-                                <td>${product.quantity}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Sales by Category -->
-            <div class="product-table">
-                <div class="table-header">
-                    <h3>Sales by Category</h3>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Revenue</th>
-                            <th>% of Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${Object.entries(salesData.categorySales).map(([category, revenue]) => {
-                            const percentage = ((revenue / salesData.totalSales) * 100).toFixed(1);
-                            return `
-                                <tr>
-                                    <td>${categoryManager.categories.find(c => c.id === category)?.name || category}</td>
-                                    <td>R${revenue}</td>
-                                    <td>${percentage}%</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Customer Analytics -->
-        <div class="admin-form" style="margin-top: 30px;">
-            <h3>Customer Insights</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                <div>
-                    <h4>Top Customers by Spending</h4>
-                    <table style="width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>Customer</th>
-                                <th>Orders</th>
-                                <th>Total Spent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${customerMetrics.topCustomers.map(customer => `
-                                <tr>
-                                    <td>${customer.name}</td>
-                                    <td>${customer.orders}</td>
-                                    <td>R${customer.totalSpent}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div>
-                    <h4>Customer Metrics</h4>
-                    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
-                        <p><strong>Total Customers:</strong> ${customerMetrics.totalCustomers}</p>
-                        <p><strong>Repeat Customers:</strong> ${customerMetrics.repeatCustomers}</p>
-                        <p><strong>Repeat Rate:</strong> ${customerMetrics.repeatRate}%</p>
-                        <p><strong>Avg. Orders per Customer:</strong> ${customerMetrics.totalCustomers > 0 ? 
-                            (salesData.totalOrders / customerMetrics.totalCustomers).toFixed(1) : 0}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Date Range Selector -->
-        <div class="admin-form" style="margin-top: 30px;">
-            <h3>Custom Date Range</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="start-date-range">Start Date</label>
-                    <input type="date" id="start-date-range" value="${new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]}">
-                </div>
-                <div class="form-group">
-                    <label for="end-date-range">End Date</label>
-                    <input type="date" id="end-date-range" value="${new Date().toISOString().split('T')[0]}">
-                </div>
-            </div>
-            <button class="btn-primary" onclick="loadCustomAnalytics()">
-                <i class="fas fa-chart-line"></i> Generate Report
-            </button>
-        </div>
-    `;
-    
-    // Initialize chart
-    setTimeout(() => {
-        initializeSalesChart(salesData.dailySales);
-    }, 100);
-}
-
-// ===== SETTINGS SECTION =====
-function loadSettings() {
-    const settingsSection = document.getElementById('settings-section');
-    const session = adminAuth?.getSession?.() || { username: 'admin', role: 'administrator' };
-    
-    settingsSection.innerHTML = `
-        <h2>Admin Settings</h2>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
-            <!-- Account Settings -->
-            <div class="admin-form">
-                <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
-                
-                <div class="form-group">
-                    <label for="admin-username-display">Username</label>
-                    <input type="text" id="admin-username-display" value="${session.username}" disabled>
-                </div>
-                
-                <div class="form-group">
-                    <label for="admin-role-display">Role</label>
-                    <input type="text" id="admin-role-display" value="${session.role}" disabled>
-                </div>
-                
-                <div class="form-group">
-                    <label for="session-time">Session Expires In</label>
-                    <input type="text" id="session-time" value="30 minutes" disabled>
-                </div>
-                
-                <button class="btn-primary" onclick="changeAdminPassword()">
-                    <i class="fas fa-key"></i> Change Password
-                </button>
-            </div>
-            
-            <!-- Store Settings -->
-            <div class="admin-form">
-                <h3><i class="fas fa-store"></i> Store Settings</h3>
-                
-                <div class="form-group">
-                    <label for="store-name">Store Name</label>
-                    <input type="text" id="store-name" value="ACIDIC Clothing">
-                </div>
-                
-                <div class="form-group">
-                    <label for="store-currency">Currency</label>
-                    <select id="store-currency">
-                        <option value="ZAR" selected>South African Rand (R)</option>
-                        <option value="USD">US Dollar ($)</option>
-                        <option value="EUR">Euro (€)</option>
-                        <option value="GBP">British Pound (£)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="tax-rate">Tax Rate (%)</label>
-                    <input type="number" id="tax-rate" value="15" step="0.1">
-                </div>
-                
-                <div class="form-group">
-                    <label for="shipping-fee">Default Shipping Fee (R)</label>
-                    <input type="number" id="shipping-fee" value="150">
-                </div>
-                
-                <button class="btn-primary" onclick="saveStoreSettings()">
-                    <i class="fas fa-save"></i> Save Store Settings
-                </button>
-            </div>
-        </div>
-        
-        <!-- Inventory Settings -->
-        <div class="admin-form" style="margin-top: 30px;">
-            <h3><i class="fas fa-boxes"></i> Inventory Settings</h3>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="low-stock-threshold-global">Low Stock Threshold</label>
-                    <input type="number" id="low-stock-threshold-global" value="${inventoryManager.lowStockThreshold}">
-                    <small>Alert when stock falls below this number</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="auto-restock-level">Auto Restock Level</label>
-                    <input type="number" id="auto-restock-level" value="20">
-                    <small>Suggested restock quantity</small>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="enable-low-stock-emails" checked>
-                    Send email alerts for low stock
-                </label>
-            </div>
-            
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="enable-out-of-stock-hiding" checked>
-                    Hide products when out of stock
-                </label>
-            </div>
-            
-            <button class="btn-primary" onclick="saveInventorySettings()">
-                <i class="fas fa-save"></i> Save Inventory Settings
-            </button>
-        </div>
-        
-        <!-- System Information -->
-        <div class="admin-form" style="margin-top: 30px; background: #f9f9f9;">
-            <h3><i class="fas fa-info-circle"></i> System Information</h3>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Total Products</label>
-                    <input type="text" value="${productManager.products.length}" disabled>
-                </div>
-                
-                <div class="form-group">
-                    <label>Total Orders</label>
-                    <input type="text" value="${orderManager.orders.length}" disabled>
-                </div>
-                
-                <div class="form-group">
-                    <label>Storage Used</label>
-                    <input type="text" value="${Math.round(JSON.stringify(localStorage).length / 1024)}KB" disabled>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Last Backup</label>
-                <input type="text" value="${new Date().toLocaleDateString()}" disabled>
-            </div>
-            
-            <div class="form-actions">
-                <button class="btn-primary" onclick="backupData()">
-                    <i class="fas fa-database"></i> Backup Data
-                </button>
-                <button class="btn-secondary" onclick="clearCache()">
-                    <i class="fas fa-broom"></i> Clear Cache
-                </button>
-                <button class="btn-secondary" style="background: #ff4444; color: white;" onclick="resetSystem()">
-                    <i class="fas fa-redo"></i> Reset System
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// ===== HELPER FUNCTIONS =====
-
-// Inventory Functions
-function loadProductVariants(productId) {
-    const product = productManager.products.find(p => p.id == productId);
-    const variantSelect = document.getElementById('adjust-variant');
-    
-    variantSelect.innerHTML = '<option value="">All variants</option>';
-    
-    if (product && product.inventory) {
-        product.inventory.forEach(variant => {
-            const option = document.createElement('option');
-            option.value = variant.sku;
-            option.textContent = `${variant.color || ''} ${variant.size || ''} (${variant.sku})`;
-            variantSelect.appendChild(option);
-        });
-    }
-}
-
-function updateStock() {
-    const productId = document.getElementById('adjust-product').value;
-    const variantSku = document.getElementById('adjust-variant').value;
-    const newQuantity = document.getElementById('adjust-quantity').value;
-    const reason = document.getElementById('adjust-reason').value;
-    
-    if (!productId || newQuantity === '') {
-        alert('Please select a product and enter quantity');
-        return;
-    }
-    
-    if (inventoryManager.updateStock(productId, variantSku, newQuantity)) {
-        alert('Stock updated successfully!');
-        loadInventory();
-        productManager.renderProductsTable();
-    } else {
-        alert('Error updating stock');
-    }
-}
-
-function restockProduct(productId) {
-    const newStock = prompt('Enter new stock quantity:', '50');
-    if (newStock !== null && !isNaN(newStock)) {
-        if (inventoryManager.updateStock(productId, null, newStock)) {
-            alert('Product restocked successfully!');
-            loadInventory();
-        }
-    }
-}
-
-function restockAllLowStock() {
-    const lowStockProducts = inventoryManager.getLowStockProducts();
-    const restockAmount = parseInt(prompt('Enter restock quantity for all low stock items:', '20'));
-    
-    if (!isNaN(restockAmount)) {
-        let successCount = 0;
-        lowStockProducts.forEach(product => {
-            const newStock = product.totalStock + restockAmount;
-            if (inventoryManager.updateStock(product.id, null, newStock)) {
-                successCount++;
-            }
-        });
-        
-        alert(`Restocked ${successCount} products`);
-        loadInventory();
-    }
-}
-
-// Order Functions
-function searchOrders(searchTerm) {
-    const currentFilter = document.querySelector('.btn-primary')?.textContent?.toLowerCase() || 'all';
-    const filter = currentFilter.includes('processing') ? 'processing' :
-                   currentFilter.includes('shipped') ? 'shipped' :
-                   currentFilter.includes('delivered') ? 'delivered' : 'all';
-    
-    loadOrders(filter, searchTerm);
-}
-
-function updateOrderStatus(orderId, newStatus) {
-    if (orderManager.updateOrderStatus(orderId, newStatus)) {
-        alert('Order status updated!');
-        loadOrders();
-    } else {
-        alert('Error updating order status');
-    }
-}
-
-function viewOrderDetails(orderId) {
-    const order = orderManager.orders.find(o => o.id === orderId);
-    if (!order) return;
-    
-    const modalHTML = `
-        <div class="modal active" onclick="closeModal()">
-            <div class="modal-content" style="max-width: 700px;" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h3>Order Details: ${order.id}</h3>
-                    <span class="close-modal" onclick="closeModal()">×</span>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
-                    <div>
-                        <h4>Customer Information</h4>
-                        <p><strong>Name:</strong> ${order.customerName}</p>
-                        <p><strong>Email:</strong> ${order.email}</p>
-                        <p><strong>Phone:</strong> ${order.phone}</p>
-                        <p><strong>Address:</strong> ${order.address}</p>
-                    </div>
-                    
-                    <div>
-                        <h4>Order Information</h4>
-                        <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
-                        <p><strong>Status:</strong> <span class="status ${order.status}">${order.status}</span></p>
-                        <p><strong>Tracking:</strong> ${order.trackingNumber || 'Not assigned'}</p>
-                        <p><strong>Total:</strong> R${order.total}</p>
-                    </div>
-                </div>
-                
-                <h4>Order Items</h4>
-                <table style="width: 100%; margin: 15px 0;">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${order.items.map(item => `
-                            <tr>
-                                <td>${item.name} ${item.size ? `(${item.size})` : ''} ${item.color ? `- ${item.color}` : ''}</td>
-                                <td>R${item.price}</td>
-                                <td>${item.quantity}</td>
-                                <td>R${item.price * item.quantity}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="form-actions">
-                    <button class="btn-primary" onclick="printOrder('${order.id}')">
-                        <i class="fas fa-print"></i> Print Invoice
-                    </button>
-                    <button class="btn-secondary" onclick="closeModal()">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHTML;
-    document.body.appendChild(modalContainer.firstElementChild);
-}
-
-function printOrder(orderId) {
-    alert(`Printing order ${orderId}...\n(In a real system, this would generate a printable invoice)`);
-}
-
-// Analytics Functions
-function initializeSalesChart(dailySales) {
-    const ctx = document.getElementById('salesChart');
-    if (!ctx) return;
-    
-    // If Chart.js is available
-    if (typeof Chart !== 'undefined') {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dailySales.map(d => new Date(d.date).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })),
-                datasets: [{
-                    label: 'Daily Sales (R)',
-                    data: dailySales.map(d => d.sales),
-                    borderColor: '#f4b400',
-                    backgroundColor: 'rgba(244, 180, 0, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-    } else {
-        // Simple HTML chart fallback
-        const maxSales = Math.max(...dailySales.map(d => d.sales));
-        ctx.innerHTML = `
-            <div style="display: flex; align-items: flex-end; height: 100%; gap: 5px;">
-                ${dailySales.map(d => `
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                        <div style="background: #f4b400; width: 100%; 
-                                    height: ${(d.sales / maxSales) * 100}%; 
-                                    border-radius: 3px;"></div>
-                        <small style="margin-top: 5px; font-size: 10px;">
-                            ${new Date(d.date).getDate()}/${new Date(d.date).getMonth() + 1}
-                        </small>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-}
-
-function loadCustomAnalytics() {
-    alert('Custom analytics feature coming soon!');
-}
-
-// Settings Functions
-function saveStoreSettings() {
-    const settings = {
-        storeName: document.getElementById('store-name').value,
-        currency: document.getElementById('store-currency').value,
-        taxRate: parseFloat(document.getElementById('tax-rate').value),
-        shippingFee: parseFloat(document.getElementById('shipping-fee').value)
-    };
-    
-    localStorage.setItem('acidic_store_settings', JSON.stringify(settings));
-    alert('Store settings saved!');
-}
-
-function saveInventorySettings() {
-    inventoryManager.lowStockThreshold = parseInt(document.getElementById('low-stock-threshold-global').value);
-    alert('Inventory settings saved!');
-}
-
-function backupData() {
-    const data = {
-        products: localStorage.getItem('acidicProducts'),
-        orders: localStorage.getItem('acidicOrders'),
-        promotions: localStorage.getItem('acidicPromotions'),
-        settings: localStorage.getItem('acidic_store_settings'),
-        timestamp: new Date().toISOString()
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `acidic_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    
-    alert('Backup downloaded successfully!');
-}
-
-function clearCache() {
-    if (confirm('Clear cache? This will not delete your data.')) {
-        // In a real app, you'd clear cache
-        alert('Cache cleared!');
-    }
-}
-
-function resetSystem() {
-    if (confirm('WARNING: This will reset all data except admin credentials. Are you sure?')) {
-        localStorage.removeItem('acidicProducts');
-        localStorage.removeItem('acidicOrders');
-        localStorage.removeItem('acidicPromotions');
-        localStorage.removeItem('acidic_store_settings');
-        
-        // Reload managers
-        productManager.loadProducts();
-        orderManager.loadSampleOrders();
-        promotionManager.loadPromotions();
-        
-        alert('System reset complete!');
-        loadDashboard();
-    }
-}
-
-// Modal Functions
-function closeModal() {
-    const modal = document.querySelector('.modal.active');
-    if (modal) modal.remove();
-}
-
-// Initialize dashboard on load
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is logged in (if using auth system)
-    if (typeof adminAuth !== 'undefined' && adminAuth.getSession()) {
-        loadDashboard();
-    } else {
-        // For demo purposes, load dashboard anyway
-        loadDashboard();
-    }
+  }
+  loadDashboard();
 });
 
-// ===== UI FUNCTIONS =====
+function saveProductForm() {
+  const name     = getInputVal("product-name");
+  const category = getInputVal("product-category");
+  const price    = getInputVal("product-price");
+  const stock    = getInputVal("initial-stock");
 
-// Show/Hide Sections
-function showSection(sectionId) {
-    // Hide all sections
-    document.querySelectorAll('.admin-section').forEach(section => {
-        section.style.display = 'none';
-    });
-    
-    // Show selected section
-    document.getElementById(`${sectionId}-section`).style.display = 'block';
-    
-    // Update active menu item
-    document.querySelectorAll('.admin-sidebar li').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Find and activate corresponding menu item
-    const menuItems = document.querySelectorAll('.admin-sidebar li');
-    for (let item of menuItems) {
-        if (item.textContent.toLowerCase().includes(sectionId.toLowerCase())) {
-            item.classList.add('active');
-            break;
-        }
-    }
-    
-    // Load section data
-    switch(sectionId) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'products':
-            productManager.renderProductsTable();
-            break;
-        case 'promotions':
-            promotionManager.renderPromotions();
-            break;
-    }
+  if (!name || !category || !price || !stock) {
+    return alert("Please fill in all required fields (Name, Category, Price, Stock).");
+  }
+
+  const productData = {
+    name,
+    category,
+    price:              parseFloat(price),
+    comparePrice:       parseFloat(getInputVal("product-compare-price")) || 0,
+    description:        getInputVal("product-description"),
+    sku:                getInputVal("product-sku"),
+    stock:              parseInt(stock),
+    lowStockThreshold:  parseInt(getInputVal("low-stock-threshold")) || 5,
+    image:              window._uploadedImageUrl || "",
+    images:             window._uploadedImages || [],
+    isNew:              true
+  };
+
+  if (editingProductId) {
+    AcidicStore.updateProduct(editingProductId, productData);
+    showToast(`✅ "${name}" updated successfully! Changes are live on your website.`);
+  } else {
+    AcidicStore.addProduct(productData);
+    showToast(`✅ "${name}" added! It's now visible in your store.`);
+  }
+
+  clearProductForm();
+  showSection("products");
 }
 
-// Dashboard
-function loadDashboard() {
-    productManager.updateDashboardStats();
-    loadRecentOrders();
+function confirmDeleteProduct(id, name) {
+  if (confirm(`Delete "${name}"? This will remove it from your website immediately.`)) {
+    AcidicStore.deleteProduct(id);
+    renderProductsTable();
+    showToast(`🗑️ "${name}" deleted from your store.`);
+  }
 }
 
-function loadRecentOrders() {
-    const orders = JSON.parse(localStorage.getItem('acidicOrders')) || [];
-    const recentOrders = orders.slice(-5).reverse(); // Last 5 orders
-    
-    const container = document.getElementById('recent-orders');
-    
-    if (recentOrders.length === 0) {
-        container.innerHTML = `
-            <p style="text-align: center; padding: 40px; color: #666;">
-                No recent orders
-            </p>
-        `;
-        return;
-    }
-    
+// ─── INVENTORY ────────────────────────────────────────────────────────────────
+function renderInventory() {
+  const container = document.getElementById("inventory-section");
+  if (!container) return;
+
+  const products = AcidicStore.getProducts();
+  container.innerHTML = `
+    <h2>Inventory Management</h2>
+    <div class="product-table" style="margin-top:20px">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Current Stock</th>
+            <th>Low Stock Threshold</th>
+            <th>Status</th>
+            <th>Update Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${products.map(p => {
+            const ss = p.stock === 0 ? "out-of-stock" : p.stock <= (p.lowStockThreshold || 5) ? "low-stock" : "in-stock";
+            const sl = p.stock === 0 ? "Out of Stock" : p.stock <= (p.lowStockThreshold || 5) ? "Low Stock" : "In Stock";
+            return `
+              <tr>
+                <td><strong>${p.name}</strong></td>
+                <td>${p.sku || "-"}</td>
+                <td><strong id="stock-display-${p.id}">${p.stock}</strong></td>
+                <td>${p.lowStockThreshold || 5}</td>
+                <td><span class="status ${ss}">${sl}</span></td>
+                <td>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input type="number" id="stock-input-${p.id}" value="${p.stock}" min="0" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px" />
+                    <button class="action-btn edit-btn" onclick="updateStock(${p.id})">Update</button>
+                  </div>
+                </td>
+              </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function updateStock(id) {
+  const input = document.getElementById("stock-input-" + id);
+  if (!input) return;
+  const newStock = parseInt(input.value);
+  if (isNaN(newStock) || newStock < 0) return alert("Please enter a valid stock number.");
+  AcidicStore.updateProduct(id, { stock: newStock });
+  const display = document.getElementById("stock-display-" + id);
+  if (display) display.textContent = newStock;
+  showToast("✅ Stock updated. Changes are live on your website.");
+}
+
+// ─── ORDERS ───────────────────────────────────────────────────────────────────
+window.renderAdminOrders = function() {
+  const container = document.getElementById("orders-section");
+  if (!container) return;
+
+  const orders = AcidicStore.getOrders();
+  if (orders.length === 0) {
     container.innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${recentOrders.map(order => `
-                    <tr>
-                        <td>${order.id || 'N/A'}</td>
-                        <td>${order.customerName || 'Guest'}</td>
-                        <td>${new Date(order.date).toLocaleDateString()}</td>
-                        <td>R${order.total || 0}</td>
-                        <td>
-                            <span class="status ${order.status === 'processing' ? 'low-stock' : 'in-stock'}">
-                                ${order.status || 'Processing'}
-                            </span>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+      <h2>Orders</h2>
+      <div class="product-table" style="margin-top:20px;padding:40px;text-align:center;color:#666">
+        <p style="font-size:18px">📦 No orders yet</p>
+        <p style="margin-top:10px">When customers place orders on your website, they will appear here automatically.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <h2>Orders <span style="font-size:14px;color:#666;font-weight:normal">(${orders.length} total)</span></h2>
+    <div class="product-table" style="margin-top:20px">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${orders.map(o => `
+            <tr id="order-row-${o.id}">
+              <td><strong>${o.id}</strong></td>
+              <td>
+                <div>${o.customerName || "Guest"}</div>
+                <div style="font-size:12px;color:#666">${o.email || ""}</div>
+              </td>
+              <td>
+                ${(o.items || []).map(i => `<div style="font-size:12px">${i.name || i.productName} × ${i.qty || i.quantity || 1}</div>`).join("") || "—"}
+              </td>
+              <td><strong>R${parseFloat(o.total || 0).toFixed(2)}</strong></td>
+              <td>
+                <select onchange="changeOrderStatus('${o.id}', this.value)" style="padding:5px;border-radius:4px;border:1px solid #ddd">
+                  ${["pending","processing","shipped","delivered","cancelled"].map(s =>
+                    `<option value="${s}" ${o.status === s ? "selected" : ""}>${capitalize(s)}</option>`
+                  ).join("")}
+                </select>
+              </td>
+              <td>${formatDate(o.createdAt)}</td>
+              <td>
+                <button class="action-btn edit-btn" onclick="viewOrderDetail('${o.id}')">View</button>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+};
+
+function changeOrderStatus(orderId, newStatus) {
+  AcidicStore.updateOrderStatus(orderId, newStatus);
+  showToast(`✅ Order ${orderId} marked as ${capitalize(newStatus)}`);
 }
 
-// Product Form Handling
-let uploadedImages = [];
+function viewOrderDetail(orderId) {
+  const order = AcidicStore.getOrders().find(o => o.id === orderId);
+  if (!order) return;
+  const items = (order.items || []).map(i =>
+    `• ${i.name || i.productName} (${i.size || ""} ${i.color || ""}) × ${i.qty || i.quantity || 1} = R${((i.price || 0) * (i.qty || i.quantity || 1)).toFixed(2)}`
+  ).join("\n");
+  alert(`ORDER: ${order.id}
+Customer: ${order.customerName || "Guest"}
+Email: ${order.email || "—"}
+Phone: ${order.phone || "—"}
+Address: ${order.address || "—"}
+
+ITEMS:
+${items || "No items recorded"}
+
+Total: R${parseFloat(order.total || 0).toFixed(2)}
+Status: ${capitalize(order.status || "pending")}
+Date: ${formatDate(order.createdAt)}`);
+}
+
+// ─── ANALYTICS ───────────────────────────────────────────────────────────────
+function renderAnalytics() {
+  const container = document.getElementById("analytics-section");
+  if (!container) return;
+
+  const stats   = AcidicStore.getStats();
+  const orders  = AcidicStore.getOrders();
+  const products = AcidicStore.getProducts();
+
+  // Category breakdown
+  const catCount = {};
+  products.forEach(p => { catCount[p.category] = (catCount[p.category] || 0) + 1; });
+
+  // Order status breakdown
+  const statusCount = {};
+  orders.forEach(o => { statusCount[o.status || "pending"] = (statusCount[o.status || "pending"] || 0) + 1; });
+
+  container.innerHTML = `
+    <h2>Analytics Overview</h2>
+    <div class="dashboard-stats" style="margin-top:20px">
+      <div class="stat-card">
+        <h3>Total Revenue</h3>
+        <div class="value">R${stats.totalSales.toFixed(2)}</div>
+        <div class="trend up">From ${stats.totalOrders} orders</div>
+      </div>
+      <div class="stat-card">
+        <h3>Total Products</h3>
+        <div class="value">${stats.totalProducts}</div>
+        <div class="trend">${stats.outOfStock} out of stock</div>
+      </div>
+      <div class="stat-card">
+        <h3>Total Orders</h3>
+        <div class="value">${stats.totalOrders}</div>
+        <div class="trend up">${stats.pendingOrders} pending</div>
+      </div>
+      <div class="stat-card">
+        <h3>Avg Order Value</h3>
+        <div class="value">R${stats.totalOrders > 0 ? (stats.totalSales / stats.totalOrders).toFixed(2) : "0.00"}</div>
+        <div class="trend">Per completed order</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+      <div class="product-table" style="padding:20px">
+        <h3>Products by Category</h3>
+        <table style="margin-top:15px">
+          <thead><tr><th>Category</th><th>Products</th></tr></thead>
+          <tbody>
+            ${Object.entries(catCount).map(([cat, count]) =>
+              `<tr><td>${capitalize(cat)}</td><td>${count}</td></tr>`
+            ).join("") || "<tr><td colspan='2' style='color:#666'>No products</td></tr>"}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="product-table" style="padding:20px">
+        <h3>Orders by Status</h3>
+        <table style="margin-top:15px">
+          <thead><tr><th>Status</th><th>Count</th></tr></thead>
+          <tbody>
+            ${Object.entries(statusCount).map(([status, count]) =>
+              `<tr><td><span class="status ${statusClass(status)}">${capitalize(status)}</span></td><td>${count}</td></tr>`
+            ).join("") || "<tr><td colspan='2' style='color:#666'>No orders yet</td></tr>"}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ─── PROMOTIONS ───────────────────────────────────────────────────────────────
+function renderPromotions() {
+  const promos = AcidicStore.getSettings().promotions || [];
+  const list = document.getElementById("promotions-list");
+  if (!list) return;
+  if (promos.length === 0) {
+    list.innerHTML = `<div class="promotion-card"><p style="color:#666;text-align:center">No promotions yet. Create your first one!</p></div>`;
+    return;
+  }
+  list.innerHTML = promos.map((p, i) => `
+    <div class="promotion-card">
+      <div class="promotion-header">
+        <h3>${p.name}</h3>
+        <span class="promotion-badge ${promoStatus(p)}">${capitalize(promoStatus(p))}</span>
+      </div>
+      <p>${p.type === "percentage" ? p.value + "% off" : "R" + p.value + " off"} — ${capitalize(p.target || "all products")}</p>
+      <p style="font-size:12px;color:#666;margin-top:8px">
+        ${formatDate(p.startDate)} → ${formatDate(p.endDate)}
+      </p>
+      <div style="margin-top:10px">
+        <button class="action-btn delete-btn" onclick="deletePromotion(${i})">Remove</button>
+      </div>
+    </div>`).join("");
+}
+
+function showAddPromotionModal() {
+  const m = document.getElementById("add-promotion-modal");
+  if (m) m.classList.add("active");
+}
+function closePromotionModal() {
+  const m = document.getElementById("add-promotion-modal");
+  if (m) m.classList.remove("active");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const pf = document.getElementById("promotion-form");
+  if (pf) {
+    pf.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const promo = {
+        name:      getInputVal("promotion-name"),
+        type:      getInputVal("promotion-type"),
+        value:     getInputVal("promotion-value"),
+        target:    getInputVal("promotion-target"),
+        startDate: getInputVal("start-date"),
+        endDate:   getInputVal("end-date")
+      };
+      const settings = AcidicStore.getSettings();
+      settings.promotions = settings.promotions || [];
+      settings.promotions.push(promo);
+      AcidicStore.saveSettings(settings);
+      closePromotionModal();
+      renderPromotions();
+      showToast("✅ Promotion created!");
+    });
+  }
+
+  // Promotion target toggle
+  const target = document.getElementById("promotion-target");
+  if (target) {
+    target.addEventListener("change", () => {
+      const catDiv = document.getElementById("target-category");
+      if (catDiv) catDiv.style.display = target.value === "category" ? "block" : "none";
+    });
+  }
+});
+
+function deletePromotion(index) {
+  if (!confirm("Remove this promotion?")) return;
+  const settings = AcidicStore.getSettings();
+  settings.promotions = settings.promotions || [];
+  settings.promotions.splice(index, 1);
+  AcidicStore.saveSettings(settings);
+  renderPromotions();
+}
+
+// ─── IMAGE UPLOAD ─────────────────────────────────────────────────────────────
+window._uploadedImageUrl = "";
+window._uploadedImages   = [];
 
 function triggerImageUpload() {
-    document.getElementById('image-upload').click();
+  document.getElementById("image-upload")?.click();
 }
 
 function handleImageUpload(files) {
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML = '';
-    
-    Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            uploadedImages.push(e.target.result);
-            
-            const imgContainer = document.createElement('div');
-            imgContainer.style.cssText = `
-                display: inline-block;
-                margin: 5px;
-                position: relative;
-            `;
-            
-            imgContainer.innerHTML = `
-                <img src="${e.target.result}" 
-                     style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
-                <button onclick="removeImage(this)" 
-                        style="position: absolute; top: 5px; right: 5px; background: #ff4444; 
-                               color: white; border: none; border-radius: 50%; width: 20px; 
-                               height: 20px; cursor: pointer; font-size: 12px;">×</button>
-            `;
-            
-            preview.appendChild(imgContainer);
-        };
-        reader.readAsDataURL(file);
-    });
-}
+  if (!files || files.length === 0) return;
+  window._uploadedImages = [];
+  const preview = document.getElementById("image-preview");
+  if (preview) preview.innerHTML = "";
 
-function removeImage(button) {
-    const container = button.parentElement;
-    const img = container.querySelector('img');
-    const src = img.src;
-    
-    uploadedImages = uploadedImages.filter(image => image !== src);
-    container.remove();
-}
-
-// Variant Management
-function addVariant() {
-    const container = document.getElementById('variant-container');
-    const variantItem = document.createElement('div');
-    variantItem.className = 'variant-item';
-    variantItem.innerHTML = `
-        <input type="text" placeholder="Variant Name (e.g., Size, Color)" class="variant-name">
-        <input type="text" placeholder="Options (comma-separated)" class="variant-options">
-        <button type="button" class="action-btn delete-btn" onclick="removeVariant(this)">Remove</button>
-    `;
-    container.appendChild(variantItem);
-}
-
-function removeVariant(button) {
-    const container = document.getElementById('variant-container');
-    if (container.children.length > 1) {
-        button.parentElement.remove();
-    } else {
-        alert('At least one variant is required');
-    }
-}
-
-// Add Product Form Submission
-document.getElementById('add-product-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Collect variant data
-    const variants = [];
-    document.querySelectorAll('.variant-item').forEach(item => {
-        const name = item.querySelector('.variant-name').value;
-        const options = item.querySelector('.variant-options').value
-            .split(',')
-            .map(opt => opt.trim())
-            .filter(opt => opt !== '');
-        
-        if (name && options.length > 0) {
-            variants.push({ name, options });
-        }
-    });
-    
-    // Create product object
-    const productData = {
-        name: document.getElementById('product-name').value,
-        category: document.getElementById('product-category').value,
-        price: parseFloat(document.getElementById('product-price').value),
-        comparePrice: document.getElementById('product-compare-price').value || null,
-        description: document.getElementById('product-description').value,
-        images: uploadedImages,
-        variants: variants,
-        sku: document.getElementById('product-sku').value || `ACID-${Date.now()}`,
-        initialStock: parseInt(document.getElementById('initial-stock').value),
-        lowStockThreshold: parseInt(document.getElementById('low-stock-threshold').value),
-        totalStock: parseInt(document.getElementById('initial-stock').value)
-    };
-    
-    // Add product
-    productManager.addProduct(productData);
-    
-    // Reset form
-    clearProductForm();
-    
-    // Show success message
-    alert('Product added successfully!');
-    
-    // Switch to products view
-    showSection('products');
-});
-
-function clearProductForm() {
-    document.getElementById('add-product-form').reset();
-    document.getElementById('image-preview').innerHTML = '';
-    uploadedImages = [];
-    
-    // Reset variants to single default
-    const container = document.getElementById('variant-container');
-    container.innerHTML = `
-        <div class="variant-item">
-            <input type="text" placeholder="Variant Name (e.g., Color)" 
-                   class="variant-name" value="Color">
-            <input type="text" placeholder="Options (comma-separated, e.g., Black, White, Red)" 
-                   class="variant-options" value="Black,White,Red">
-            <button type="button" class="action-btn delete-btn" 
-                    onclick="removeVariant(this)">Remove</button>
-        </div>
-    `;
-}
-
-// Bulk Upload
-function downloadTemplate() {
-    const csvContent = "data:text/csv;charset=utf-8," + 
-        "Name,Category,Price,Compare Price,Description,SKU,Initial Stock,Low Stock Threshold\n" +
-        "ACIDIC Logo T-Shirt,tshirts,299,399,Premium cotton t-shirt,ACID-TSH-001,50,10\n" +
-        "ACIDIC Hoodie,hoodies,599,799,Warm winter hoodie,ACID-HOD-001,30,5";
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "acidic_products_template.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function triggerCsvUpload() {
-    document.getElementById('csv-upload').click();
-}
-
-function handleCsvUpload(files) {
-    if (files.length === 0) return;
-    
-    const file = files[0];
+  Array.from(files).forEach((file, i) => {
     const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        const content = e.target.result;
-        const preview = document.getElementById('upload-preview');
-        
-        // Parse CSV
-        const lines = content.split('\n');
-        const headers = lines[0].split(',');
-        const data = lines.slice(1).filter(line => line.trim() !== '');
-        
-        preview.innerHTML = `
-            <div style="background: #f9f9f9; padding: 20px; border-radius: 5px;">
-                <h4>Upload Preview (${data.length} products)</h4>
-                <table style="width: 100%; margin-top: 10px; font-size: 12px;">
-                    <thead>
-                        <tr>
-                            ${headers.map(h => `<th>${h}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.slice(0, 5).map(line => {
-                            const cells = line.split(',');
-                            return `<tr>${cells.map(c => `<td>${c}</td>`).join('')}</tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
-                ${data.length > 5 ? `<p style="margin-top: 10px;">... and ${data.length - 5} more products</p>` : ''}
-            </div>
-        `;
-        
-        // Enable process button
-        document.getElementById('process-upload-btn').disabled = false;
-        
-        // Store CSV data for processing
-        window.csvData = content;
+    reader.onload = (e) => {
+      const url = e.target.result;
+      window._uploadedImages.push(url);
+      if (i === 0) window._uploadedImageUrl = url;
+      if (preview) {
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.cssText = "width:80px;height:80px;object-fit:cover;border-radius:4px;margin:4px;border:2px solid #ddd";
+        preview.appendChild(img);
+      }
     };
-    
-    reader.readAsText(file);
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── CSV BULK UPLOAD ──────────────────────────────────────────────────────────
+function triggerCsvUpload() {
+  document.getElementById("csv-upload")?.click();
+}
+
+let _csvData = null;
+function handleCsvUpload(files) {
+  if (!files || files.length === 0) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split("\n").filter(l => l.trim());
+    if (lines.length < 2) return alert("CSV file appears empty.");
+    const headers = lines[0].split(",").map(h => h.trim().replace(/"/g, ""));
+    _csvData = lines.slice(1).map(line => {
+      const vals = line.split(",").map(v => v.trim().replace(/"/g, ""));
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = vals[i] || "");
+      return obj;
+    });
+    const preview = document.getElementById("upload-preview");
+    if (preview) {
+      preview.innerHTML = `<p style="color:#4caf50;font-weight:bold">✅ ${_csvData.length} products ready to import.</p>
+        <p style="color:#666;font-size:13px">Columns found: ${headers.join(", ")}</p>`;
+    }
+    const btn = document.getElementById("process-upload-btn");
+    if (btn) btn.disabled = false;
+  };
+  reader.readAsText(files[0]);
 }
 
 function processBulkUpload() {
-    if (!window.csvData) return;
-    
-    const lines = window.csvData.split('\n');
-    const headers = lines[0].split(',');
-    const data = lines.slice(1).filter(line => line.trim() !== '');
-    
-    let successCount = 0;
-    let errorCount = 0;
-    
-    data.forEach((line, index) => {
-        try {
-            const cells = line.split(',');
-            const productData = {
-                name: cells[0] || `Product ${index + 1}`,
-                category: cells[1] || 'tshirts',
-                price: parseFloat(cells[2]) || 0,
-                comparePrice: cells[3] ? parseFloat(cells[3]) : null,
-                description: cells[4] || '',
-                sku: cells[5] || `ACID-BULK-${Date.now()}-${index}`,
-                initialStock: parseInt(cells[6]) || 0,
-                lowStockThreshold: parseInt(cells[7]) || 5,
-                images: [],
-                variants: [],
-                totalStock: parseInt(cells[6]) || 0
-            };
-            
-            productManager.addProduct(productData);
-            successCount++;
-        } catch (error) {
-            console.error(`Error processing line ${index + 1}:`, error);
-            errorCount++;
-        }
-    });
-    
-    alert(`Bulk upload completed!\nSuccess: ${successCount}\nErrors: ${errorCount}`);
-    
-    // Reset
-    document.getElementById('upload-preview').innerHTML = '';
-    document.getElementById('process-upload-btn').disabled = true;
-    delete window.csvData;
-    
-    // Refresh products table
-    showSection('products');
-}
-
-// Search Products
-function searchProducts(query) {
-    productManager.renderProductsTable(query);
-}
-
-// Product Actions
-function editProduct(productId) {
-    const product = productManager.getProduct(productId);
-    if (!product) return;
-    
-    // Populate form with product data
-    document.getElementById('product-name').value = product.name;
-    document.getElementById('product-category').value = product.category;
-    document.getElementById('product-price').value = product.price;
-    document.getElementById('product-compare-price').value = product.comparePrice || '';
-    document.getElementById('product-description').value = product.description;
-    document.getElementById('product-sku').value = product.sku || '';
-    document.getElementById('initial-stock').value = product.totalStock || 0;
-    document.getElementById('low-stock-threshold').value = product.lowStockThreshold || 5;
-    
-    // Handle images
-    uploadedImages = product.images || [];
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML = '';
-    uploadedImages.forEach(image => {
-        const imgContainer = document.createElement('div');
-        imgContainer.style.cssText = `
-            display: inline-block;
-            margin: 5px;
-            position: relative;
-        `;
-        imgContainer.innerHTML = `
-            <img src="${image}" 
-                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
-            <button onclick="removeImage(this)" 
-                    style="position: absolute; top: 5px; right: 5px; background: #ff4444; 
-                           color: white; border: none; border-radius: 50%; width: 20px; 
-                           height: 20px; cursor: pointer; font-size: 12px;">×</button>
-        `;
-        preview.appendChild(imgContainer);
-    });
-    
-    // Handle variants
-    const container = document.getElementById('variant-container');
-    container.innerHTML = '';
-    product.variants?.forEach(variant => {
-        const variantItem = document.createElement('div');
-        variantItem.className = 'variant-item';
-        variantItem.innerHTML = `
-            <input type="text" class="variant-name" value="${variant.name}">
-            <input type="text" class="variant-options" value="${variant.options.join(',')}">
-            <button type="button" class="action-btn delete-btn" onclick="removeVariant(this)">Remove</button>
-        `;
-        container.appendChild(variantItem);
-    });
-    
-    // Change form to update mode
-    const form = document.getElementById('add-product-form');
-    form.onsubmit = function(e) {
-        e.preventDefault();
-        updateProduct(productId);
-    };
-    
-    // Update button text
-    const submitBtn = form.querySelector('.btn-primary');
-    submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Product';
-    
-    // Show add product section
-    showSection('add-product');
-}
-
-function updateProduct(productId) {
-    // Collect form data
-    const variants = [];
-    document.querySelectorAll('.variant-item').forEach(item => {
-        const name = item.querySelector('.variant-name').value;
-        const options = item.querySelector('.variant-options').value
-            .split(',')
-            .map(opt => opt.trim())
-            .filter(opt => opt !== '');
-        
-        if (name && options.length > 0) {
-            variants.push({ name, options });
-        }
-    });
-    
-    const productData = {
-        name: document.getElementById('product-name').value,
-        category: document.getElementById('product-category').value,
-        price: parseFloat(document.getElementById('product-price').value),
-        comparePrice: document.getElementById('product-compare-price').value || null,
-        description: document.getElementById('product-description').value,
-        images: uploadedImages,
-        variants: variants,
-        sku: document.getElementById('product-sku').value,
-        totalStock: parseInt(document.getElementById('initial-stock').value),
-        lowStockThreshold: parseInt(document.getElementById('low-stock-threshold').value),
-        updatedAt: new Date().toISOString()
-    };
-    
-    // Update product
-    if (productManager.updateProduct(productId, productData)) {
-        alert('Product updated successfully!');
-        showSection('products');
-    } else {
-        alert('Error updating product');
+  if (!_csvData || _csvData.length === 0) return alert("No data to import.");
+  let count = 0;
+  _csvData.forEach(row => {
+    if (row.name && row.category && row.price) {
+      AcidicStore.addProduct({
+        name:        row.name,
+        category:    row.category,
+        price:       parseFloat(row.price) || 0,
+        comparePrice:parseFloat(row.comparePrice || row.compare_price) || 0,
+        description: row.description || "",
+        sku:         row.sku || "",
+        stock:       parseInt(row.stock) || 0,
+        image:       row.image || "",
+        images:      row.image ? [row.image] : []
+      });
+      count++;
     }
+  });
+  _csvData = null;
+  const btn = document.getElementById("process-upload-btn");
+  if (btn) btn.disabled = true;
+  showToast(`✅ ${count} products imported successfully! They're now live on your store.`);
 }
 
-function deleteProduct(productId) {
-    if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-        if (productManager.deleteProduct(productId)) {
-            alert('Product deleted successfully!');
-            productManager.renderProductsTable();
-        } else {
-            alert('Error deleting product');
-        }
-    }
+function downloadTemplate() {
+  const csv = "name,category,price,comparePrice,description,sku,stock,image\nACIDIC Example Tee,tshirts,350,450,A great product,ACID-001,10,";
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "acidic-products-template.csv";
+  a.click();
 }
 
-// Promotion Modal
-function showAddPromotionModal() {
-    document.getElementById('add-promotion-modal').classList.add('active');
-    
-    // Set default dates
-    const now = new Date();
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    
-    document.getElementById('start-date').value = now.toISOString().slice(0, 16);
-    document.getElementById('end-date').value = tomorrow.toISOString().slice(0, 16);
+// ─── VARIANTS ─────────────────────────────────────────────────────────────────
+function addVariant() {
+  const container = document.getElementById("variant-container");
+  if (!container) return;
+  const div = document.createElement("div");
+  div.className = "variant-item";
+  div.innerHTML = `
+    <input type="text" placeholder="Variant Name (e.g., Size)" class="variant-name" />
+    <input type="text" placeholder="Options (comma-separated)" class="variant-options" />
+    <button type="button" class="action-btn delete-btn" onclick="removeVariant(this)">Remove</button>`;
+  container.appendChild(div);
 }
 
-function closePromotionModal() {
-    document.getElementById('add-promotion-modal').classList.remove('active');
-    document.getElementById('promotion-form').reset();
+function removeVariant(btn) {
+  btn.closest(".variant-item")?.remove();
 }
 
-// Handle promotion target change
-document.getElementById('promotion-target')?.addEventListener('change', function() {
-    const targetCategory = document.getElementById('target-category');
-    targetCategory.style.display = this.value === 'category' ? 'block' : 'none';
-});
-
-// Add Promotion
-document.getElementById('promotion-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const promotionData = {
-        name: document.getElementById('promotion-name').value,
-        type: document.getElementById('promotion-type').value,
-        value: document.getElementById('promotion-type').value === 'percentage' ? 
-               parseInt(document.getElementById('promotion-value').value) : 
-               document.getElementById('promotion-value').value,
-        startDate: new Date(document.getElementById('start-date').value).toISOString(),
-        endDate: new Date(document.getElementById('end-date').value).toISOString(),
-        target: document.getElementById('promotion-target').value,
-        targetCategory: document.getElementById('promotion-target').value === 'category' ? 
-                      document.getElementById('selected-category').value : null
-    };
-    
-    promotionManager.addPromotion(promotionData);
-    closePromotionModal();
-    promotionManager.renderPromotions();
-    
-    alert('Promotion created successfully!');
-});
-
-// Admin Authentication
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
 function logoutAdmin() {
-    if (confirm('Are you sure you want to logout?')) {
-        // In a real app, you would clear admin session
-        // For now, just redirect to main site
-        window.location.href = 'index.html';
-    }
+  if (confirm("Log out of admin?")) {
+    localStorage.removeItem("acidic_admin_token");
+    window.location.href = "index.html";
+  }
 }
 
-// const productManager = new ProductManager();
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for auth to initialize
-    setTimeout(() => {
-        // Only initialize if user is logged in
-        if (adminAuth.getSession()) {
-            const productManager = new ProductManager();
-            const promotionManager = new PromotionManager();
-            
-            // Load dashboard by default
-            loadDashboard();
-            
-            // Make managers available globally
-            window.productManager = productManager;
-            window.promotionManager = promotionManager;
-        }
-    }, 100);
-});
-
-// Enhanced checkout function with admin data
-function checkout() {
-    if (cart.length === 0) {
-        alert('Your cart is empty. Add some items before checking out.');
-        return;
-    }
-    
-    // Generate order data with variant details for admin
-    const orderData = {
-        orderId: 'ACD-' + Date.now().toString().slice(-8),
-        items: cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size,
-            color: item.color,
-            colorName: item.colorName,
-            sizeCode: item.sizeCode,
-            variantId: item.variantId,
-            sku: item.sku,
-            category: item.category,
-            isCustomized: item.isCustomized || false,
-            customizationDetails: item.customizationDetails || null,
-            image: item.image,
-            total: item.price * item.quantity
-        })),
-        subtotal: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
-        deliveryFee: 150,
-        total: cart.reduce((total, item) => total + (item.price * item.quantity), 0) + 150,
-        timestamp: new Date().toISOString(),
-        date: new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }),
-        status: 'pending',
-        paymentMethod: 'pending',
-        customerInfo: {
-            // Will be filled from checkout form
-        },
-        variantSummary: generateVariantSummary(cart)
-    };
-    
-    // Save order data for admin access
-    saveOrderForAdmin(orderData);
-    
-    // Close cart and open checkout
-    toggleCart(false);
-    setTimeout(() => {
-        openCheckout();
-    }, 300);
+// ─── TOAST NOTIFICATION ───────────────────────────────────────────────────────
+function showToast(msg) {
+  let toast = document.getElementById("admin-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "admin-toast";
+    toast.style.cssText = `
+      position:fixed;bottom:30px;right:30px;background:#000;color:#fff;
+      padding:14px 22px;border-radius:8px;font-size:14px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:9999;
+      opacity:0;transition:opacity 0.3s;max-width:350px;`;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = "1";
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.style.opacity = "0", 3500);
 }
 
-// Generate summary of variants for admin
-function generateVariantSummary(cartItems) {
-    const summary = {
-        totalItems: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        uniqueItems: cartItems.length,
-        sizeBreakdown: {},
-        colorBreakdown: {},
-        categoryBreakdown: {},
-        customizedItems: 0
-    };
-    
-    cartItems.forEach(item => {
-        // Size breakdown
-        summary.sizeBreakdown[item.size] = (summary.sizeBreakdown[item.size] || 0) + item.quantity;
-        
-        // Color breakdown
-        summary.colorBreakdown[item.color] = (summary.colorBreakdown[item.color] || 0) + item.quantity;
-        
-        // Category breakdown
-        summary.categoryBreakdown[item.category] = (summary.categoryBreakdown[item.category] || 0) + item.quantity;
-        
-        // Customized items
-        if (item.isCustomized) {
-            summary.customizedItems += item.quantity;
-        }
-    });
-    
-    return summary;
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function setEl(id, val)     { const el = document.getElementById(id); if (el) el.textContent = val; }
+function getInputVal(id)    { return (document.getElementById(id)?.value || "").trim(); }
+function setInputVal(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
+function capitalize(s)      { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
+function escHtml(s)         { return (s || "").replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
+function formatDate(iso)    {
+  if (!iso) return "—";
+  try { return new Date(iso).toLocaleDateString("en-ZA", { day:"2-digit", month:"short", year:"numeric" }); }
+  catch(e) { return iso; }
 }
-
-// Save order for admin access
-function saveOrderForAdmin(orderData) {
-    // Get existing orders
-    let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
-    
-    // Add new order
-    orders.unshift(orderData);
-    
-    // Keep only last 100 orders
-    if (orders.length > 100) {
-        orders = orders.slice(0, 100);
-    }
-    
-    // Save to localStorage (admin can access this)
-    localStorage.setItem('adminOrders', JSON.stringify(orders));
-    
-    // Also save individual order for easy access
-    localStorage.setItem('currentOrder', JSON.stringify(orderData));
-    
-    console.log('Order saved for admin:', orderData);
+function statusClass(s) {
+  switch((s || "").toLowerCase()) {
+    case "delivered":   return "in-stock";
+    case "processing":
+    case "shipped":     return "low-stock";
+    case "cancelled":   return "out-of-stock";
+    default:            return "low-stock";
+  }
 }
-
-// Enhanced payment processing with admin data
-function processPayment() {
-    if (paymentInProgress) {
-        alert('Payment is already being processed. Please wait...');
-        return;
-    }
-    
-    const paymentButton = document.querySelector('.purchase--btn');
-    const originalText = paymentButton.innerHTML;
-    
-    paymentInProgress = true;
-    paymentButton.innerHTML = '🔄 Processing Payment...';
-    paymentButton.disabled = true;
-    
-    // Get customer info from form
-    const customerInfo = {
-        name: `${document.getElementById('fname')?.value || ''} ${document.getElementById('lname')?.value || ''}`.trim(),
-        email: document.getElementById('email')?.value || '',
-        phone: document.getElementById('phone')?.value || '',
-        address: document.getElementById('address')?.value || '',
-        city: document.getElementById('city')?.value || '',
-        province: document.getElementById('province')?.value || '',
-        postalCode: document.getElementById('postal')?.value || '',
-        country: document.getElementById('country')?.value || 'South Africa'
-    };
-    
-    setTimeout(() => {
-        // Get current order
-        const currentOrder = JSON.parse(localStorage.getItem('currentOrder')) || {};
-        
-        // Update order with payment info
-        const completedOrder = {
-            ...currentOrder,
-            status: 'paid',
-            paymentMethod: document.getElementById('payment-method')?.value || 'Card',
-            paymentDate: new Date().toISOString(),
-            paymentId: 'PAY-' + Date.now().toString().slice(-10),
-            customerInfo: customerInfo,
-            // Include variant details for admin
-            variantDetails: cart.map(item => ({
-                product: item.name,
-                color: item.color,
-                size: item.size,
-                quantity: item.quantity,
-                price: item.price,
-                sku: item.sku,
-                variantId: item.variantId,
-                isCustomized: item.isCustomized || false
-            }))
-        };
-        
-        // Save completed order for admin
-        saveCompletedOrder(completedOrder);
-        
-        // Close payment and show confirmation
-        paymentInProgress = false;
-        closePayment();
-        openConfirmation();
-        
-        // Update confirmation with order details
-        updateConfirmationWithOrderDetails(completedOrder);
-        
-        paymentButton.innerHTML = originalText;
-        paymentButton.disabled = false;
-        
-    }, 2000);
-}
-
-// Save completed order for admin
-function saveCompletedOrder(order) {
-    // Get completed orders
-    let completedOrders = JSON.parse(localStorage.getItem('completedOrders')) || [];
-    
-    // Add new completed order
-    completedOrders.unshift(order);
-    
-    // Keep only last 50 orders
-    if (completedOrders.length > 50) {
-        completedOrders = completedOrders.slice(0, 50);
-    }
-    
-    // Save to localStorage
-    localStorage.setItem('completedOrders', JSON.stringify(completedOrders));
-    
-    // Also update admin orders
-    let adminOrders = JSON.parse(localStorage.getItem('adminOrders')) || [];
-    const orderIndex = adminOrders.findIndex(o => o.orderId === order.orderId);
-    if (orderIndex !== -1) {
-        adminOrders[orderIndex] = order;
-        localStorage.setItem('adminOrders', JSON.stringify(adminOrders));
-    }
-    
-    console.log('Completed order saved for admin:', order);
-}
-
-// Admin function to view all orders with variant details
-function viewAdminOrders() {
-    const password = prompt('Enter admin password:');
-    if (password !== 'acidic123') {
-        alert('Access denied');
-        return;
-    }
-    
-    const completedOrders = JSON.parse(localStorage.getItem('completedOrders')) || [];
-    const pendingOrders = JSON.parse(localStorage.getItem('adminOrders')) || [];
-    
-    if (completedOrders.length === 0 && pendingOrders.length === 0) {
-        alert('No orders found');
-        return;
-    }
-    
-    let report = '=== ACIDIC CLOTHING ADMIN REPORT ===\n\n';
-    report += `TOTAL ORDERS: ${completedOrders.length + pendingOrders.length}\n`;
-    report += `COMPLETED: ${completedOrders.length}\n`;
-    report += `PENDING: ${pendingOrders.length}\n\n`;
-    
-    report += '=== RECENT ORDERS ===\n\n';
-    
-    [...completedOrders, ...pendingOrders].slice(0, 10).forEach(order => {
-        report += `Order: ${order.orderId}\n`;
-        report += `Date: ${order.date}\n`;
-        report += `Status: ${order.status}\n`;
-        report += `Customer: ${order.customerInfo?.name || 'N/A'}\n`;
-        report += `Total: R${order.total?.toFixed(2) || '0.00'}\n`;
-        
-        report += 'Items:\n';
-        order.variantDetails?.forEach(item => {
-            report += `  - ${item.product} (${item.color}, ${item.size}) x${item.quantity} - R${item.price.toFixed(2)} each\n`;
-        });
-        
-        report += '\n---\n\n';
-    });
-    
-    // Create modal to show report
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    `;
-    
-    modal.innerHTML = `
-        <div style="background: white; padding: 20px; border-radius: 10px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Admin Orders Report</h2>
-                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-            </div>
-            <pre style="white-space: pre-wrap; font-family: monospace; font-size: 12px; line-height: 1.4;">${report}</pre>
-            <div style="margin-top: 20px; text-align: center;">
-                <button onclick="exportOrdersToCSV()" style="background: #000; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">Export CSV</button>
-                <button onclick="clearAllOrders()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Clear All Orders</button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-}
-
-// Export orders to CSV
-function exportOrdersToCSV() {
-    const orders = JSON.parse(localStorage.getItem('completedOrders')) || [];
-    
-    if (orders.length === 0) {
-        alert('No orders to export');
-        return;
-    }
-    
-    let csv = 'Order ID,Date,Customer,Email,Phone,Total,Payment Method,Status,Items\n';
-    
-    orders.forEach(order => {
-        const items = order.variantDetails?.map(item => 
-            `${item.product} (${item.color}, ${item.size}) x${item.quantity}`
-        ).join('; ') || '';
-        
-        csv += `"${order.orderId}","${order.date}","${order.customerInfo?.name || ''}","${order.customerInfo?.email || ''}","${order.customerInfo?.phone || ''}",${order.total},"${order.paymentMethod}","${order.status}","${items}"\n`;
-    });
-    
-    // Create download link
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `acidic-orders-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-}
-
-// Clear all orders (admin only)
-function clearAllOrders() {
-    if (confirm('Are you sure you want to clear ALL order data? This cannot be undone.')) {
-        localStorage.removeItem('adminOrders');
-        localStorage.removeItem('completedOrders');
-        localStorage.removeItem('currentOrder');
-        alert('All orders have been cleared');
-        document.querySelector('.modal').remove();
-    }
+function promoStatus(p) {
+  const now = Date.now();
+  const start = new Date(p.startDate).getTime();
+  const end   = new Date(p.endDate).getTime();
+  if (now < start) return "upcoming";
+  if (now > end)   return "expired";
+  return "active";
 }

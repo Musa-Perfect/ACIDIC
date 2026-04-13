@@ -3526,6 +3526,146 @@ function clearCart() {
   
 })();
 
+// Modified checkout function to save orders to API
+async function checkout() {
+    const cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+    
+    if (cart.length === 0) {
+        alert('Your cart is empty');
+        return;
+    }
+    
+    // Calculate total
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = subtotal + 150; // Add delivery
+    
+    // Get customer info from checkout form
+    const orderData = {
+        items: cart,
+        subtotal: subtotal,
+        delivery: 150,
+        total: total,
+        customer: {
+            firstName: document.getElementById('fname')?.value || '',
+            lastName: document.getElementById('lname')?.value || '',
+            email: document.getElementById('email')?.value || '',
+            phone: document.getElementById('phone')?.value || '',
+            address: document.getElementById('address')?.value || '',
+            city: document.getElementById('city')?.value || '',
+            province: document.getElementById('province')?.value || '',
+            postal: document.getElementById('postal')?.value || '',
+            country: document.getElementById('country')?.value || 'South Africa'
+        },
+        paymentMethod: document.getElementById('payment-method')?.value || 'Card'
+    };
+    
+    try {
+        // Save order to API
+        const response = await fetch('/api/orders.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('Order saved:', result.order);
+            
+            // Clear cart
+            localStorage.removeItem('acidicCart');
+            updateCartCount();
+            
+            // Show confirmation
+            alert('Order placed successfully!');
+        }
+    } catch (error) {
+        console.error('Failed to save order:', error);
+        alert('Order placed but could not be saved to database');
+    }
+}
+
+// Add this function to your cart.js
+async function saveOrderToAPI(orderData) {
+    try {
+        const response = await fetch('/api/orders.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Order saved:', result.order);
+            return true;
+        } else {
+            console.error('Failed to save order:', result);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error saving order:', error);
+        return false;
+    }
+}
+
+// Modify your checkout function to use this
+async function processCheckout() {
+    // Get cart data
+    const cart = JSON.parse(localStorage.getItem('acidicCart')) || [];
+    
+    if (cart.length === 0) {
+        alert('Your cart is empty');
+        return;
+    }
+    
+    // Calculate totals
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = subtotal + 150; // Add delivery
+    
+    // Get customer info
+    const orderData = {
+        items: cart,
+        subtotal: subtotal,
+        delivery: 150,
+        total: total,
+        customer: {
+            firstName: document.getElementById('fname')?.value || '',
+            lastName: document.getElementById('lname')?.value || '',
+            email: document.getElementById('email')?.value || '',
+            phone: document.getElementById('phone')?.value || '',
+            address: document.getElementById('address')?.value || '',
+            city: document.getElementById('city')?.value || '',
+            province: document.getElementById('province')?.value || '',
+            postalCode: document.getElementById('postal')?.value || '',
+            country: document.getElementById('country')?.value || 'South Africa'
+        },
+        paymentMethod: document.getElementById('payment-method')?.value || 'Card',
+        notes: ''
+    };
+    
+    // Save to API
+    const saved = await saveOrderToAPI(orderData);
+    
+    if (saved) {
+        // Clear cart
+        localStorage.removeItem('acidicCart');
+        updateCartCount();
+        
+        // Show success message
+        alert('Order placed successfully!');
+        
+        // Redirect to confirmation page or close modals
+        closeAllModals();
+    } else {
+        alert('Order placed but could not be saved to database. Please contact support.');
+    }
+}
+
 // Debug helper
 window.debugCart = function() {
   const cart = JSON.parse(localStorage.getItem('acidicCart') || '[]');

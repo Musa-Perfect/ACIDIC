@@ -10,6 +10,13 @@
     <script src="https://www.payfast.co.za/onsite/engine.js"></script>
   </head>
   <body>
+
+<!-- CRITICAL FIX: Set initial page visibility intelligently -->
+<style>
+/* Only force home page on initial load, allow JS navigation to work */
+#home-page { display: block; }
+#shop-page { display: none; }
+</style>
     <!-- FULLSCREEN SLIDESHOW BACKGROUND -->
     <div class="fullscreen-slideshow">
       <div class="slideshow-background">
@@ -2396,12 +2403,15 @@
 <script src="scripts/firebase-bridge.js"></script>
 
 <!-- scripts -->
+<script src="scripts/admin-products-sync.js"></script>
 <script src="scripts/products.js"></script>
 <script src="scripts/cart.js"></script>
 <script src="scripts/cart-fix.js"></script>
 <script src="scripts/auth.js"></script>
 <script src="scripts/rewards.js"></script>
 <script src="scripts/main.js"></script>
+<script src="scripts/acidic-store.js"></script>
+<script src="scripts/storefront-bridge.js"></script>
 <script src="scripts/experience-direct-navigation.js"></script>
 <script src="scripts/enhanced-category-system.js"></script>
 <script src="scripts/product-modal.js"></script>
@@ -2474,20 +2484,12 @@ console.log('🎨 Loading FIXED Enhanced Category System...');
     console.log('✅ Enhanced shop ready!');
   }
   
-  // Ensure homepage displays first (no auto-redirect to shop)
+  // Ensure homepage displays first — always show home, always hide shop
   function ensureHomepageVisible() {
     const homepage = document.getElementById('home-page');
     const shopPage = document.getElementById('shop-page');
-    
-    if (homepage) {
-      homepage.style.display = 'block';
-      console.log('✅ Homepage visible');
-    }
-    
-    if (shopPage && shopPage.style.display === 'block') {
-      shopPage.style.display = 'none';
-      console.log('✅ Shop hidden (will open when user clicks category)');
-    }
+    if (homepage) homepage.style.display = 'block';
+    if (shopPage) shopPage.style.display = 'none';
   }
   
   // Setup category system
@@ -3297,49 +3299,85 @@ window.openProductModal = function(productId) {
 console.log('✅ Product navigation fixed');
 </script>
 
+
+<script>
+// COMPREHENSIVE HOME PAGE FIX - Runs immediately and overrides any other scripts
+(function() {
+  console.log('🏠 COMPREHENSIVE HOME PAGE FIX LOADING...');
+  
+  // Force home page to show initially, but allow navigation
+  function showHomePage() {
+    const homeSection = document.getElementById('home-page');
+    const shopSection = document.getElementById('shop-page');
+    
+    if (homeSection) {
+      homeSection.style.display = 'block';
+      console.log('✓ Home page forced visible');
+    }
+    
+    if (shopSection) {
+      shopSection.style.display = 'none';
+      console.log('✓ Shop page forced hidden');
+    }
+  }
+  
+  // Override the triggerShop function to ensure it works
+  window.triggerShop = function() {
+    console.log('🛒 Shop button clicked - navigating to shop');
+    
+    const homeSection = document.getElementById('home-page');
+    const shopSection = document.getElementById('shop-page');
+    
+    if (homeSection) {
+      homeSection.style.display = 'none';
+      console.log('✓ Home page hidden');
+    }
+    
+    if (shopSection) {
+      shopSection.style.display = 'block';
+      console.log('✓ Shop page shown');
+    } else {
+      console.error('❌ Shop page element not found');
+    }
+    
+    // Call the original shop function if it exists
+    if (window.goToShop && typeof window.goToShop === 'function') {
+      setTimeout(() => window.goToShop(), 10);
+    }
+  };
+  
+  // Override openHomePage to ensure it works
+  window.openHomePage = function() {
+    console.log('🏠 Home button clicked - navigating to home');
+    showHomePage();
+    
+    // Call the original home function if it exists
+    if (window.goToHome && typeof window.goToHome === 'function') {
+      setTimeout(() => window.goToHome(), 10);
+    }
+  };
+  
+  // Run initially only if no specific page is requested
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestedCategory = urlParams.get('category');
+  const requestedProduct = urlParams.get('product');
+  
+  if (!requestedCategory && !requestedProduct) {
+    showHomePage();
+  }
+  
+  // Set up event listeners for initial load only
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔒 DOMContentLoaded: Setting initial page state');
+    if (!requestedCategory && !requestedProduct) {
+      showHomePage();
+    }
+  });
+  
+  console.log('✅ HOME PAGE FIX INSTALLED WITH NAVIGATION SUPPORT');
+})();
+</script>
+
+<!-- Load main script -->
+<script src="main.js"></script>
 </body>
-</html>
-
-<!-- Additional CSS for SVG Icons -->
-<style>
-/* Ensure SVG icons display properly */
-.pill-icon svg {
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-
-.experience-icon svg {
-  display: block;
-  margin: 0 auto;
-}
-
-.close-modal svg,
-.close-cart svg,
-.quick-modal-close svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* Quick modal close button adjustment */
-.quick-modal-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Smooth transitions for icons */
-.pill-icon svg,
-.experience-icon svg {
-  transition: transform 0.3s ease;
-}
-
-.filter-pill:hover .pill-icon svg {
-  transform: scale(1.1);
-}
-
-.experience-card:hover .experience-icon svg {
-  transform: scale(1.1);
-}
-</style>

@@ -1,5 +1,30 @@
 // === MAIN APPLICATION LOGIC ===
 
+// INITIAL FIX: Ensure home page shows by default on load only
+console.log('🔧 Loading ACIDIC with smart home page fix...');
+
+// Force home page to be visible from the start, but don't block navigation
+function ensureInitialHomePage() {
+    const homeSection = document.getElementById('home-page');
+    const shopSection = document.getElementById('shop-page');
+    
+    console.log('🏠 Setting initial page visibility...');
+    
+    // Only set initial state, don't force it permanently
+    if (homeSection && !homeSection.style.display) {
+        homeSection.style.display = 'block';
+        console.log('✓ Home page set to visible initially');
+    }
+    
+    if (shopSection && !shopSection.style.display) {
+        shopSection.style.display = 'none';
+        console.log('✓ Shop page set to hidden initially');
+    }
+}
+
+// Run once on initial load
+ensureInitialHomePage();
+
 // Initialize the application
 // [Removed duplicate DOMContentLoaded - handled in comprehensive init below]
 
@@ -2414,13 +2439,11 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (category && typeof showCategory === "function") {
         showCategory(category);
     } else {
-        // Show default category only if no URL params
-        showCategory("tshirts");
-        // Ensure home page is visible by default
+        // No URL params — show home page, do NOT open shop
         const homePage = document.getElementById('home-page');
-        if (homePage) {
-            homePage.style.display = 'block';
-        }
+        const shopPage = document.getElementById('shop-page');
+        if (homePage) homePage.style.display = 'block';
+        if (shopPage) shopPage.style.display = 'none';
     }
     
     // Add payment form listener
