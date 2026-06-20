@@ -3357,26 +3357,80 @@ console.log('✅ Product navigation fixed');
     }
   };
   
-  // Run initially only if no specific page is requested
+// Run initially only if no specific page is requested
   const urlParams = new URLSearchParams(window.location.search);
   const requestedCategory = urlParams.get('category');
   const requestedProduct = urlParams.get('product');
-  
+
+  // If user is on home (no query params), force home section visibility.
   if (!requestedCategory && !requestedProduct) {
     showHomePage();
+
+    // Hard-stop any accidental auto-navigation to shop on first paint.
+    // Some other scripts call triggerShop/openShopPage/filterCategory('all') during init.
+    window.__acidicDidForceHome = true;
   }
-  
+
   // Set up event listeners for initial load only
   document.addEventListener('DOMContentLoaded', function() {
     console.log('🔒 DOMContentLoaded: Setting initial page state');
     if (!requestedCategory && !requestedProduct) {
       showHomePage();
+      window.__acidicDidForceHome = true;
     }
   });
-  
-  console.log('✅ HOME PAGE FIX INSTALLED WITH NAVIGATION SUPPORT');
+
+  // Guard: prevent shop auto-open/filtering only during the initial first paint.
+  // After initial paint, we remove the guard so manual clicks work.
+  // NOTE: keep this fairly short, because it must NOT block real user clicks.
+  const removeGuards = () => {
+    window.__acidicDidForceHome = false;
+  };
+  // Give other init scripts a short window to run.
+  setTimeout(removeGuards, 250);
+
+  // If other scripts override these later, our guards should still be active
+  // only while __acidicDidForceHome is true.
+  const originalOpenShopPage = window.openShopPage;
+  window.openShopPage = function() {
+    if (window.__acidicDidForceHome) {
+      showHomePage();
+      return;
+    }
+    if (typeof originalOpenShopPage === 'function') {
+      return originalOpenShopPage.apply(this, arguments);
+    }
+  };
+
+  const originalGoToShop = window.goToShop;
+  window.goToShop = function() {
+    if (window.__acidicDidForceHome) {
+      showHomePage();
+      return;
+    }
+    if (typeof originalGoToShop === 'function') {
+      return originalGoToShop.apply(this, arguments);
+    }
+  };
+
+  const originalFilterCategory = window.filterCategory;
+  window.filterCategory = function(category) {
+    if (
+      window.__acidicDidForceHome &&
+      (category === 'all' || category === 'allproducts' || category === 'all products')
+    ) {
+      showHomePage();
+      return;
+    }
+    if (typeof originalFilterCategory === 'function') {
+      return originalFilterCategory.apply(this, arguments);
+    }
+  };
+
+  console.log('✅ HOME PAGE FIX INSTALLED (shop auto-redirect guarded briefly)');
 })();
 </script>
+
 
 <!-- Load main script -->
 <script src="main.js"></script>

@@ -1,27 +1,9 @@
-const express = require('express');
-const {
-  getProducts,
-  getProduct,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  getProductsByCategory,
-  updateInventory
-} = require('../controllers/productController');
-const { protect, authorize } = require('../middleware/auth');
+// NOTE:
+// This file was incorrectly added as a router under `models/`.
+// Model definitions must live under `models/` and exports must be Mongoose models.
+//
+// The real product router is: `acidic-backend/routes/products.js`
+//
+// We keep this file as a guard to avoid runtime crashes if something imports it.
+module.exports = undefined;
 
-const router = express.Router();
-
-router.route('/')
-  .get(getProducts)
-  .post(protect, authorize('admin'), createProduct);
-
-router.route('/:id')
-  .get(getProduct)
-  .put(protect, authorize('admin'), updateProduct)
-  .delete(protect, authorize('admin'), deleteProduct);
-
-router.get('/category/:category', getProductsByCategory);
-router.put('/:id/inventory', protect, authorize('admin'), updateInventory);
-
-module.exports = router;
